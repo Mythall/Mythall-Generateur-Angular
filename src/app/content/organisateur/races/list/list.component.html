@@ -1,0 +1,46 @@
+
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Races</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card class="mb-4">
+    <div>
+        <button mat-raised-button color="primary" class="mb-4" routerLink="/organisateur/races/form">Ajouter Race</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Description</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let race of races | async">
+            <td [innerHtml]="race.nom"></td>
+            <td [innerHtml]="race.description"></td>
+            <td>
+              <div class="button-row">
+                <button mat-icon-button [routerLink]="'/jeu/races'">
+                  <mat-icon aria-label="View">remove_red_eye</mat-icon>
+                </button>
+                <button mat-icon-button [routerLink]="'/organisateur/races/form/' + race.id">
+                  <mat-icon aria-label="Edit">edit</mat-icon>
+                </button>   
+                <button mat-icon-button (click)="confirmDelete(race)">
+                  <mat-icon aria-label="Delete">delete</mat-icon>
+                </button>   
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+</div>

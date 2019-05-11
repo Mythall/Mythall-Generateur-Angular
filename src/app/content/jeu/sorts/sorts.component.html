@@ -1,0 +1,28 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Sorts</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12 col-md-10 order-2 order-md-1">
+      <mat-card *ngFor="let sort of sorts" [id]="sort.nom" class="mb-4">
+        <mat-card-title (click)="displayDetails(sort.id)" [innerHtml]="sort.nom"></mat-card-title>
+        <mat-card-content>
+          <p><i [innerHtml]="sort.sommaire"></i></p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="col-12 col-md-2 order-1 order-md-2 mb-4">
+      <nav>
+        <div class="mb-2">
+          <strong>Sorts</strong>
+        </div>
+        <a *ngFor="let sort of sorts" [href]="'jeu/sorts#' + sort.nom" [innerHtml]="sort.nom"></a>
+      </nav>
+    </div>
+  </div>
+</div>

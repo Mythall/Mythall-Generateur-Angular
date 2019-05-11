@@ -1,0 +1,30 @@
+<div class="container mt-4 text-center">
+    <mat-card class="mb-4">
+        <mat-card-title>Connexion ou Enregistrement</mat-card-title>
+        <mat-card-content>
+            <div class="row">
+                <div class="col-12">
+                    <div class="form-container">
+                        <button mat-raised-button class="mb-4" (click)="googleLogin()">
+                            <img src="//www.gstatic.com/mobilesdk/160512_mobilesdk/auth_service_google.svg" alt="Google"
+                                class="img-fluid" />
+                            <span> Google</span>
+                        </button>
+                        <button mat-raised-button class="mb-4" (click)="facebookLogin()">
+                            <img src="//www.gstatic.com/mobilesdk/160409_mobilesdk/images/auth_service_facebook.svg"
+                                alt="Facebook" class="img-fluid" />
+                            <span> Facebook</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <p>
+                        <span class="font-weight-bold text-danger font-italic">Prendre Note*</span>
+                        <span class="font-weight-bold font-italic"> les comptes Facebook et Google sont deux compte
+                            différent, donc utiliser la même méthode pour vous connecter à l'avenir.</span>
+                    </p>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

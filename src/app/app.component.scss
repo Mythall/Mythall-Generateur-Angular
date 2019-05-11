@@ -1,0 +1,28 @@
+@import "src/assets/scss/_custom.scss"; //Bootstrap & Custom Variables
+
+.app-container{
+  height: calc(100vh - 64px);
+
+  @media (max-width: 600px) {
+    height: calc(100vh - 56px);
+  }
+
+  @media print {
+    height: 100%;
+  }
+
+  .app-sidenav{
+    width: 240px;
+    z-index: 3;
+
+    @media print {
+      display: none;
+    }
+
+  }
+
+  .referal{
+    color: $primary;
+  }
+
+}

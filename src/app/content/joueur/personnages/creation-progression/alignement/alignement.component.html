@@ -1,0 +1,25 @@
+<div class="row">
+
+	<!--Alignements-->
+	<div class="col-12">
+
+		<!--Choix de alignement-->
+		<mat-form-field>
+			<mat-select placeholder="Sélectionner un Alignement" name="selectedAlignement" [(ngModel)]="selectedAlignement" (ngModelChange)="setAlignement()" required>
+				<mat-option *ngFor="let e of availableAlignements" [value]="e" [innerHtml]="e.nom"></mat-option>
+			</mat-select>
+		</mat-form-field>
+
+		<!--Description Alignement-->
+		<div class="mb-2" *ngIf="selectedAlignement">
+			<span class="font-italic" [innerHtml]="selectedAlignement.description"></span>
+		</div>
+
+	</div>
+
+	<!--Stepper Buttons-->
+	<div class="col-12">
+		<button mat-raised-button color="primary" (click)="next()" [disabled]="!isCompleted()">Suivant</button>
+	</div>
+
+</div>

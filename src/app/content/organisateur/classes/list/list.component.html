@@ -1,0 +1,46 @@
+
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Classes</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card class="mb-4">
+    <div>
+        <button mat-raised-button color="primary" class="mb-4" routerLink="/organisateur/classes/form">Ajouter Classe</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Description</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let classe of classes | async">
+            <td [innerHtml]="classe.nom"></td>
+            <td [innerHtml]="classe.description"></td>
+            <td>
+              <div class="button-row">
+                <button mat-icon-button [routerLink]="'/jeu/classes'">
+                  <mat-icon aria-label="View">remove_red_eye</mat-icon>
+                </button>
+                <button mat-icon-button [routerLink]="'/organisateur/classes/form/' + classe.id">
+                  <mat-icon aria-label="Edit">edit</mat-icon>
+                </button>   
+                <button mat-icon-button (click)="confirmDelete(classe)">
+                  <mat-icon aria-label="Delete">delete</mat-icon>
+                </button>   
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+</div>

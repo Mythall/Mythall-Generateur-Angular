@@ -1,0 +1,28 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Aptitudes</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12 col-md-10 order-2 order-md-1">
+      <mat-card *ngFor="let aptitude of aptitudes" [id]="aptitude.nom" class="mb-4">
+        <mat-card-title [innerHtml]="aptitude.nom"></mat-card-title>
+        <mat-card-content>
+          <p><i [innerHtml]="aptitude.description"></i></p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="col-12 col-md-2 order-1 order-md-2 mb-4">
+      <nav>
+        <div class="mb-2">
+          <strong>Aptitudes</strong>
+        </div>
+        <a *ngFor="let aptitude of aptitudes" [href]="'jeu/aptitudes#' + aptitude.nom" [innerHtml]="aptitude.nom"></a>
+      </nav>
+    </div>
+  </div>
+</div>

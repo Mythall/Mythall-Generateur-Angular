@@ -1,0 +1,72 @@
+<div class="container-fluid">
+    <div class="row">
+        <mat-toolbar color="primary">
+            <span>Dieux</span>
+        </mat-toolbar>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <mat-card>
+        <mat-card-title>Formulaire d'Dieu</mat-card-title>
+        <form #form="ngForm">
+            <div class="form-container">
+
+                <div class="row mb-1">
+                    <div class="col">
+
+                        <mat-form-field>
+                            <input matInput name="dieu.nom" [(ngModel)]="dieu.nom" placeholder="Nom" required>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <input matInput name="dieu.prononciation" [(ngModel)]="dieu.prononciation" placeholder="Prononciation" required>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <input matInput name="dieu.titre" [(ngModel)]="dieu.titre" placeholder="Titre" required>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <input matInput name="dieu.rang" [(ngModel)]="dieu.rang" placeholder="Rang" required>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-select placeholder="Alignement" name="dieu.alignementRef" [(ngModel)]="dieu.alignementRef" required>
+                                <mat-option *ngFor="let a of alignements" [value]="a.id">{{a.nom}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-select placeholder="Alignements Permis" name="dieu.alignementPermisRef" [(ngModel)]="dieu.alignementPermisRef" multiple
+                                required>
+                                <mat-option *ngFor="let a of alignements" [value]="a.id">{{a.nom}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-select placeholder="Domaines" name="dieu.domainesRef" [(ngModel)]="dieu.domainesRef" multiple required>
+                                <mat-option *ngFor="let d of domaines" [value]="d.id">{{d.nom}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <input matInput name="dieu.armeDePredilection" [(ngModel)]="dieu.armeDePredilection" placeholder="Arme De Predilection" required>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <textarea matInput name="dieu.relations" [(ngModel)]="dieu.relations" placeholder="Relations" required></textarea>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <textarea matInput name="dieu.dogmes" [(ngModel)]="dieu.dogmes" placeholder="Dogmes" required></textarea>
+                        </mat-form-field>
+
+                    </div>
+                </div>
+
+            </div>
+            <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+        </form>
+    </mat-card>
+</div>

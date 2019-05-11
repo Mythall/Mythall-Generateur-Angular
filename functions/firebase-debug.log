@@ -1,0 +1,33 @@
+[debug] [2019-05-11T00:42:45.386Z] ----------------------------------------------------------------------
+[debug] [2019-05-11T00:42:45.388Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\girou\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js serve
+[debug] [2019-05-11T00:42:45.388Z] CLI Version:   6.8.0
+[debug] [2019-05-11T00:42:45.388Z] Platform:      win32
+[debug] [2019-05-11T00:42:45.388Z] Node Version:  v10.14.1
+[debug] [2019-05-11T00:42:45.389Z] Time:          Fri May 10 2019 20:42:45 GMT-0400 (Eastern Daylight Time)
+[debug] [2019-05-11T00:42:45.389Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2019-05-11T00:42:45.400Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2019-05-11T00:42:45.400Z] > authorizing via signed-in user
+[debug] [2019-05-11T00:42:45.400Z] [iam] checking project mythall-v7 for permissions ["firebase.projects.get"]
+[debug] [2019-05-11T00:42:45.402Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/mythall-v7:testIamPermissions  
+
+[debug] [2019-05-11T00:42:45.723Z] <<< HTTP RESPONSE 200
+[debug] [2019-05-11T00:42:45.725Z] >>> HTTP REQUEST GET https://cloudresourcemanager.googleapis.com/v1/projects/mythall-v7  
+ 
+[debug] [2019-05-11T00:42:45.981Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Serving from 'D:\Projects\Mythall'...
+[info] 
+[info] i  functions: Preparing to emulate functions.
+[debug] [2019-05-11T00:42:46.585Z] Fetching environment
+[debug] [2019-05-11T00:42:46.586Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/24383131218:getServerAppConfig  
+ 
+[debug] [2019-05-11T00:42:46.587Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/24383131218/clients/_:getWebAppConfig  
+ 
+[debug] [2019-05-11T00:42:46.835Z] <<< HTTP RESPONSE 200
+[debug] [2019-05-11T00:42:46.836Z] Starting @google-cloud/functions-emulator
+[debug] [2019-05-11T00:42:46.920Z] <<< HTTP RESPONSE 200
+[info] i  hosting: Serving hosting files from: dist
+[info] +  hosting: Local server: http://localhost:5000
+[debug] [2019-05-11T00:42:48.357Z] Parsing function triggers
+[info] +  functions: main: http://localhost:5001/mythall-v7/us-central1/main

@@ -1,0 +1,25 @@
+<div class="row">
+
+	<!--Ordres-->
+	<div class="col-12">
+
+		<!--Choix de ordre-->
+		<mat-form-field>
+			<mat-select placeholder="Sélectionner un Ordre" name="selectedOrdre" [(ngModel)]="selectedOrdre" (ngModelChange)="setOrdre()" required>
+				<mat-option *ngFor="let e of availableOrdres" [value]="e" [innerHtml]="e.nom"></mat-option>
+			</mat-select>
+		</mat-form-field>
+
+		<!--Description Ordre-->
+		<div class="mb-2" *ngIf="selectedOrdre">
+			<span class="font-italic" [innerHtml]="selectedOrdre.description"></span>
+		</div>
+
+	</div>
+
+	<!--Stepper Buttons-->
+	<div class="col-12">
+		<button mat-raised-button color="primary" (click)="next()" [disabled]="!isCompleted()">Suivant</button>
+	</div>
+
+</div>

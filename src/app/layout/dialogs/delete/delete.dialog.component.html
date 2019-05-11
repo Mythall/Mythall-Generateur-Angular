@@ -1,0 +1,10 @@
+<h2 mat-dialog-title class="text-center">Confirmation</h2>
+<mat-dialog-content class="text-center">
+  <span [innerHtml]="'Voulez-vous vraiment supprimer '"></span>
+  <strong [innerHtml]="data.displayname"></strong>
+  <span [innerHtml]="' ?'"></span>
+</mat-dialog-content>
+<mat-dialog-actions class="d-flex justify-content-center">
+  <button mat-button mat-dialog-close>Non</button>
+  <button mat-button [mat-dialog-close]="data.item">Oui</button>
+</mat-dialog-actions>

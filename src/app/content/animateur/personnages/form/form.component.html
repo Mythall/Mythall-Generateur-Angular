@@ -1,0 +1,264 @@
+<div class="container-fluid">
+	<div class="row">
+		<mat-toolbar color="primary">
+			<span>Personnages</span>
+		</mat-toolbar>
+	</div>
+</div>
+
+<div class="container mt-4">
+	<mat-card>
+		<mat-card-title>Formulaire de Personnage</mat-card-title>
+		<form #form="ngForm">
+			<div *ngIf="personnage" class="form-container">
+
+				<mat-tab-group class="tab-group">
+
+					<!--Information de base-->
+					<mat-tab label="Information de base">
+						<div class="row mb-1 mt-2">
+							<div class="col">
+								<mat-form-field>
+									<input matInput name="personnage.nom" [(ngModel)]="personnage.nom" placeholder="Nom" required>
+								</mat-form-field>
+
+								<mat-form-field>
+									<mat-select placeholder="Joueur" name="personnage.userRef" [(ngModel)]="personnage.userRef" required>
+										<mat-option *ngFor="let u of users" [value]="u.uid" [innerHtml]="u.displayname"></mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field>
+									<mat-select placeholder="Race" name="personnage.raceRef" [(ngModel)]="personnage.raceRef" required>
+										<mat-option *ngFor="let r of races" [value]="r.id" [innerHtml]="r.nom"></mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field>
+									<mat-select placeholder="Alignement" name="personnage.alignementRef" [(ngModel)]="personnage.alignementRef" required>
+										<mat-option *ngFor="let a of alignements" [value]="a.id" [innerHtml]="a.nom"></mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field>
+									<mat-select placeholder="Dieu" name="personnage.dieuRef" [(ngModel)]="personnage.dieuRef">
+										<mat-option value=""></mat-option>
+										<mat-option *ngFor="let d of dieux" [value]="d.id" [innerHtml]="d.nom"></mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field>
+									<mat-select placeholder="Domaines" name="personnage.domainesRef" [(ngModel)]="personnage.domainesRef" multiple>
+										<mat-option *ngFor="let d of domaines" [value]="d.id">{{d.nom}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field>
+									<mat-select placeholder="Esprit" name="personnage.espritRef" [(ngModel)]="personnage.espritRef">
+										<mat-option value=""></mat-option>
+										<mat-option *ngFor="let e of esprits" [value]="e.id" [innerHtml]="e.nom"></mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field>
+									<mat-select placeholder="Ordres" name="personnage.ordresRef" [(ngModel)]="personnage.ordresRef" multiple>
+										<mat-option *ngFor="let o of ordres" [value]="o.id">{{o.nom}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field>
+									<input matInput type="number" min="0" name="personnage.vie" [(ngModel)]="personnage.vie" placeholder="Vie(s)" required>
+								</mat-form-field>
+
+							</div>
+						</div>
+					</mat-tab>
+
+					<!--Classe(s)-->
+					<mat-tab label="Classe(s)">
+						<div class="row mb-1 mt-2">
+							<ng-template ngFor [ngForOf]="personnage.classes" let-classe let-i="index">
+								<div *ngIf="classe" class="col-5">
+									<mat-form-field>
+										<mat-select placeholder="Classe" name="personnage.classes[{{i}}].classeRef" [(ngModel)]="personnage.classes[i].classeRef" required>
+											<mat-option *ngFor="let c of classes" [value]="c.id" [innerHtml]="c.nom"></mat-option>
+										</mat-select>
+									</mat-form-field>
+								</div>
+								<div class="col-5">
+									<mat-form-field>
+										<input matInput type="number" [min]="1" name="personnage.classes[{{i}}].niveau" [(ngModel)]="personnage.classes[i].niveau"
+										 placeholder="Niveau" required>
+									</mat-form-field>
+								</div>
+								<div class="col-2">
+									<button mat-raised-button color="basic" (click)="deleteClasse(i)">
+										<i class="material-icons">delete</i>
+									</button>
+								</div>
+							</ng-template>
+							<div *ngIf="!personnage.classes || personnage.classes && personnage.classes.length < 3" class="col-12 mb-2">
+								<button mat-raised-button color="basic" (click)="addClasse()">
+									<i class="material-icons">add</i>
+								</button>
+							</div>
+						</div>
+					</mat-tab>
+
+					<!--Dons-->
+					<mat-tab label="Don(s)">
+						<div class="row mb-1 mt-2">
+							<ng-template ngFor [ngForOf]="personnage.dons" let-don let-i="index">
+
+								<div *ngIf="don" class="col-5">
+									<mat-form-field>
+										<mat-select placeholder="Don" name="personnage.dons[{{i}}].donRef" [(ngModel)]="personnage.dons[i].donRef" required>
+											<mat-option *ngFor="let d of dons" [value]="d.id" [innerHtml]="d.nom"></mat-option>
+										</mat-select>
+									</mat-form-field>
+								</div>
+
+								<div class="col-5">
+									<mat-form-field>
+										<input matInput type="number" [min]="1" name="personnage.dons[{{i}}].niveauObtention" [(ngModel)]="personnage.dons[i].niveauObtention"
+										 placeholder="Niveau D\'Obtention" required>
+									</mat-form-field>
+								</div>
+
+								<div class="col-2">
+									<button mat-raised-button color="basic" (click)="deleteDon(i)">
+										<i class="material-icons">delete</i>
+									</button>
+								</div>
+
+							</ng-template>
+
+							<div class="col-12 mb-2">
+								<button mat-raised-button color="basic" (click)="addDon()">
+									<i class="material-icons">add</i>
+								</button>
+							</div>
+
+						</div>
+					</mat-tab>
+
+					<!--Sorts-->
+					<mat-tab label="Sort(s)">
+						<div class="row mb-1 mt-2">
+							<ng-template ngFor [ngForOf]="personnage.sorts" let-sort let-i="index">
+
+								<div *ngIf="sort" class="col-5">
+									<mat-form-field>
+										<mat-select placeholder="Sort" name="personnage.sorts[{{i}}].sortRef" [(ngModel)]="personnage.sorts[i].sortRef" required>
+											<mat-option *ngFor="let d of sorts" [value]="d.id" [innerHtml]="d.nom"></mat-option>
+										</mat-select>
+									</mat-form-field>
+								</div>
+
+								<div class="col-5">
+									<mat-form-field>
+										<input matInput type="number" [min]="1" name="personnage.sorts[{{i}}].niveauObtention" [(ngModel)]="personnage.sorts[i].niveauObtention"
+										 placeholder="Niveau D\'Obtention" required>
+									</mat-form-field>
+								</div>
+
+								<div class="col-2">
+									<button mat-raised-button color="basic" (click)="deleteSort(i)">
+										<i class="material-icons">delete</i>
+									</button>
+								</div>
+
+							</ng-template>
+
+							<div class="col-12 mb-2">
+								<button mat-raised-button color="basic" (click)="addSort()">
+									<i class="material-icons">add</i>
+								</button>
+							</div>
+
+						</div>
+					</mat-tab>
+
+					<!--Aptitudes Spécials-->
+					<mat-tab label="Aptitudes Spéciales(s)">
+						<div class="row mb-1 mt-2">
+							<ng-template ngFor [ngForOf]="personnage.aptitudes" let-aptitude let-i="index">
+
+								<div *ngIf="aptitude" class="col-5">
+									<mat-form-field>
+										<mat-select placeholder="Aptitude Spécial" name="personnage.aptitudes[{{i}}].aptitudeRef" [(ngModel)]="personnage.aptitudes[i].aptitudeRef"
+										 required>
+											<mat-option *ngFor="let a of aptitudes" [value]="a.id" [innerHtml]="a.nom"></mat-option>
+										</mat-select>
+									</mat-form-field>
+								</div>
+
+								<div class="col-5">
+									<mat-form-field>
+										<input matInput type="number" [min]="1" name="personnage.aptitudes[{{i}}].niveauObtention" [(ngModel)]="personnage.aptitudes[i].niveauObtention"
+										 placeholder="Niveau D\'Obtention" required>
+									</mat-form-field>
+								</div>
+
+								<div class="col-2">
+									<button mat-raised-button color="basic" (click)="deleteAptitude(i)">
+										<i class="material-icons">delete</i>
+									</button>
+								</div>
+
+							</ng-template>
+
+							<div class="col-12 mb-2">
+								<button mat-raised-button color="basic" (click)="addAptitude()">
+									<i class="material-icons">add</i>
+								</button>
+							</div>
+
+						</div>
+					</mat-tab>
+
+					<!--Fourberiess-->
+					<mat-tab label="Fourberiess">
+						<div class="row mb-1 mt-2">
+							<ng-template ngFor [ngForOf]="personnage.fourberies" let-i="index">
+
+								<div *ngIf="fourberies" class="col-5">
+									<mat-form-field>
+										<mat-select placeholder="Fourberies" name="personnage.fourberies[{{i}}].fourberieRef" [(ngModel)]="personnage.fourberies[i].fourberieRef"
+										 required>
+											<mat-option *ngFor="let f of fourberies" [value]="f.id" [innerHtml]="f.nom"></mat-option>
+										</mat-select>
+									</mat-form-field>
+								</div>
+
+								<div class="col-5">
+									<mat-form-field>
+										<input matInput type="number" [min]="1" name="personnage.fourberies[{{i}}].niveauObtention" [(ngModel)]="personnage.fourberies[i].niveauObtention"
+										 placeholder="Niveau D\'Obtention" required>
+									</mat-form-field>
+								</div>
+
+								<div class="col-2">
+									<button mat-raised-button color="basic" (click)="deleteFourberie(i)">
+										<i class="material-icons">delete</i>
+									</button>
+								</div>
+
+							</ng-template>
+
+							<div class="col-12 mb-2">
+								<button mat-raised-button color="basic" (click)="addFourberie()">
+									<i class="material-icons">add</i>
+								</button>
+							</div>
+
+						</div>
+					</mat-tab>
+
+				</mat-tab-group>
+
+			</div>
+			<button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+		</form>
+	</mat-card>
+</div>

@@ -1,0 +1,53 @@
+<div class="container-fluid">
+    <div class="row">
+        <mat-toolbar color="primary">
+            <span>Ordres</span>
+        </mat-toolbar>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <mat-card>
+        <mat-card-title>Formulaire d'Ordre</mat-card-title>
+        <form #form="ngForm">
+            <div class="form-container">
+
+                <div class="row mb-1">
+                    <div class="col">
+
+                        <mat-form-field>
+                            <input matInput name="ordre.nom" [(ngModel)]="ordre.nom" placeholder="Nom" required>
+                        </mat-form-field>
+
+
+                        <mat-form-field>
+                            <textarea matInput name="ordre.description" [(ngModel)]="ordre.description" placeholder="Description" required></textarea>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-select placeholder="Classe" name="ordre.classeRef" [(ngModel)]="ordre.classeRef" required>
+                                <mat-option *ngFor="let c of classes" [value]="c.id">{{c.nom}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-select placeholder="Multiclassement" name="ordre.multiclassementRef" [(ngModel)]="ordre.multiclassementRef" multiple
+                                required>
+                                <mat-option *ngFor="let c of classes" [value]="c.id">{{c.nom}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-select placeholder="Alignement" name="ordre.alignementPermisRef" [(ngModel)]="ordre.alignementPermisRef" required multiple>
+                                <mat-option *ngFor="let a of alignements" [value]="a.id">{{a.nom}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                    </div>
+                </div>
+
+            </div>
+            <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+        </form>
+    </mat-card>
+</div>

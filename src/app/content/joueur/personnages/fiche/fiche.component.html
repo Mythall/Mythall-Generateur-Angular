@@ -1,0 +1,462 @@
+<div class="container-fluid">
+	<div class="row">
+		<mat-toolbar color="primary">
+			<span [innerHtml]="'Fiche de ' + personnage.nom"></span>
+		</mat-toolbar>
+	</div>
+</div>
+
+<div class="container mt-4">
+	<div class="row">
+
+		<div *ngIf="auth.isAnimateur(user) && personnage && personnage.id" class="col-12 d-print-none">
+			<button mat-raised-button color="primary" class="mb-4 mr-1" [routerLink]="'/animateur/personnages/form/' + personnage.id">Mode DM</button>
+			<button mat-raised-button color="primary" [routerLink]="'/joueur/personnage/progression/' + personnage.id">Progression</button>
+		</div>
+
+		<div class="col-12">
+			<mat-card class="mb-4">
+
+				<!--Informations-->
+				<div class="row mb-1">
+					<div class="col">
+						<mat-card-title>
+							<strong>Informations</strong>
+						</mat-card-title>
+						<mat-card-content>
+
+							<div class="row">
+								<div class="col">
+
+									<ng-template [ngIf]="personnage?.user?.displayname">
+										<strong>Joueur: </strong>
+										<span [innerHtml]="personnage?.user?.displayname"></span>
+										<br />
+									</ng-template>
+
+									<ng-template [ngIf]="personnage.nom">
+										<strong>Nom du Personnage: </strong>
+										<span [innerHtml]="personnage.nom"></span>
+										<br />
+									</ng-template>
+
+									<ng-template [ngIf]="personnage?.race?.nom">
+										<strong>Race: </strong>
+										<span [innerHtml]="personnage?.race?.nom"></span>
+										<br />
+									</ng-template>
+
+									<!--Alignement-->
+									<ng-template [ngIf]="personnage?.alignement?.nom">
+										<strong>Alignement: </strong>
+										<span [innerHtml]="personnage?.alignement?.nom"></span>
+										<br />
+									</ng-template>
+
+									<!--Niveaux-->
+									<ng-template [ngIf]="personnage.classes">
+										<strong>Niveau: </strong>
+										<ng-template ngFor [ngForOf]="personnage.classes" let-classe>
+											<span [innerHtml]="classe?.classe?.nom + '(' + classe.niveau + ') '"></span>
+										</ng-template>
+										<br />
+									</ng-template>
+
+									<!--Niveaux Effectif-->
+									<ng-template [ngIf]="personnage?.niveauEffectif">
+										<strong>Niveau Effectif: </strong>
+										<span [innerHtml]="personnage?.niveauEffectif"></span>
+										<!-- <span *ngIf="personnage?.niveauProfane && personnage?.niveauProfane > 0" [innerHtml]="'Profane(' + personnage?.niveauProfane + ')'"></span>
+										<span *ngIf="personnage?.niveauDivin && personnage?.niveauDivin > 0" [innerHtml]="'Divin(' + personnage?.niveauDivin + ')'"></span> -->
+										<br />
+									</ng-template>
+
+								</div>
+								<div class="col">
+
+									<!--Vie(s)-->
+									<ng-template [ngIf]="personnage?.vie">
+										<strong>Vie(s): </strong>
+										<span [innerHtml]="personnage?.vie"></span>
+										<br />
+									</ng-template>
+
+									<!--Divinité-->
+									<ng-template [ngIf]="personnage?.dieu?.nom">
+										<strong>Divinité: </strong>
+										<span [innerHtml]="personnage?.dieu?.nom"></span>
+										<br />
+									</ng-template>
+
+									<!--Domaines-->
+									<ng-template [ngIf]="personnage.domaines && personnage.domaines.length > 0">
+										<strong>Domaines: </strong>
+										<ng-template ngFor [ngForOf]="personnage.domaines" let-domaine let-last="last">
+											<span [innerHtml]="domaine?.nom"></span>
+											<span *ngIf="!last">, </span>
+										</ng-template>
+										<br />
+									</ng-template>
+
+									<!--Ordres-->
+									<ng-template [ngIf]="personnage?.ordres && personnage?.ordres?.length > 0">
+										<strong>Ordre(s): </strong>
+										<ng-template ngFor [ngForOf]="personnage.ordres" let-ordre>
+											<span [innerHtml]="ordre?.nom"></span>
+										</ng-template>
+										<br />
+									</ng-template>
+
+									<!--Esprit-->
+									<ng-template [ngIf]="personnage?.esprit?.nom">
+										<strong>Esprit Patron: </strong>
+										<span [innerHtml]="personnage?.esprit?.nom"></span>
+										<br />
+									</ng-template>
+
+									<!--GN-->
+									<!-- <ng-template [ngIf]="personnage?.gnEffectif">
+										<strong>Nombre d'évenement: </strong>
+										<span [innerHtml]="personnage?.gnEffectif"></span>
+										<br />
+									</ng-template> -->
+
+									<!--Niveau Disponible-->
+									<ng-template [ngIf]="personnage?.niveauDisponible">
+										<strong>Niveau Disponible: </strong>
+										<span [innerHtml]="personnage?.niveauDisponible"></span>
+										<br />
+									</ng-template>
+
+								</div>
+							</div>
+
+						</mat-card-content>
+					</div>
+				</div>
+
+				<!--Statistique-->
+				<div class="row">
+					<div class="col-12">
+						<mat-card-title>
+							<strong>Statistiques</strong>
+						</mat-card-title>
+					</div>
+					<div class="col-6">
+						<mat-card-content>
+
+							<!--Constitution-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == 'OdzM6YHkYw41HXMIcTsw'">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+							<!--Dextérité-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == 'oFeJq3NgdDDEwi0Y1rdR'">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+							<!--Force-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == 'gOg0TFSbU8mvlv8baCXE'">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+							<!--Intelligence-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == 'yKfNuFBQY5UknrTNOxpA'">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+							<!--Sagesse-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == 'HkaChqWpHOlINdla02ja'">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+						</mat-card-content>
+					</div>
+					<div class="col-6">
+						<mat-card-content>
+
+							<!--Point(s) de vie Torse-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == 'sCcNIQDoWKUIIcSpkB2m'">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+							<!--Point(s) de vie Bras-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == 'ZSnV9s6cyzYihdFR6wfr'">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+							<!--Point(s) de vie Jambes-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == '69jKTq64XUCk51EmY0Z1'">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+							<!--Point(s) de lutte-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == 'Rp8BG8OtlNKl8aeuojdi'">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+							<!--Point(s) de magie-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == '3f75skgSz3CWqdERXcqG' && statistique.valeur > 0">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+							<!--Point(s) de ki-->
+							<ng-template ngFor [ngForOf]="personnage.statistiques" let-statistique>
+								<div *ngIf="statistique.statistique.id == 'py44fmGyDCUnkkBZmto9' && statistique.valeur > 0">
+									<strong [innerHtml]="statistique.statistique.nom + ': '"></strong>
+									<span [innerHtml]="statistique.valeur"></span>
+									<br />
+								</div>
+							</ng-template>
+
+						</mat-card-content>
+					</div>
+
+				</div>
+
+				<!--Résistances & Immunitées-->
+				<div class="row">
+					<div class="col-6">
+						<mat-card-title>
+							<strong>Résistance(s)</strong>
+						</mat-card-title>
+						<mat-card-content>
+							<ng-template ngFor [ngForOf]="personnage.resistances" let-resistance>
+								<strong [innerHtml]="resistance.resistance.nom + ': '"></strong>
+								<span [innerHtml]="resistance.valeur"></span>
+								<br />
+							</ng-template>
+							<span *ngIf="!personnage.resistances || personnage.resistances && personnage.resistances.length == 0">Aucune</span>
+						</mat-card-content>
+					</div>
+					<div class="col-6">
+						<mat-card-title>
+							<strong>Immunitée(s)</strong>
+						</mat-card-title>
+						<mat-card-content>
+							<ng-template ngFor [ngForOf]="personnage.immunites" let-immunite>
+								<strong [innerHtml]="immunite.nom"></strong>
+								<br />
+							</ng-template>
+							<span *ngIf="!personnage.immunites || personnage.immunites && personnage.immunites.length == 0">Aucune</span>
+						</mat-card-content>
+					</div>
+				</div>
+
+				<!--Capacitée(s) Spéciale(s)-->
+				<div *ngIf="personnage.capaciteSpeciales && personnage.capaciteSpeciales.length > 0" class="row">
+					<div class="col-12">
+						<mat-card-title>
+							<strong>Capacitée(s) Spéciale(s)</strong>
+						</mat-card-title>
+						<mat-card-content>
+							<ng-template ngFor [ngForOf]="personnage.capaciteSpeciales" let-statistique>
+								<strong [innerHtml]="statistique.statistique.nom + ': ' "></strong>
+								<span [innerHtml]="statistique.valeur"></span>
+								<br />
+							</ng-template>
+						</mat-card-content>
+					</div>
+				</div>
+
+				<!--Dons(s)-->
+				<div *ngIf="personnage.dons && personnage.dons.length > 0" class="row mb-1">
+					<div class="col">
+						<mat-card-title>
+							<strong>Dons</strong>
+						</mat-card-title>
+						<mat-card-content>
+
+							<ng-template ngFor [ngForOf]="personnage?.dons" let-donItem>
+								<div class="row mb-2">
+									<div class="col">
+										<h3 class="mb-0">
+											<span class="font-weight-bold" [innerHtml]="donItem.don?.nom"></span>
+											<span *ngIf="donItem.don?.afficherNiveau" [innerHtml]="'(' + donItem?.niveauEffectif + ')'"></span>
+										</h3>
+
+										<span [innerHtml]="donItem.don?.description"></span>
+										<br />
+									</div>
+								</div>
+							</ng-template>
+
+						</mat-card-content>
+					</div>
+				</div>
+
+				<!--Aptitudes(s)-->
+				<div *ngIf="personnage.aptitudes && personnage.aptitudes.length > 0" class="row mb-1">
+					<div class="col">
+						<mat-card-title>
+							<strong>Aptitude(s) Spéciale</strong>
+						</mat-card-title>
+						<mat-card-content>
+
+							<ng-template ngFor [ngForOf]="personnage?.aptitudes" let-aptitudeItem>
+								<div class="row mb-2">
+									<div class="col">
+										<h3 class="mb-0">
+											<span class="font-weight-bold" [innerHtml]="aptitudeItem.aptitude?.nom"></span>
+										</h3>
+
+										<span [innerHtml]="aptitudeItem.aptitude?.description"></span>
+										<br />
+									</div>
+								</div>
+							</ng-template>
+
+						</mat-card-content>
+					</div>
+				</div>
+
+				<!--Fourberies(s)-->
+				<div *ngIf="personnage.fourberies && personnage.fourberies.length > 0" class="row mb-1">
+					<div class="col">
+						<mat-card-title>
+							<strong>Fourberies</strong>
+						</mat-card-title>
+						<mat-card-content>
+
+							<ng-template ngFor [ngForOf]="personnage?.fourberies" let-fourberieItem>
+								<div class="row mb-2">
+									<div class="col">
+										<h3 class="mb-0">
+											<span class="font-weight-bold" [innerHtml]="fourberieItem.fourberie?.nom"></span>
+										</h3>
+										<span [innerHtml]="fourberieItem.fourberie?.description"></span>
+										<br />
+									</div>
+								</div>
+							</ng-template>
+
+						</mat-card-content>
+					</div>
+				</div>
+
+				<!--Sort(s) Racial-->
+				<div *ngIf="personnage.race && personnage.race.sortsRacial && personnage.race.sortsRacial.length > 0" class="row mb-1">
+					<div class="col">
+						<mat-card-title>
+							<strong>Sort(s) Racial</strong>
+						</mat-card-title>
+						<mat-card-content>
+
+							<ng-template ngFor [ngForOf]="personnage?.race?.sortsRacial" let-sort>
+
+								<h3 class="font-weight-bold mb-0" [innerHtml]="sort.nom + ' (' + sort.ecole.nom + ')'"></h3>
+
+								<strong>Portée: </strong>
+								<span [innerHtml]="sort.porte.nom"></span>
+								<br />
+
+								<strong>Durée: </strong>
+								<span [innerHtml]="sort.duree.nom"></span>
+								<br />
+
+								<strong>Zone d’effet: </strong>
+								<span [innerHtml]="sort.zone.nom"></span>
+								<br />
+
+								<strong>Incantation: </strong>
+								<span [innerHtml]="sort.incantation"></span>
+								<br />
+
+								<strong>Sommaire: </strong>
+								<span [innerHtml]="sort.sommaire"></span>
+								<br />
+
+							</ng-template>
+
+						</mat-card-content>
+					</div>
+				</div>
+
+				<!--Sort(s)-->
+				<div *ngIf="personnage.sorts && personnage.sorts.length > 0" class="row mb-1">
+					<div class="col">
+						<mat-card-title>
+							<strong>Sort(s)</strong>
+						</mat-card-title>
+						<mat-card-content>
+
+							<ng-template ngFor [ngForOf]="personnage?.sorts" let-sort>
+
+								<h3 class="font-weight-bold mb-0" [innerHtml]="sort?.sort?.nom + ' (' + sort?.sort?.ecole?.nom + ')'"></h3>
+
+								<strong>Niveau: </strong>
+								<span [innerHtml]="sort?.sort?.niveau"></span>
+								<br />
+
+								<strong>Portée: </strong>
+								<span [innerHtml]="sort?.sort?.porte?.nom"></span>
+								<br />
+
+								<strong>Durée: </strong>
+								<span [innerHtml]="sort?.sort?.duree?.nom"></span>
+								<br />
+
+								<strong>Zone d’effet: </strong>
+								<span [innerHtml]="sort?.sort?.zone?.nom"></span>
+								<br />
+
+								<strong>Incantation: </strong>
+								<span [innerHtml]="sort?.sort?.incantation"></span>
+								<br />
+
+								<strong>Sommaire: </strong>
+								<span [innerHtml]="sort?.sort?.sommaire"></span>
+								<br />
+								<br />
+
+							</ng-template>
+
+						</mat-card-content>
+					</div>
+				</div>
+
+			</mat-card>
+		</div>
+
+	</div>
+</div>

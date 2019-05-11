@@ -1,0 +1,25 @@
+<div class="row">
+
+	<!--Esprits-->
+	<div class="col-12">
+
+		<!--Choix de esprit-->
+		<mat-form-field>
+			<mat-select placeholder="Sélectionner un Esprit Patron" name="selectedEsprit" [(ngModel)]="selectedEsprit" (ngModelChange)="setEsprit()" required>
+				<mat-option *ngFor="let e of availableEsprits" [value]="e" [innerHtml]="e.nom"></mat-option>
+			</mat-select>
+		</mat-form-field>
+
+		<!--Description Esprit-->
+		<div class="mb-2" *ngIf="selectedEsprit">
+			<span class="font-italic" [innerHtml]="selectedEsprit.description"></span>
+		</div>
+
+	</div>
+
+	<!--Stepper Buttons-->
+	<div class="col-12">
+		<button mat-raised-button color="primary" (click)="next()" [disabled]="!isCompleted()">Suivant</button>
+	</div>
+
+</div>

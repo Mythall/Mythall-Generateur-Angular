@@ -1,0 +1,35 @@
+<div class="container-fluid">
+    <div class="row">
+        <mat-toolbar color="primary">
+            <span [innerHtml]="'Profil de ' + user?.displayname"></span>
+        </mat-toolbar>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+
+        <!--Profil-->
+        <div class="col-xs-12 col-md-12">
+            <mat-card class="mb-4">
+                <mat-card-content>
+                    <div class="text-center">
+                        <img *ngIf="user?.photoURL" class="img-fluid rounded" [src]="user?.photoURL" alt="Avatar" />
+                        <h1 class="my-1" [innerHtml]="user?.displayname"></h1>
+                        <p>
+                            <span class="font-weight-bold">Date d'inscription: </span>
+                            <span [innerHtml]="user?.createdAt.toDate() | date:'medium'"></span>
+                            <br />
+
+                            <span class="font-weight-bold">Courriel: </span>
+                            <span [innerHtml]="user?.email"></span>
+                            <br />
+
+                        </p>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+    </div>
+</div>

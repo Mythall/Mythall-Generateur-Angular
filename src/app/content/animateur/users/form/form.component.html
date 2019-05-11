@@ -1,0 +1,45 @@
+<div class="container-fluid">
+    <div class="row">
+        <mat-toolbar color="primary">
+            <span>Joueur</span>
+        </mat-toolbar>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <mat-card>
+        <mat-card-title>Formulaire de joueur</mat-card-title>
+        <form #form="ngForm">
+            <div class="form-container">
+
+                <div class="row mb-1">
+                    <div class="col">
+                        <mat-form-field>
+                            <input matInput name="user.displayname" [(ngModel)]="user.displayname" placeholder="Nom" disabled required>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <input matInput name="user.email" [(ngModel)]="user.email" placeholder="Courriel" disabled required>
+                        </mat-form-field>
+
+                        <section *ngIf="user">
+                            <mat-checkbox name="user.roles.joueur" [(ngModel)]="user.roles.joueur" disabled>Joueur</mat-checkbox>
+                        </section>
+                        
+                        <section *ngIf="user">
+                            <mat-checkbox name="user.roles.animateur" [(ngModel)]="user.roles.animateur" [disabled]="!auth.isOrganisateur(auth.user | async)">Animateur</mat-checkbox>
+                        </section>
+
+                        <section *ngIf="user">
+                            <mat-checkbox name="user.roles.organisateur" [(ngModel)]="user.roles.organisateur" [disabled]="!auth.isOrganisateur(auth.user | async)">Organisateur</mat-checkbox>
+                        </section>                        
+                        
+
+                    </div>
+                </div>
+                
+            </div>
+            <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+        </form>
+    </mat-card>
+</div>

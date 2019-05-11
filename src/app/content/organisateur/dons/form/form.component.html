@@ -1,0 +1,260 @@
+<div class="container-fluid">
+    <div class="row">
+        <mat-toolbar color="primary">
+            <span>Dons</span>
+        </mat-toolbar>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <mat-card>
+        <mat-card-title>Formulaire de Don</mat-card-title>
+        <form #form="ngForm">
+            <div class="form-container">
+
+                <mat-tab-group class="tab-group">
+
+                    <!--Information de base-->
+                    <mat-tab label="Information de base">
+                        <div class="row mb-1 mt-2">
+                            <div class="col">
+
+                                <div class="row">
+                                    <div class="col">
+                                        <mat-form-field>
+                                            <input matInput name="don.nom" [(ngModel)]="don.nom" placeholder="Nom" required />
+                                        </mat-form-field>
+                                    </div>
+                                    <!-- <div class="col-2 pt-3">
+                                        <mat-checkbox name="don.epic" [(ngModel)]="don.epic">Épic</mat-checkbox>
+                                    </div> -->
+                                </div>
+
+                                <mat-form-field>
+                                    <textarea matInput name="don.description" [(ngModel)]="don.description" placeholder="description" required></textarea>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <input matInput type="number" min="0" name="don.niveauRequis" [(ngModel)]="don.niveauRequis" placeholder="Niveau Requis"
+                                        required />
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <input matInput type="number" min="0" name="don.nlsRequis" [(ngModel)]="don.nlsRequis" placeholder="Niveau de Lanceur de Sort Requis"
+                                        required />
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <input matInput type="number" min="0" name="don.niveauMaxObtention" [(ngModel)]="don.niveauMaxObtention" placeholder="Niveau Maximum"
+                                        required />
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-select placeholder="Catégorie" name="don.categorie" [(ngModel)]="don.categorie" required>
+                                        <mat-option *ngFor="let c of categories" [value]="c" [innerHtml]="c"></mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <mat-form-field>
+                                            <mat-select placeholder="Modificateur (DEPRECATED)" name="don.modificateurRef" [(ngModel)]="don.modificateurRef">
+                                                <mat-option value=""></mat-option>
+                                                <mat-option *ngFor="let s of statistiques" [value]="s.id">{{s.nom}}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="col-10">
+                                            <mat-form-field>
+                                                <mat-select placeholder="Modificateur (Niveau)" name="don.modificateursRef" [(ngModel)]="don.modificateursRef" multiple>
+                                                    <mat-option *ngFor="let s of statistiques" [value]="s.id">{{s.nom}}</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    <div class="col-2 pt-3">
+                                        <mat-checkbox name="don.afficherNiveau" [(ngModel)]="don.afficherNiveau">Afficher le Niveau</mat-checkbox>
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-10">
+                                        <mat-form-field>
+                                            <mat-select placeholder="Race(s) Authorisé" name="don.racesAutoriseRef" [(ngModel)]="don.racesAutoriseRef" multiple>
+                                                <mat-option *ngFor="let r of races" [value]="r.id">{{r.nom}}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="col-2 pr-0">
+                                        <button mat-raised-button color="basic" (click)="selectAllRaces()">
+                                            <i class="material-icons">check</i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </mat-tab>
+
+                    <!--Classe(s) Authorisé-->
+                    <mat-tab label="Classe(s) Authorisé" class="mat-tab">
+                        <div class="row mb-1 mt-2">
+
+                            <ng-template ngFor [ngForOf]="don.classesAutorise" let-resistance let-i="index">
+                                <div class="col-8">
+                                    <mat-form-field>
+                                        <mat-select placeholder="Classe" name="don.classesAutorise[{{i}}].classeRef" [(ngModel)]="don.classesAutorise[i].classeRef"
+                                            required>
+                                            <mat-option *ngFor="let c of classes" [value]="c.id" [innerHtml]="c.nom"></mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-2">
+                                    <mat-form-field>
+                                        <input matInput type="number" [min]="1" name="don.classesAutorise[{{i}}].niveau" [(ngModel)]="don.classesAutorise[i].niveau"
+                                            placeholder="Niveau" required>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-2">
+                                    <button mat-raised-button color="basic" (click)="deleteClasseAuthorise(i)">
+                                        <i class="material-icons">delete</i>
+                                    </button>
+                                </div>
+                            </ng-template>
+                            <div class="col-10 mb-2">
+                                <button mat-raised-button color="basic" (click)="addClasseAuthorise()">
+                                    <i class="material-icons">add</i>
+                                </button>
+                            </div>
+                            <div *ngIf="classes && don.classesAutorise" class="col-2">
+                                <button mat-raised-button color="basic" (click)="selectAllClasses()" [disabled]="don.classesAutorise.length >= classes.length">
+                                    <i class="material-icons">check</i>
+                                </button>
+                            </div>
+
+                        </div>
+                    </mat-tab>
+
+                    <!--Don(s) Requis-->
+                    <mat-tab label="Don(s) Requis" class="mat-tab">
+                        <div class="row mb-1 mt-2">
+                            <div class="col">
+
+                                <mat-form-field>
+                                    <mat-select placeholder="Don(s)" name="don.donsRequisRef" [(ngModel)]="don.donsRequisRef" multiple>
+                                        <mat-option *ngFor="let d of dons" [value]="d.id">{{d.nom}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </mat-tab>
+
+                    <!--Statistiques-->
+                    <mat-tab label="Statistiques" class="mat-tab">
+                        <div class="row mb-1 mt-2">
+
+                            <ng-template ngFor [ngForOf]="don.statistiques" let-statistique let-i="index">
+                                <div class="col-4">
+                                    <mat-form-field>
+                                        <mat-select placeholder="Statistique" name="don.statistiques[{{i}}].statistiqueRef" [(ngModel)]="don.statistiques[i].statistiqueRef"
+                                            required>
+                                            <mat-option *ngFor="let s of statistiques" [value]="s.id" [innerHtml]="s.nom"></mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-2">
+                                    <mat-form-field>
+                                        <input matInput type="number" [min]="1" name="don.statistiques[{{i}}].niveau" [(ngModel)]="don.statistiques[i].niveau" placeholder="Niveau"
+                                            required>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-2">
+                                    <mat-form-field>
+                                        <input matInput type="number" [min]="1" name="don.statistiques[{{i}}].valeur" [(ngModel)]="don.statistiques[i].valeur" placeholder="Valeur"
+                                            required>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-2 pt-3">
+                                    <mat-checkbox name="don.statistiques[{{i}}].cummulable" [(ngModel)]="don.statistiques[i].cummulable">Cummulable</mat-checkbox>
+                                </div>
+                                <div class="col-2">
+                                    <button mat-raised-button color="basic" (click)="deleteStatistique(i)">
+                                        <i class="material-icons">delete</i>
+                                    </button>
+                                </div>
+                            </ng-template>
+                            <div class="col-12 mb-2">
+                                <button mat-raised-button color="basic" (click)="addStatistique()">
+                                    <i class="material-icons">add</i>
+                                </button>
+                            </div>
+
+                        </div>
+                    </mat-tab>
+
+                    <!--Resistances-->
+                    <mat-tab label="Résistances" class="mat-tab">
+                        <div class="row mb-1 mt-2">
+
+                            <ng-template ngFor [ngForOf]="don.resistances" let-resistance let-i="index">
+                                <div class="col-4">
+                                    <mat-form-field>
+                                        <mat-select placeholder="Resistance" name="don.resistances[{{i}}].resistanceRef" [(ngModel)]="don.resistances[i].resistanceRef"
+                                            required>
+                                            <mat-option *ngFor="let r of resistances" [value]="r.id" [innerHtml]="r.nom"></mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-2">
+                                    <mat-form-field>
+                                        <input matInput type="number" [min]="1" name="don.resistances[{{i}}].niveau" [(ngModel)]="don.resistances[i].niveau" placeholder="Niveau"
+                                            required>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-2">
+                                    <mat-form-field>
+                                        <input matInput type="number" [min]="1" name="don.resistances[{{i}}].valeur" [(ngModel)]="don.resistances[i].valeur" placeholder="Valeur"
+                                            required>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-2 pt-3">
+                                    <mat-checkbox name="don.resistances[{{i}}].cummulable" [(ngModel)]="don.resistances[i].cummulable">Cummulable</mat-checkbox>
+                                </div>
+                                <div class="col-2">
+                                    <button mat-raised-button color="basic" (click)="deleteResistance(i)">
+                                        <i class="material-icons">delete</i>
+                                    </button>
+                                </div>
+                            </ng-template>
+                            <div class="col-12 mb-2">
+                                <button mat-raised-button color="basic" (click)="addResistance()">
+                                    <i class="material-icons">add</i>
+                                </button>
+                            </div>
+
+                        </div>
+                    </mat-tab>
+
+                    <!--Immunites-->
+                    <mat-tab label="Immunités" class="mat-tab">
+                        <div class="row mb-1 mt-2">
+                            <div class="col">
+
+                                <mat-form-field>
+                                    <mat-select placeholder="Immunité(s)" name="don.immunitesRef" [(ngModel)]="don.immunitesRef" multiple>
+                                        <mat-option *ngFor="let im of immunites" [value]="im.id">{{im.nom}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </mat-tab>
+
+                </mat-tab-group>
+
+            </div>
+            <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+        </form>
+    </mat-card>
+</div>

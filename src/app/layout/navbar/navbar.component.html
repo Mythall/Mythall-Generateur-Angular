@@ -1,0 +1,28 @@
+<mat-toolbar color="primary" class="navbar mat-elevation-z6">
+
+  <!--Sidebar Toggle-->
+  <button mat-icon-button (click)="toggle()">
+    <mat-icon aria-label="Sidenav Toggle">menu</mat-icon>
+  </button>
+
+  <!--Brand-->
+  <button mat-button routerLink="/">
+    <img class="logo-icon" src="/assets/img/logo-wht.png" alt="Logo" />
+    <span *ngIf="false">Mythall</span>
+  </button>
+
+  <!--Spacer-->
+  <span class="fill-remaining-space"></span>
+
+  <div class="button-row">
+
+    <!--Settings-->
+    <button mat-icon-button>
+      <mat-icon aria-label="User">more_vert</mat-icon>
+    </button>
+
+    <!--Auth-->
+    <app-navbar-auth></app-navbar-auth>
+
+  </div>
+</mat-toolbar>

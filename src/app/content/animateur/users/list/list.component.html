@@ -1,0 +1,66 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Joueurs</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card class="mb-4">
+    <div class="table-responsive">
+      <table class="table" matSort (matSortChange)="sortData($event)">
+        <thead>
+          <tr>
+            <th mat-sort-header="displayname">Nom</th>
+            <th mat-sort-header="email">Courriel</th>
+            <th mat-sort-header="role">Role</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <mat-form-field>
+                <input matInput placeholder="Filtre" [(ngModel)]="filter.displayname">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field>
+                <input matInput placeholder="Filtre" [(ngModel)]="filter.email">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field>
+                <mat-select [(ngModel)]="filter.role" placeholder="Role">
+                  <mat-option value="joueur">Joueur</mat-option>
+                  <mat-option value="animateur">Animateur</mat-option>
+                  <mat-option value="organisateur">Organisateur</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </td>
+          </tr>
+          <ng-template ngFor let-user [ngForOf]="sortedData">
+            <tr *ngIf="filterResult(user)">
+              <td [innerHtml]="user.displayname"></td>
+              <td [innerHtml]="user.email"></td>
+              <td *ngIf="user.roles.organisateur">Organisateur</td>
+              <td *ngIf="!user.roles.organisateur && user.roles.animateur">Animateur</td>
+              <td *ngIf="!user.roles.organisateur && !user.roles.animateur">Joueur</td>
+              <td>
+                <div class="button-row">
+                  <button mat-icon-button [routerLink]="'/animateur/users/form/' + user.id">
+                    <mat-icon aria-label="Edit">edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="confirmDelete(user)" disabled>
+                    <mat-icon aria-label="Delete">delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+</div>

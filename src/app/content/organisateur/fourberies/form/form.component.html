@@ -1,0 +1,88 @@
+<div class="container-fluid">
+    <div class="row">
+        <mat-toolbar color="primary">
+            <span>Fourberies</span>
+        </mat-toolbar>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <mat-card>
+        <mat-card-title>Formulaire de Fourberie</mat-card-title>
+        <form #form="ngForm">
+            <div class="form-container">
+
+                <mat-tab-group class="tab-group">
+
+                    <!--Information de base-->
+                    <mat-tab label="Information de base">
+                        <div class="row mb-1 mt-2">
+                            <div class="col">
+
+                                <div class="row">
+                                    <div class="col">
+                                        <mat-form-field>
+                                            <input matInput name="fourberie.nom" [(ngModel)]="fourberie.nom" placeholder="Nom" required />
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+
+                                <mat-form-field>
+                                    <textarea matInput name="fourberie.description" [(ngModel)]="fourberie.description" placeholder="description" required></textarea>
+                                </mat-form-field>
+
+                                <div class="row">
+                                    <div class="col-10">
+                                        <mat-form-field>
+                                            <mat-select placeholder="Modificateur (Niveau)" name="fourberie.modificateurRef" [(ngModel)]="fourberie.modificateurRef">
+                                                <mat-option *ngFor="let s of statistiques" [value]="s.id">{{s.nom}}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="col-2 pt-3">
+                                        <mat-checkbox name="fourberie.afficherNiveau" [(ngModel)]="fourberie.afficherNiveau">Afficher le Niveau</mat-checkbox>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </mat-tab>
+
+                    <!--Fourberie(s) Requis-->
+                    <mat-tab label="Fourberie(s) Requis" class="mat-tab">
+                        <div class="row mb-1 mt-2">
+                            <div class="col">
+
+                                <mat-form-field>
+                                    <mat-select placeholder="Fourberie(s)" name="fourberie.fourberiesRequisRef" [(ngModel)]="fourberie.fourberiesRequisRef" multiple>
+                                        <mat-option *ngFor="let d of fourberies" [value]="d.id">{{d.nom}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </mat-tab>
+
+                    <!--Don(s) Équivalent-->
+                    <mat-tab label="Don(s) Équivalent" class="mat-tab">
+                        <div class="row mb-1 mt-2">
+                            <div class="col">
+
+                                <mat-form-field>
+                                    <mat-select placeholder="Don(s)" name="fourberie.donsEquivalentRef" [(ngModel)]="fourberie.donsEquivalentRef"
+                                        multiple>
+                                        <mat-option *ngFor="let d of dons" [value]="d.id">{{d.nom}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </mat-tab>
+
+                </mat-tab-group>
+
+            </div>
+            <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+        </form>
+    </mat-card>
+</div>

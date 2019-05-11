@@ -1,0 +1,46 @@
+
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Esprits</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card class="mb-4">
+    <div>
+        <button mat-raised-button color="primary" class="mb-4" routerLink="/organisateur/esprits/form">Ajouter Esprit</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Description</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let esprit of esprits | async">
+            <td [innerHtml]="esprit.nom"></td>
+            <td [innerHtml]="esprit.description"></td>
+            <td>
+              <div class="button-row">
+                <button mat-icon-button [routerLink]="'/jeu/esprits'">
+                  <mat-icon aria-label="View">remove_red_eye</mat-icon>
+                </button>
+                <button mat-icon-button [routerLink]="'/organisateur/esprits/form/' + esprit.id">
+                  <mat-icon aria-label="Edit">edit</mat-icon>
+                </button>   
+                <button mat-icon-button (click)="confirmDelete(esprit)">
+                  <mat-icon aria-label="Delete">delete</mat-icon>
+                </button>   
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+</div>

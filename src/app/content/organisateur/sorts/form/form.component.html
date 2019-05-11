@@ -1,0 +1,68 @@
+<div class="container-fluid">
+    <div class="row">
+        <mat-toolbar color="primary">
+            <span>Sorts</span>
+        </mat-toolbar>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <mat-card>
+        <mat-card-title>Formulaire de Sort</mat-card-title>
+        <form #form="ngForm">
+            <div class="form-container">
+
+                <div class="row mb-1">
+                    <div class="col">
+                        <mat-form-field>
+                            <input matInput name="sort.nom" [(ngModel)]="sort.nom" placeholder="Nom" required />
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <input matInput name="sort.niveau" [(ngModel)]="sort.niveau" placeholder="Niveau" required />
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <textarea matInput name="sort.incantation" [(ngModel)]="sort.incantation" placeholder="Incantation" required></textarea>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <textarea matInput name="sort.sommaire" [(ngModel)]="sort.sommaire" placeholder="Sommaire" required></textarea>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <textarea matInput name="sort.description" [(ngModel)]="sort.description" placeholder="Description" required></textarea>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-select placeholder="École" name="sort.ecoleRef" [(ngModel)]="sort.ecoleRef" required>
+                                <mat-option *ngFor="let e of ecoles | async" [value]="e.id">{{e.nom}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-select placeholder="Porté" name="sort.porteRef" [(ngModel)]="sort.porteRef" required>
+                                <mat-option *ngFor="let p of portes | async" [value]="p.id">{{p.nom}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-select placeholder="Durée" name="sort.dureeRef" [(ngModel)]="sort.dureeRef" required>
+                                <mat-option *ngFor="let d of durees | async" [value]="d.id">{{d.nom}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field>
+                            <mat-select placeholder="Zone d'effet" name="sort.zoneRef" [(ngModel)]="sort.zoneRef" required>
+                                <mat-option *ngFor="let z of zones | async" [value]="z.id">{{z.nom}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                    </div>
+                </div>
+
+            </div>
+            <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+        </form>
+    </mat-card>
+</div>

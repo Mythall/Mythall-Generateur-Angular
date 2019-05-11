@@ -1,0 +1,46 @@
+<div class="container-fluid">
+    <div class="row">
+        <mat-toolbar color="primary">
+            <span [innerHtml]="'Personnages de ' + user?.displayname"></span>
+        </mat-toolbar>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <mat-card class="mb-4">
+        <div class="col-12 mb-2">
+            <button mat-raised-button color="primary" routerLink="/joueur/personnage/creation">Création de Personnage</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <!-- <th>Race</th>
+                        <th>Classe</th> -->
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let personnage of personnages">
+                        <td [innerHtml]="personnage.nom"></td>
+                        <!-- <td [innerHtml]="personnage?.race?.nom"></td> -->
+                        <!-- <td>
+                            <ng-template ngFor [ngForOf]="personnage.classes" let-classe>
+                                <span [innerHtml]="classe?.classe?.nom + '(' + classe.niveau + ')'"></span>
+                            </ng-template>
+                        </td> -->
+                        <td class="text-center">
+                            <button mat-icon-button [routerLink]="'/joueur/personnage/' + personnage.id">
+                                <mat-icon aria-label="View">remove_red_eye</mat-icon>
+                            </button>
+                            <button mat-icon-button [routerLink]="'/animateur/personnages/form/' + personnage.id">
+                                <mat-icon aria-label="Edit">edit</mat-icon>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </mat-card>
+</div>

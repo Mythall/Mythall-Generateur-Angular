@@ -1,0 +1,17 @@
+<button *ngIf="user" mat-icon-button [matMenuTriggerFor]="menu">
+    <img class="img-fluid rounded-circle" [src]="user.photoURL" alt="User Avatar" />
+</button>
+<mat-menu class="mt-5" #menu="matMenu">
+    <button mat-menu-item routerLink="/joueur/profil">
+        <mat-icon>account_box</mat-icon>
+        <span>Profile</span>
+    </button>
+    <button mat-menu-item (click)="auth.logout()">
+        <mat-icon>exit_to_app</mat-icon>
+        <span>Logout</span>
+    </button>
+</mat-menu>
+
+<button *ngIf="!user" mat-icon-button routerLink="/login">
+    <mat-icon aria-label="User">account_circle</mat-icon>
+</button>

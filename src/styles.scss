@@ -1,0 +1,39 @@
+@import "assets/scss/_theme.scss"; //Material Mythall Theme
+@import "assets/scss/_custom.scss"; //Bootstrap & Custom Variables
+
+body{
+  margin: 0;
+}
+
+.mat-drawer-container{
+  background-image: url(https://firebasestorage.googleapis.com/v0/b/mythall-v7.appspot.com/o/bg.jpg?alt=media&token=b818688d-309b-4e06-a429-cea75f4652ae);
+  background-repeat: repeat;
+  background-position: top left;
+  background-attachment: scroll;
+}
+
+.mat-drawer-content{
+  width: 100%;
+}
+
+button{
+  &:focus{
+    outline: none;
+  }
+}
+
+a{
+  transition: $transition-base;
+
+  &:hover,
+  &:active,
+  &:focus{
+    text-decoration: none !important;
+  }
+}
+
+.mat-toolbar{
+  @media print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,98 @@
+<nav>
+  <h3>Système de jeu</h3>
+  <ul>
+    <li>
+      <a routerLink="/jeu/aptitudes" routerLinkActive="active">Aptitudes</a>
+    </li>
+    <li>
+      <a routerLink="/jeu/classes" routerLinkActive="active">Classes</a>
+    </li>
+    <li>
+      <a routerLink="/jeu/classes-prestige" routerLinkActive="active">Classes de Prestige</a>
+    </li>
+    <li>
+      <a routerLink="/jeu/dons" routerLinkActive="active">Dons</a>
+    </li>
+    <li>
+      <a routerLink="/jeu/races" routerLinkActive="active">Races</a>
+    </li>
+    <li>
+      <a routerLink="/jeu/sorts" routerLinkActive="active">Sorts</a>
+    </li>
+  </ul>
+</nav>
+
+<nav *ngIf="auth.isJoueur(user)">
+  <h3>Joueur</h3>
+  <ul>
+    <li>
+      <a routerLink="/joueur/personnages" routerLinkActive="active">Personnages</a>
+    </li>
+    <li>
+      <a routerLink="/joueur/profil" routerLinkActive="active">Profil</a>
+    </li>
+  </ul>
+</nav>
+
+<nav *ngIf="auth.isAnimateur(user)">
+  <h3>Animateur</h3>
+  <ul>
+    <li>
+      <a routerLink="/animateur/personnages/list" routerLinkActive="active">Personnages</a>
+    </li>
+    <li>
+      <a routerLink="/animateur/users/list" routerLinkActive="active">Joueurs</a>
+    </li>
+  </ul>
+</nav>
+
+<nav *ngIf="auth.isOrganisateur(user)">
+  <h3>Organisateur</h3>
+  <ul>
+    <li>
+      <a routerLink="/organisateur/alignements/list" routerLinkActive="active">Alignements</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/aptitudes/list" routerLinkActive="active">Aptitudes</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/classes/list" routerLinkActive="active">Classes</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/dieux/list" routerLinkActive="active">Dieux</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/domaines/list" routerLinkActive="active">Domaines</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/dons/list" routerLinkActive="active">Dons</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/ecoles/list" routerLinkActive="active">Écoles</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/esprits/list" routerLinkActive="active">Esprits</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/fourberies/list" routerLinkActive="active">Fourberies</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/immunites/list" routerLinkActive="active">Immunités</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/ordres/list" routerLinkActive="active">Ordres</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/races/list" routerLinkActive="active">Races</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/resistances/list" routerLinkActive="active">Résistances</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/sorts/list" routerLinkActive="active">Sorts</a>
+    </li>
+    <li>
+      <a routerLink="/organisateur/statistiques/list" routerLinkActive="active">Statistiques</a>
+    </li>
+  </ul>
+</nav>

@@ -1,0 +1,14 @@
+header{
+    background: url('/assets/img/logo-banner.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    .logo{
+        max-width: 35vw;
+        @media (max-width: 600px) {
+            max-width: 75vw;
+        }    
+    }
+    
+}
