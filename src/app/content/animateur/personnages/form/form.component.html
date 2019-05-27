@@ -179,14 +179,14 @@
 						</div>
 					</mat-tab>
 
-					<!--Aptitudes Spécials-->
-					<mat-tab label="Aptitudes Spéciales(s)">
+					<!--Aptitudes Spéciales-->
+					<mat-tab label="Aptitude(s) Spéciales(s)">
 						<div class="row mb-1 mt-2">
 							<ng-template ngFor [ngForOf]="personnage.aptitudes" let-aptitude let-i="index">
 
 								<div *ngIf="aptitude" class="col-5">
 									<mat-form-field>
-										<mat-select placeholder="Aptitude Spécial" name="personnage.aptitudes[{{i}}].aptitudeRef" [(ngModel)]="personnage.aptitudes[i].aptitudeRef"
+										<mat-select placeholder="Aptitude Spéciale" name="personnage.aptitudes[{{i}}].aptitudeRef" [(ngModel)]="personnage.aptitudes[i].aptitudeRef"
 										 required>
 											<mat-option *ngFor="let a of aptitudes" [value]="a.id" [innerHtml]="a.nom"></mat-option>
 										</mat-select>
@@ -218,7 +218,7 @@
 					</mat-tab>
 
 					<!--Fourberiess-->
-					<mat-tab label="Fourberiess">
+					<mat-tab label="Fourberies">
 						<div class="row mb-1 mt-2">
 							<ng-template ngFor [ngForOf]="personnage.fourberies" let-i="index">
 
