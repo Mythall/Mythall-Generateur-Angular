@@ -10,6 +10,7 @@ import { Domaine } from './models/domaine';
 import { Sort } from '../sorts/models/sort';
 import { Classe } from '../classes/models/classe';
 import { ClasseService } from '../classes/classe.service';
+import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class DomaineService {
@@ -23,7 +24,13 @@ export class DomaineService {
   ) { }
 
   getDomaines(): Observable<Domaine[]> {
-    return this.db.colWithIds$('domaines', ref => ref.orderBy("nom"));
+	return this.db.colWithIds$('domaines', ref => ref.orderBy("nom")).pipe(
+		tap(results => {
+			results.sort((a: Domaine, b: Domaine) => {
+				return a.nom.localeCompare(b.nom);
+			})
+		})
+	);
   }
 
   getDomaine(id: string): Observable<Domaine> {

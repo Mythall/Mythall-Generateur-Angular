@@ -27,8 +27,8 @@ export class SortService {
 	return this.db.colWithIds$('sorts', ref => ref.orderBy("nom")).pipe(
 		tap(results => {
 			results.sort((a: Sort, b: Sort) => {
-				return a.nom.localeCompare(b.nom)
-			});
+				return a.nom.localeCompare(b.nom);
+			})
 		})
 	);
   }
