@@ -10,6 +10,7 @@ import { Immunite } from '../../models/immunite';
 import { Race } from '../races/models/race';
 import { Resistance } from '../../models/resistance';
 import { Statistique } from '../../models/statistique';
+import { tap } from 'rxjs/operators';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 
@@ -24,7 +25,13 @@ export class DonService {
   ) { }
 
   getDons(): Observable<Don[]> {
-    return this.db.colWithIds$('dons', ref => ref.orderBy("nom"));
+	return this.db.colWithIds$('dons', ref => ref.orderBy("nom")).pipe(
+		tap(results => {
+			results.sort((a : Don, b: Don) => {
+				return a.nom.localeCompare(b.nom);
+			})
+		})
+	);
   }
 
   getDon(id: string): Observable<Don> {

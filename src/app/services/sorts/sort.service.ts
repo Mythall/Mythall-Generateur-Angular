@@ -10,6 +10,7 @@ import { Ecole } from '../../models/ecole';
 import { Porte } from '../../models/porte';
 import { Duree } from '../../models/duree';
 import { Zone } from '../../models/zone';
+import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class SortService {
@@ -23,7 +24,13 @@ export class SortService {
   ) { }
 
   getSorts(): Observable<Sort[]> {
-    return this.db.colWithIds$('sorts', ref => ref.orderBy("nom"));
+	return this.db.colWithIds$('sorts', ref => ref.orderBy("nom")).pipe(
+		tap(results => {
+			results.sort((a: Sort, b: Sort) => {
+				return a.nom.localeCompare(b.nom)
+			});
+		})
+	);
   }
 
   getSort(id: string): Observable<Sort> {
