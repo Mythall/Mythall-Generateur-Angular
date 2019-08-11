@@ -62,7 +62,7 @@
 										<br />
 									</ng-template>
 
-									<!--Niveaux Effectif-->
+									<!--Niveau Effectif-->
 									<ng-template [ngIf]="personnage?.niveauEffectif">
 										<strong>Niveau Effectif: </strong>
 										<span [innerHtml]="personnage?.niveauEffectif"></span>
@@ -254,7 +254,7 @@
 
 				</div>
 
-				<!--Résistances & Immunitées-->
+				<!--Résistances & Immunités-->
 				<div class="row">
 					<div class="col-6">
 						<mat-card-title>
@@ -271,7 +271,7 @@
 					</div>
 					<div class="col-6">
 						<mat-card-title>
-							<strong>Immunitée(s)</strong>
+							<strong>Immunité(s)</strong>
 						</mat-card-title>
 						<mat-card-content>
 							<ng-template ngFor [ngForOf]="personnage.immunites" let-immunite>
@@ -283,11 +283,11 @@
 					</div>
 				</div>
 
-				<!--Capacitée(s) Spéciale(s)-->
+				<!--Capacité(s) Spéciale(s)-->
 				<div *ngIf="personnage.capaciteSpeciales && personnage.capaciteSpeciales.length > 0" class="row">
 					<div class="col-12">
 						<mat-card-title>
-							<strong>Capacitée(s) Spéciale(s)</strong>
+							<strong>Capacité(s) Spéciale(s)</strong>
 						</mat-card-title>
 						<mat-card-content>
 							<ng-template ngFor [ngForOf]="personnage.capaciteSpeciales" let-statistique>
@@ -329,7 +329,7 @@
 				<div *ngIf="personnage.aptitudes && personnage.aptitudes.length > 0" class="row mb-1">
 					<div class="col">
 						<mat-card-title>
-							<strong>Aptitude(s) Spéciale</strong>
+							<strong>Aptitude(s) Spéciale(s)</strong>
 						</mat-card-title>
 						<mat-card-content>
 
@@ -378,7 +378,7 @@
 				<div *ngIf="personnage.race && personnage.race.sortsRacial && personnage.race.sortsRacial.length > 0" class="row mb-1">
 					<div class="col">
 						<mat-card-title>
-							<strong>Sort(s) Racial</strong>
+							<strong>Sort(s) Racial(aux)</strong>
 						</mat-card-title>
 						<mat-card-content>
 
