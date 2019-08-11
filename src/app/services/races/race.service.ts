@@ -13,6 +13,7 @@ import { Don } from '../dons/models/don';
 import { Immunite } from '../../models/immunite';
 import { Sort } from '../sorts/models/sort';
 import { Statistique } from '../../models/statistique';
+import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class RaceService {
@@ -27,7 +28,12 @@ export class RaceService {
 
   getRaces(): Observable<Race[]> {
 
-    let races: Observable<Race[]> = this.db.colWithIds$('races', ref => ref.orderBy("nom")).mergeMap((races: Race[]) => {
+	let races: Observable<Race[]> = this.db.colWithIds$('races', ref => ref.orderBy("nom")).pipe(
+	tap(results => {
+		results.sort((a: Race, b: Race) => {
+			return a.nom.localeCompare(b.nom);
+		})
+	})).mergeMap((races: Race[]) => {
 
       races.forEach(race => {
 

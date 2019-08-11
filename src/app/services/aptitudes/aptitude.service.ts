@@ -12,6 +12,7 @@ import { Aptitude } from './models/aptitude';
 import { Immunite } from '../../models/immunite';
 import { Resistance, ResistanceItem } from '../../models/resistance';
 import { Statistique } from '../../models/statistique';
+import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class AptitudeService {
@@ -24,7 +25,13 @@ export class AptitudeService {
   ) { }
 
   getAptitudes(): Observable<Aptitude[]> {
-    return this.db.colWithIds$('aptitudes', ref => ref.orderBy("nom"));
+	return this.db.colWithIds$('aptitudes', ref => ref.orderBy("nom")).pipe(
+		tap(results => {
+			results.sort((a: Aptitude, b: Aptitude) => {
+				return a.nom.localeCompare(b.nom);
+			})
+		})
+	);
   }
 
   getAptitude(id: string): Observable<Aptitude> {

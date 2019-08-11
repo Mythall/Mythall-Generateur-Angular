@@ -19,6 +19,7 @@ import { StatistiqueService } from '../statistique.service';
 import { Resistance } from '../../models/resistance';
 import { Statistique } from '../../models/statistique';
 import { Immunite } from '../../models/immunite';
+import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class ClasseService {
@@ -33,7 +34,13 @@ export class ClasseService {
   ) { }
 
   getClasses(): Observable<Classe[]> {
-    return this.db.colWithIds$('classes', ref => ref.orderBy("nom"));
+	return this.db.colWithIds$('classes', ref => ref.orderBy("nom")).pipe(
+		tap(results => {
+			results.sort((a: Classe, b: Classe) => {
+				return a.nom.localeCompare(b.nom);
+			})
+		})
+	);
   }
 
   getClasse(id: string): Observable<Classe> {
@@ -89,7 +96,13 @@ export class ClasseService {
   }
 
   getClassesPrestige(): Observable<Classe[]> {
-    return this.db.colWithIds$('classes', ref => ref.where('prestige', '==', true).orderBy("nom"));
+	return this.db.colWithIds$('classes', ref => ref.where('prestige', '==', true).orderBy("nom")).pipe(
+		tap(results => {
+			results.sort((a: Classe, b: Classe) => {
+				return a.nom.localeCompare(b.nom);
+			})
+		})
+	);
   }
 
   //#region Maps
