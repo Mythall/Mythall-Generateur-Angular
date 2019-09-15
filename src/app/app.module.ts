@@ -1,7 +1,6 @@
 //Modules
 import { NgModule, Injector } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MaterialModule } from './modules/material.module';
@@ -341,7 +340,6 @@ const appRoutes: Routes = [
     MaterialModule,
     FirebaseModule,
     FormsModule,
-    HttpModule,
     HttpClientModule
   ],
   providers: [

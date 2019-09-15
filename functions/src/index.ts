@@ -2,7 +2,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as express from 'express';
-import * as cors from 'cors';
+// import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import { Config } from './config';
 import { Routes } from './routes';
@@ -18,7 +18,7 @@ admin.initializeApp({
 });
 
 // Automatically allow cross-origin requests
-app.use(cors());
+// app.use(cors());
 
 // Routes
 app.use(new Routes().app);
