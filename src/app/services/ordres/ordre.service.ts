@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
+import { map, flatMap, first } from 'rxjs/operators';
 import { FirestoreService } from '../firestore/firestore.service';
 import { Ordre } from './models/ordre';
 import { ClasseService } from '../classes/classe.service';
@@ -13,35 +14,39 @@ export class OrdreService {
     private classeService: ClasseService
   ) { }
 
-  getOrdres(): Observable<Ordre[]>{
+  getOrdres(): Observable<Ordre[]> {
     return this.db.colWithIds$('ordres', ref => ref.orderBy("nom"));
   }
 
   getOrdre(id: string): Observable<Ordre> {
-    return this.db.doc$('ordres/' + id).flatMap((ordre: Ordre) => {
+    return this.db.doc$('ordres/' + id).pipe(
+      flatMap((ordre: Ordre) => {
 
-      let observableBatch: Observable<any>[] = [];
-      observableBatch.push(Observable.of(ordre));
+        let observableBatch: Observable<any>[] = [];
+        observableBatch.push(of(ordre));
 
-      this.getClasses(ordre, observableBatch);
+        this.getClasses(ordre, observableBatch);
 
-      return Observable.forkJoin(observableBatch).map((data: any[]) => {
-        let ordre: Ordre = this.map(data[0]);
-        return ordre;
+        return forkJoin(observableBatch).pipe(
+          map((data: any[]) => {
+            let ordre: Ordre = this.map(data[0]);
+            return ordre;
+          })
+        )
+
       })
-
-    })
+    ) as Observable<Ordre>
   }
 
-  addOrdre(ordre: Ordre){
+  addOrdre(ordre: Ordre) {
     return this.db.add('ordres', ordre, ordre.nom);
   }
 
-  updateOrdre(id: string, ordre: Ordre){
+  updateOrdre(id: string, ordre: Ordre) {
     return this.db.update('ordres/' + id, ordre, ordre.nom);
   }
 
-  deleteOrdre(ordre: Ordre){
+  deleteOrdre(ordre: Ordre) {
     return this.db.delete('ordres/' + ordre.id, ordre.nom);
   }
 
@@ -56,10 +61,13 @@ export class OrdreService {
   private getClasses(ordre: Ordre, observableBatch: any[]) {
     if (ordre.multiclassementRef) {
       ordre.multiclassementRef.forEach(classeRef => {
-        observableBatch.push(this.classeService.getClasseSummary(classeRef).map((classe: Classe) => {
-          if (!ordre.multiclassement) ordre.multiclassement = [];
-          ordre.multiclassement.push(classe);
-        }).first())
+        observableBatch.push(this.classeService.getClasseSummary(classeRef).pipe(
+          map((classe: Classe) => {
+            if (!ordre.multiclassement) ordre.multiclassement = [];
+            ordre.multiclassement.push(classe);
+          }),
+          first()
+        ))
       });
     }
   }

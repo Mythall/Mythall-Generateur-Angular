@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
-import { MatSidenav } from '@angular/material';
+import { MatSidenav } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +13,7 @@ export class AppComponent implements OnInit {
     private mediaMatcher: MediaMatcher
   ) { }
 
-  @ViewChild("sidenav") sidenav: MatSidenav;
+  @ViewChild("sidenav", {static: false}) sidenav: MatSidenav;
   mediaQueryList;
 
   ngOnInit(){

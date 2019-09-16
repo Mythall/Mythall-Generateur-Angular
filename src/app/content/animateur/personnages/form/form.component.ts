@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { LoadingDialogComponent } from '../../../../layout/dialogs/loading/loading.dialog.component';
 import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
 import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
@@ -28,7 +28,7 @@ import { Fourberie, FourberieItem } from '../../../../services/fourberies/models
 import { FourberieService } from '../../../../services/fourberies/fourberie.service';
 import { DomaineService } from '../../../../services/domaines/domaine-service';
 import { Domaine } from '../../../../services/domaines/models/domaine';
-import { ISubscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-animateur-personnages-form',
@@ -56,7 +56,7 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     private router: Router,
   ) { }
 
-  private subscriptions: ISubscription[] = [];
+  private subscriptions: Subscription[] = [];
 
   id: string;
   personnage: Personnage = new Personnage();

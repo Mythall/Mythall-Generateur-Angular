@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
+import { map, flatMap, first } from 'rxjs/operators';
 import { FirestoreService } from '../firestore/firestore.service';
 import { StatistiqueService } from '../statistique.service';
 import { Fourberie } from './models/fourberie';
@@ -18,36 +19,44 @@ export class FourberieService {
   }
 
   getFourberie(id: string): Observable<Fourberie> {
-    return this.db.doc$('fourberies/' + id).flatMap((fourberie: Fourberie) => {
+    return this.db.doc$('fourberies/' + id).pipe(
+      flatMap((fourberie: Fourberie) => {
 
-      let observableBatch: Observable<any>[] = [];
-      observableBatch.push(Observable.of(fourberie));
+        let observableBatch: Observable<any>[] = [];
+        observableBatch.push(of(fourberie));
 
-      this.getFourberiesRequis(fourberie, observableBatch);
-      this.getModificateur(fourberie, observableBatch);
+        this.getFourberiesRequis(fourberie, observableBatch);
+        this.getModificateur(fourberie, observableBatch);
 
-      return Observable.forkJoin(observableBatch).map((data: any[]) => {
-        let fourberie: Fourberie = this.map(data[0]);
-        return fourberie;
+        return forkJoin(observableBatch).pipe(
+          map((data: any[]) => {
+            let fourberie: Fourberie = this.map(data[0]);
+            return fourberie;
+          })
+        )
+
       })
-
-    })
+    ) as Observable<Fourberie>
   }
 
   getFourberieFiche(id: string): Observable<Fourberie> {
-    return this.db.doc$('fourberies/' + id).flatMap((fourberie: Fourberie) => {
+    return this.db.doc$('fourberies/' + id).pipe(
+      flatMap((fourberie: Fourberie) => {
 
-      let observableBatch: Observable<any>[] = [];
-      observableBatch.push(Observable.of(fourberie));
+        let observableBatch: Observable<any>[] = [];
+        observableBatch.push(of(fourberie));
 
-      this.getModificateur(fourberie, observableBatch);
+        this.getModificateur(fourberie, observableBatch);
 
-      return Observable.forkJoin(observableBatch).map((data: any[]) => {
-        let fourberie: Fourberie = this.map(data[0]);
-        return fourberie;
+        return forkJoin(observableBatch).pipe(
+          map((data: any[]) => {
+            let fourberie: Fourberie = this.map(data[0]);
+            return fourberie;
+          })
+        )
+
       })
-
-    })
+    ) as Observable<Fourberie>
   }
 
   addFourberie(fourberie: Fourberie) {
@@ -77,19 +86,26 @@ export class FourberieService {
   private getFourberiesRequis(fourberie: Fourberie, observableBatch: any[]) {
     if (fourberie.fourberiesRequisRef) {
       fourberie.fourberiesRequisRef.forEach(fourberieRequisRef => {
-        observableBatch.push(this.getFourberie(fourberieRequisRef).map((fourberie: Fourberie) => {
-          if (!fourberie.fourberiesRequis) fourberie.fourberiesRequis = [];
-          fourberie.fourberiesRequis.push(fourberie);
-        }).first())
+        observableBatch.push(this.getFourberie(fourberieRequisRef).pipe(
+          map((fourberie: Fourberie) => {
+            if (!fourberie.fourberiesRequis) fourberie.fourberiesRequis = [];
+            fourberie.fourberiesRequis.push(fourberie);
+          }),
+          first(
+          )
+        ))
       });
     }
   }
 
   private getModificateur(fourberie: Fourberie, observableBatch: any[]) {
     if (fourberie.modificateurRef) {
-      observableBatch.push(this.statistiqueService.getStatistique(fourberie.modificateurRef).map((statistique: Statistique) => {
-        fourberie.modificateur = statistique;
-      }).first())
+      observableBatch.push(this.statistiqueService.getStatistique(fourberie.modificateurRef).pipe(
+        map((statistique: Statistique) => {
+          fourberie.modificateur = statistique;
+        }),
+        first()
+      ))
     }
   }
   //#endregion

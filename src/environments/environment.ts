@@ -2,6 +2,6 @@ import { api, firebase } from './private';
 
 export const environment = {
   production: false,
-  api: api.test,
+  api: api.dev,
   firebase: firebase.dev
 };

@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs';
 import { StatistiqueService } from '../../../../services/statistique.service';
 import { Statistique } from '../../../../models/statistique';
 import { ToastService } from '../../../../services/@core/toast.service';

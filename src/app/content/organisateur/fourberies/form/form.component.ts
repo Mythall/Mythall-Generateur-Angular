@@ -1,12 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs';
-import { ClasseService } from '../../../../services/classes/classe.service';
 import { DonService } from '../../../../services/dons/don.service';
 import { FourberieService } from '../../../../services/fourberies/fourberie.service';
 import { StatistiqueService } from '../../../../services/statistique.service';
 import { Fourberie } from '../../../../services/fourberies/models/fourberie';
-import { Race } from '../../../../services/races/models/race';
 import { Statistique } from '../../../../models/statistique';
 import { Don } from '../../../../services/dons/models/don';
 

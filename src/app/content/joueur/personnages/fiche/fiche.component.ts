@@ -6,7 +6,7 @@ import { ClasseService } from '../../../../services/classes/classe.service';
 import { PersonnageService } from '../../../../services/personnages/personnage.service';
 import { Personnage } from '../../../../services/personnages/models/personnage';
 import { DonItem } from '../../../../services/dons/models/don';
-import { ISubscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 import { UserService } from '../../../../services/@core/user.service';
 import { User } from '../../../../services/@core/models/user';
 
@@ -28,7 +28,7 @@ export class JoueurPersonnageFicheComponent implements OnInit, OnDestroy {
   id: string;
   personnage: Personnage = new Personnage();
   user: User;
-  private subscription: ISubscription;
+  private subscription: Subscription;
   // capaciteSpeciale: boolean = false;
 
   ngOnInit() {

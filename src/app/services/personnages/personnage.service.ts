@@ -1,24 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { FirestoreService } from '../firestore/firestore.service';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { LoadingDialogComponent } from '../../layout/dialogs/loading/loading.dialog.component';
-
 import { Personnage } from './models/personnage';
-
 import { AptitudeService } from '../aptitudes/aptitude.service';
 import { AptitudeItem } from '../aptitudes/models/aptitude';
-
 import { ClasseService } from '../classes/classe.service';
 import { Classe, ClasseItem } from '../classes/models/classe';
-
 import { DonService } from '../dons/don.service';
 import { Don, DonItem } from '../dons/models/don';
-
 import { RaceService } from '../races/race.service';
-
 import { UserService } from '../@core/user.service';
-
 import { StatistiqueService } from '../statistique.service';
 import { StatistiqueValue } from '../../models/statistique';
 import { ResistanceValue } from '../../models/resistance';
@@ -1020,9 +1014,11 @@ export class PersonnageService {
 
     return new Promise((resolve, reject) => {
 
-      this.raceService.getRace(personnage.raceRef).map(race => {
-        personnage.race = race;
-      }).subscribe(() => {
+      this.raceService.getRace(personnage.raceRef).pipe(
+        map(race => {
+          personnage.race = race;
+        })
+      ).subscribe(() => {
         resolve(personnage);
       }, error => {
         reject(error);
@@ -1040,9 +1036,11 @@ export class PersonnageService {
 
       personnage.classes.forEach(classeItem => {
 
-        this.classeService.getClasse(classeItem.classeRef).map(classe => {
-          classeItem.classe = classe;
-        }).subscribe(() => {
+        this.classeService.getClasse(classeItem.classeRef).pipe(
+          map(classe => {
+            classeItem.classe = classe;
+          })
+        ).subscribe(() => {
 
           count++;
           if (count == personnage.classes.length) {
@@ -1113,12 +1111,14 @@ export class PersonnageService {
 
       if (personnage.ordresRef && personnage.ordresRef.length > 0) {
         personnage.ordresRef.forEach(ordreRef => {
-          this.ordreService.getOrdre(ordreRef).map(ordre => {
+          this.ordreService.getOrdre(ordreRef).pipe(
+            map(ordre => {
 
-            if (!personnage.ordres) personnage.ordres = [];
-            personnage.ordres.push(ordre);
+              if (!personnage.ordres) personnage.ordres = [];
+              personnage.ordres.push(ordre);
 
-          }).subscribe(response => {
+            })
+          ).subscribe(response => {
             count++;
             if (count == personnage.ordresRef.length) {
               resolve(personnage);
@@ -1185,12 +1185,14 @@ export class PersonnageService {
         let count: number = 0;
 
         personnage.domainesRef.forEach(domaineRef => {
-          this.domaineService.getDomaine(domaineRef).map(domaine => {
+          this.domaineService.getDomaine(domaineRef).pipe(
+            map(domaine => {
 
-            if (!personnage.domaines) personnage.domaines = [];
-            personnage.domaines.push(domaine);
+              if (!personnage.domaines) personnage.domaines = [];
+              personnage.domaines.push(domaine);
 
-          }).subscribe(response => {
+            })
+          ).subscribe(response => {
 
             count++;
             if (count == personnage.domainesRef.length) {
@@ -1250,11 +1252,13 @@ export class PersonnageService {
 
           if (!fourberieItem.fourberie) { //Avoid fetching Fourberie if already fetch
 
-            this.fourberieService.getFourberie(fourberieItem.fourberieRef).map(fourberie => {
+            this.fourberieService.getFourberie(fourberieItem.fourberieRef).pipe(
+              map(fourberie => {
 
-              fourberieItem.fourberie = fourberie;
+                fourberieItem.fourberie = fourberie;
 
-            }).subscribe(response => {
+              })
+            ).subscribe(response => {
 
               count++;
 
@@ -1365,11 +1369,13 @@ export class PersonnageService {
         personnage.aptitudes.forEach(aptitudeItem => {
 
           if (!aptitudeItem.aptitude) {
-            this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef).map(aptitude => {
+            this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef).pipe(
+              map(aptitude => {
 
-              aptitudeItem.aptitude = aptitude;
+                aptitudeItem.aptitude = aptitude;
 
-            }).subscribe(response => {
+              })
+            ).subscribe(response => {
 
               count++;
               if (count == personnage.aptitudes.length) {
@@ -1480,11 +1486,13 @@ export class PersonnageService {
         personnage.sorts.forEach(sortItem => {
 
           if (!sortItem.sort) { //Avoid fetching Sort if already fetch
-            this.sortService.getSort(sortItem.sortRef).map(sort => {
+            this.sortService.getSort(sortItem.sortRef).pipe(
+              map(sort => {
 
-              sortItem.sort = sort;
+                sortItem.sort = sort;
 
-            }).subscribe(response => {
+              })
+            ).subscribe(response => {
               count++;
               if (count == personnage.sorts.length) {
 
@@ -1532,11 +1540,13 @@ export class PersonnageService {
       if (!personnage.dons) personnage.dons = [];
 
       personnage.dons.forEach(donItem => {
-        this.donService.getDonFiche(donItem.donRef).map(don => {
+        this.donService.getDonFiche(donItem.donRef).pipe(
+          map(don => {
 
-          donItem.don = don;
+            donItem.don = don;
 
-        }).subscribe(response => {
+          })
+        ).subscribe(response => {
           count++;
           if (count == personnage.dons.length) {
             resolve(personnage);
@@ -1639,11 +1649,13 @@ export class PersonnageService {
         personnage.dons.forEach(donItem => {
 
           if (!donItem.don) { //Avoid fetching Don if already fetch
-            this.donService.getDonFiche(donItem.donRef).map(don => {
+            this.donService.getDonFiche(donItem.donRef).pipe(
+              map(don => {
 
-              donItem.don = don;
+                donItem.don = don;
 
-            }).subscribe(response => {
+              })
+            ).subscribe(response => {
               count++;
               if (count == personnage.dons.length) {
 

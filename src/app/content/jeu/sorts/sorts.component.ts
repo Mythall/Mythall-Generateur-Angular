@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { JeuSortDetailsDialogComponent } from './details/details.dialog.component';
 import { SortService } from '../../../services/sorts/sort.service';
 import { Sort } from '../../../services/sorts/models/sort';

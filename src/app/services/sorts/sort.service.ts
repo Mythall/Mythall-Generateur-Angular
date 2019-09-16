@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
 import { FirestoreService } from '../firestore/firestore.service';
 import { EcoleService } from '../ecole.service';
 import { PorteService } from '../porte.service';
@@ -10,7 +10,7 @@ import { Ecole } from '../../models/ecole';
 import { Porte } from '../../models/porte';
 import { Duree } from '../../models/duree';
 import { Zone } from '../../models/zone';
-import { tap } from 'rxjs/operators';
+import { tap, flatMap, map, first } from 'rxjs/operators';
 
 @Injectable()
 export class SortService {
@@ -24,32 +24,36 @@ export class SortService {
   ) { }
 
   getSorts(): Observable<Sort[]> {
-	return this.db.colWithIds$('sorts', ref => ref.orderBy("nom")).pipe(
-		tap(results => {
-			results.sort((a: Sort, b: Sort) => {
-				return a.nom.localeCompare(b.nom);
-			})
-		})
-	);
+    return this.db.colWithIds$('sorts', ref => ref.orderBy("nom")).pipe(
+      tap(results => {
+        results.sort((a: Sort, b: Sort) => {
+          return a.nom.localeCompare(b.nom);
+        })
+      })
+    );
   }
 
   getSort(id: string): Observable<Sort> {
-    return this.db.doc$('sorts/' + id).flatMap((sort: Sort) => {
+    return this.db.doc$('sorts/' + id).pipe(
+      flatMap((sort: Sort) => {
 
-      let observableBatch: Observable<any>[] = [];
-      observableBatch.push(Observable.of(sort));
+        let observableBatch: Observable<any>[] = [];
+        observableBatch.push(of(sort));
 
-      this.getEcole(sort, observableBatch);
-      this.getPorte(sort, observableBatch);
-      this.getDuree(sort, observableBatch);
-      this.getZone(sort, observableBatch);
+        this.getEcole(sort, observableBatch);
+        this.getPorte(sort, observableBatch);
+        this.getDuree(sort, observableBatch);
+        this.getZone(sort, observableBatch);
 
-      return Observable.forkJoin(observableBatch).map((data: any[]) => {
-        let sort: Sort = this.map(data[0]);
-        return sort;
+        return forkJoin(observableBatch).pipe(
+          map((data: any[]) => {
+            let sort: Sort = this.map(data[0]);
+            return sort;
+          })
+        )
+
       })
-
-    })
+    ) as Observable<Sort>
   }
 
   addSort(sort: Sort) {
@@ -112,33 +116,45 @@ export class SortService {
 
   private getEcole(sort: Sort, observableBatch: any[]) {
     if (sort.ecoleRef) {
-      observableBatch.push(this.ecoleService.getEcole(sort.ecoleRef).map((ecole: Ecole) => {
-        sort.ecole = ecole;
-      }).first())
+      observableBatch.push(this.ecoleService.getEcole(sort.ecoleRef).pipe(
+        map((ecole: Ecole) => {
+          sort.ecole = ecole;
+        }),
+        first()
+      ))
     }
   }
 
   private getPorte(sort: Sort, observableBatch: any[]) {
     if (sort.porteRef) {
-      observableBatch.push(this.porteService.getPorte(sort.porteRef).map((porte: Porte) => {
-        sort.porte = porte;
-      }).first())
+      observableBatch.push(this.porteService.getPorte(sort.porteRef).pipe(
+        map((porte: Porte) => {
+          sort.porte = porte;
+        }),
+        first()
+      ))
     }
   }
 
   private getDuree(sort: Sort, observableBatch: any[]) {
     if (sort.dureeRef) {
-      observableBatch.push(this.dureeService.getDuree(sort.dureeRef).map((duree: Duree) => {
-        sort.duree = duree;
-      }).first())
+      observableBatch.push(this.dureeService.getDuree(sort.dureeRef).pipe(
+        map((duree: Duree) => {
+          sort.duree = duree;
+        }),
+        first()
+      ))
     }
   }
 
   private getZone(sort: Sort, observableBatch: any[]) {
     if (sort.zoneRef) {
-      observableBatch.push(this.zoneService.getZone(sort.zoneRef).map((zone: Zone) => {
-        sort.zone = zone;
-      }).first())
+      observableBatch.push(this.zoneService.getZone(sort.zoneRef).pipe(
+        map((zone: Zone) => {
+          sort.zone = zone;
+        }),
+        first()
+      ))
     }
   }
 

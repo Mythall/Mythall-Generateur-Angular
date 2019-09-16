@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AlignementService } from '../../../../services/alignement.service';
 import { Alignement } from '../../../../models/alignement';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 import { ToastService } from '../../../../services/@core/toast.service';
 

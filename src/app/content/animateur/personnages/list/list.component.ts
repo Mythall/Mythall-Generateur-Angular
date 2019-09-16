@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Sort, MatDialog, MatDialogRef, MatPaginator, PageEvent } from '@angular/material';
-import { Observable } from 'rxjs';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
 
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 
@@ -19,7 +20,7 @@ export class AnimateurPersonnagesListComponent implements OnInit {
     public dialog: MatDialog
   ){}
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
   length = 0;
   pageSize = 1000;
   pageSizeOptions = [1000, 10000];

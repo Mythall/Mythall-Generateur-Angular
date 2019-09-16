@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs';
 import { DieuService } from '../../../../services/dieu.service';
 import { Dieu } from '../../../../models/dieu';
 import { AlignementService } from '../../../../services/alignement.service';

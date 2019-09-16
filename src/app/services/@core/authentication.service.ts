@@ -1,17 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import 'rxjs/add/operator/switchMap';
+import { Observable, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 import * as firebase from 'firebase';
-import { AngularFireAuth } from 'angularfire2/auth';
-import { AngularFirestoreDocument, AngularFirestore } from 'angularfire2/firestore';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFirestoreDocument, AngularFirestore } from '@angular/fire/firestore';
 import { FirestoreService } from '../firestore/firestore.service';
 
 import { UserService } from './user.service';
 import { User } from './models/user';
-import { Roles } from './models/roles';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../../layout/dialogs/error/error.dialog.component';
 
 @Injectable()
@@ -32,13 +31,15 @@ export class AuthenticationService {
     }
 
     private setUser() {
-        this.user = this.afAuth.authState.switchMap(user => {
-            if (user) {
-                return this.afs.doc<User>(`users/${user.uid}`).valueChanges();
-            } else {
-                return Observable.of(null)
-            }
-        })
+        this.user = this.afAuth.authState.pipe(
+            switchMap(user => {
+                if (user) {
+                    return this.afs.doc<User>(`users/${user.uid}`).valueChanges();
+                } else {
+                    return of(null)
+                }
+            })
+        )
     }
 
     facebookLogin() {

@@ -25,7 +25,7 @@ export class JoueurPersonnageCreationProgressionComponent implements OnInit {
         private router: Router
     ) { }
 
-    @ViewChild('stepper') stepper: MatStepper;
+    @ViewChild('stepper', {static: false}) stepper: MatStepper;
 
     progression: boolean = false;
     personnage: Personnage = new Personnage();
