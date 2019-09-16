@@ -1,18 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { FirestoreService } from '../firestore/firestore.service';
-import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-
 import { ImmuniteService } from '../immunite.service';
 import { ResistanceService } from '../resistance.service';
 import { StatistiqueService } from '../statistique.service';
-
 import { Aptitude } from './models/aptitude';
 import { Immunite } from '../../models/immunite';
-import { Resistance, ResistanceItem } from '../../models/resistance';
+import { Resistance } from '../../models/resistance';
 import { Statistique } from '../../models/statistique';
-import { tap } from 'rxjs/operators';
+import { Observable, of, forkJoin } from 'rxjs';
+import { tap, flatMap, map, first } from 'rxjs/operators';
 
 @Injectable()
 export class AptitudeService {
@@ -35,21 +32,24 @@ export class AptitudeService {
   }
 
   getAptitude(id: string): Observable<Aptitude> {
-    return this.db.doc$('aptitudes/' + id).flatMap((aptitude: Aptitude) => {
+    return this.db.doc$('aptitudes/' + id).pipe(
+      flatMap((aptitude: Aptitude) => {
 
-      let observableBatch: Observable<any>[] = [];
-      observableBatch.push(Observable.of(aptitude));
+        let observableBatch: Observable<Aptitude>[] = [];
+        observableBatch.push(of(aptitude));
 
-      this.getImmunites(aptitude, observableBatch);
-      this.getResistances(aptitude, observableBatch);
-      this.getStatistiques(aptitude, observableBatch);
+        this.getImmunites(aptitude, observableBatch);
+        this.getResistances(aptitude, observableBatch);
+        this.getStatistiques(aptitude, observableBatch);
 
-      return Observable.forkJoin(observableBatch).map((data: any[]) => {
-        let aptitude: Aptitude = this.map(data[0]);
-        return aptitude;
+        return forkJoin(observableBatch).pipe(
+          map((data: any[]) => {
+            let aptitude: Aptitude = this.map(data[0]);
+            return aptitude;
+          })
+        )
       })
-
-    })
+    ) as Observable<Aptitude>
   }
 
   addAptitude(aptitude: Aptitude) {
@@ -80,10 +80,13 @@ export class AptitudeService {
   private getImmunites(aptitude: Aptitude, observableBatch: any[]) {
     if (aptitude.immunitesRef) {
       aptitude.immunitesRef.forEach(immuniteRef => {
-        observableBatch.push(this.immuniteService.getImmunite(immuniteRef).map((immunite: Immunite) => {
-          if (!aptitude.immunites) aptitude.immunites = [];
-          aptitude.immunites.push(immunite);
-        }).first())
+        observableBatch.push(this.immuniteService.getImmunite(immuniteRef).pipe(
+          map((immunite: Immunite) => {
+            if (!aptitude.immunites) aptitude.immunites = [];
+            aptitude.immunites.push(immunite);
+          }),
+          first()
+        ))
       });
     }
   }
@@ -91,9 +94,12 @@ export class AptitudeService {
   private getResistances(aptitude: Aptitude, observableBatch: any[]) {
     if (aptitude.resistances && aptitude.resistances.length > 0) {
       aptitude.resistances.forEach(resistanceItem => {
-        observableBatch.push(this.resistanceService.getResistance(resistanceItem.resistanceRef).map((resistance: Resistance) => {
-          resistanceItem.resistance = resistance;
-        }).first())
+        observableBatch.push(this.resistanceService.getResistance(resistanceItem.resistanceRef).pipe(
+          map((resistance: Resistance) => {
+            resistanceItem.resistance = resistance;
+          }),
+          first()
+        ))
       });
     }
   }
@@ -101,9 +107,12 @@ export class AptitudeService {
   private getStatistiques(aptitude: Aptitude, observableBatch: any[]) {
     if (aptitude.statistiques && aptitude.statistiques.length > 0) {
       aptitude.statistiques.forEach(statistiqueItem => {
-        observableBatch.push(this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef).map((statistique: Statistique) => {
-          statistiqueItem.statistique = statistique;
-        }).first())
+        observableBatch.push(this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef).pipe(
+          map((statistique: Statistique) => {
+            statistiqueItem.statistique = statistique;
+          }),
+          first()
+        ))
       });
     }
   }

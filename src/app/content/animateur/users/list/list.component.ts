@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
 import { UserService } from '../../../../services/@core/user.service';
 import { User } from '../../../../services/@core/models/user';
-import { Sort, MatDialog, MatDialogRef } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
+import { Sort } from '@angular/material/sort';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 
 @Component({

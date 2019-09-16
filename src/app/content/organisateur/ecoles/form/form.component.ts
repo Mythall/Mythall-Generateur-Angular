@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs';
 import { EcoleService } from '../../../../services/ecole.service';
 import { Ecole } from '../../../../models/ecole';
 import { ToastService } from '../../../../services/@core/toast.service';
@@ -52,7 +51,7 @@ export class OrganisateurEcolesFormComponent implements OnInit {
     } else {
 
       // Add
-      this.ecoleService.addEcole(this.ecole.saveState()).subscribe(result => {
+      this.ecoleService.addEcole(this.ecole).subscribe(result => {
         if (result) {
           this.toast.add(result.nom);
           this.router.navigate(["/organisateur/ecoles/list"]);

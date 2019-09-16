@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs';
 import { OrdreService } from '../../../../services/ordres/ordre.service';
 import { Ordre } from '../../../../services/ordres/models/ordre';
 import { ClasseService } from '../../../../services/classes/classe.service';

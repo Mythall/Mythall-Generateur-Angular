@@ -18,6 +18,7 @@ admin.initializeApp({
 });
 
 // Automatically allow cross-origin requests
+// @ts-ignore
 app.use(cors());
 
 // Routes

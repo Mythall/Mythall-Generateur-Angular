@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import 'rxjs/add/operator/map';
+import { map } from 'rxjs/operators';
 
-import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from 'angularfire2/firestore';
-import * as firebase from 'firebase';
+import { AngularFirestore, AngularFirestoreCollection, AngularFirestoreDocument } from '@angular/fire/firestore';
+// import * as firebase from 'firebase';
 
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 type CollectionPredicate<T> = string | AngularFirestoreCollection<T>;
 type DocPredicate<T> = string | AngularFirestoreDocument<T>;
@@ -27,31 +27,37 @@ export class FirestoreService {
   }
 
   doc$<T>(ref: DocPredicate<T>): Observable<T> {
-    return this.doc(ref).snapshotChanges().map(doc => {
-      const data: any = doc.payload.data();
-      data.id = doc.payload.id;
-      return data as T;
-    })
+    return this.doc(ref).snapshotChanges().pipe(
+      map(doc => {
+        const data: any = doc.payload.data();
+        data.id = doc.payload.id;
+        return data as T;
+      })
+    )
   }
 
   col$<T>(ref: CollectionPredicate<T>, queryFn?): Observable<T[]> {
-    return this.col(ref, queryFn).snapshotChanges().map(docs => {
-      return docs.map(a => a.payload.doc.data()) as T[]
-    });
+    return this.col(ref, queryFn).snapshotChanges().pipe(
+      map(docs => {
+        return docs.map(a => a.payload.doc.data()) as T[]
+      })
+    );
   }
 
   colWithIds$<T>(ref: CollectionPredicate<T>, queryFn?): Observable<any[]> {
-    return this.col(ref, queryFn).snapshotChanges().map(actions => {
-      return actions.map(a => {
-        const data: any = a.payload.doc.data();
-        const id = a.payload.doc.id;
-        return { id, ...data };
-      });
-    });
+    return this.col(ref, queryFn).snapshotChanges().pipe(
+      map(actions => {
+        return actions.map(a => {
+          const data: any = a.payload.doc.data();
+          const id = a.payload.doc.id;
+          return { id, ...data };
+        });
+      })
+    );
   }
 
   get timestamp() {
-    return firebase.firestore.FieldValue.serverTimestamp()
+    return Date.now();
   }
 
   add<T>(ref: CollectionPredicate<T>, data, snackbarDisplay) {
@@ -124,56 +130,25 @@ export class FirestoreService {
     });
   }
 
-  inspectDoc(ref: DocPredicate<any>): void {
-    const tick = new Date().getTime()
-    this.doc(ref).snapshotChanges()
-      .take(1)
-      .do(d => {
-        const tock = new Date().getTime() - tick
-        console.log(`Loaded Document in ${tock}ms`, d)
-      })
-      .subscribe()
-  }
-
-  inspectCol(ref: CollectionPredicate<any>): void {
-    const tick = new Date().getTime()
-    this.col(ref).snapshotChanges()
-      .take(1)
-      .do(c => {
-        const tock = new Date().getTime() - tick
-        console.log(`Loaded Collection in ${tock}ms`, c)
-      })
-      .subscribe()
-  }
-
   connect(host: DocPredicate<any>, key: string, doc: DocPredicate<any>) {
     return this.doc(host).update({ [key]: this.doc(doc).ref })
   }
 
-  docWithRefs$<T>(ref: DocPredicate<T>) {
-    return this.doc$(ref).map(doc => {
-      for (const k of Object.keys(doc)) {
-        if (doc[k] instanceof firebase.firestore.DocumentReference) {
-          doc[k] = this.doc(doc[k].path)
-        }
-      }
-      return doc
-    })
-  }
-
   getCollection(collection: string): Promise<any[]> {
     return new Promise((resolve, reject) => {
-      firebase.app().firestore().collection(collection).get().then(querySnapshot => {
-        let result: any[] = [];
-        querySnapshot.forEach(function (doc) {
-          const data: any = doc.data();
-          data.id = doc.id;
-          result.push(data);
-        });
-        resolve(result);
-      }).catch(error => reject(error));
+      this.afs.collection(collection).get().subscribe(
+        querySnapshot => {
+          let result: any[] = [];
+          querySnapshot.forEach(function (doc) {
+            const data: any = doc.data();
+            data.id = doc.id;
+            result.push(data);
+          });
+          resolve(result);
+        },
+        error => reject(error)
+      )
     });
   }
-
 
 }

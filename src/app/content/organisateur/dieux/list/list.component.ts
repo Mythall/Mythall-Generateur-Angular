@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DieuService } from '../../../../services/dieu.service';
 import { Dieu } from '../../../../models/dieu';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 import { ToastService } from '../../../../services/@core/toast.service';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-organisateur-dieux-list',

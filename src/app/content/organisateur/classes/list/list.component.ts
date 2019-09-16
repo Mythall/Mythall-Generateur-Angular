@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ClasseService } from '../../../../services/classes/classe.service';
 import { Classe } from '../../../../services/classes/models/classe';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 
 @Component({

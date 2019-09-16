@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { MatStepper } from '@angular/material';
+import { MatStepper } from '@angular/material/stepper';
 
 import { Personnage } from '../../../../../services/personnages/models/personnage';
 import { PersonnageService } from '../../../../../services/personnages/personnage.service';

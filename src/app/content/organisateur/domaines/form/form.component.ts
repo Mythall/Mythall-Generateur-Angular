@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
 import { DonService } from '../../../../services/dons/don.service';

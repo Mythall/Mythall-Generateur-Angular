@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EspritService } from '../../../../services/esprits/esprit-service';
 import { Esprit } from '../../../../services/esprits/models/esprit';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 
 @Component({

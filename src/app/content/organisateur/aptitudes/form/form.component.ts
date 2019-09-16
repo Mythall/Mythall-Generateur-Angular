@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs';
 import { ClasseService } from '../../../../services/classes/classe.service';
 import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
 import { DonService } from '../../../../services/dons/don.service';
@@ -9,7 +8,7 @@ import { RaceService } from '../../../../services/races/race.service';
 import { ResistanceService } from '../../../../services/resistance.service';
 import { StatistiqueService } from '../../../../services/statistique.service';
 import { Aptitude } from '../../../../services/aptitudes/models/aptitude';
-import { Classe, ClasseAuthorise } from '../../../../services/classes/models/classe';
+import { Classe } from '../../../../services/classes/models/classe';
 import { Don, DonCategories } from '../../../../services/dons/models/don';
 import { Immunite } from '../../../../models/immunite';
 import { Race } from '../../../../services/races/models/race';
@@ -28,11 +27,9 @@ export class OrganisateurAptitudesFormComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private classeService: ClasseService,
     private donService: DonService,
     private aptitudeService: AptitudeService,
     private immuniteService: ImmuniteService,
-    private raceService: RaceService,
     private resistanceService: ResistanceService,
     private sortService: SortService,
     private statistiqueService: StatistiqueService,

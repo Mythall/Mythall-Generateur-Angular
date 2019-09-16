@@ -1,5 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Sort as MatSort, MatDialog, MatDialogRef, MatPaginator, PageEvent } from '@angular/material';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { Sort as MatSort } from '@angular/material/sort';
 import { Observable } from 'rxjs';
 
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
@@ -19,7 +21,7 @@ export class OrganisateurDonsListComponent implements OnInit {
     public dialog: MatDialog
   ){}
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
   length = 0;
   pageSize = 50;
   pageSizeOptions = [50, 100, 200];
