@@ -13,6 +13,6 @@ export class OrganisateurAlignementsListComponent {
     public dialog: MatDialog,
   ) { }
 
-  alignements = Alignements;
+  alignements = Object.values(Alignements);
 
 }
