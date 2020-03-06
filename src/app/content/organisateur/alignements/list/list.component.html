@@ -22,20 +22,8 @@
         </thead>
         <tbody>
           <tr *ngFor="let alignement of alignements">
-            <td [innerHtml]="alignement.nom"></td>
-            <td>
-              <div class="button-row">
-                <button mat-icon-button [routerLink]="'/jeu/alignements'" disabled>
-                  <mat-icon aria-label="View">remove_red_eye</mat-icon>
-                </button>
-                <button mat-icon-button [routerLink]="'/organisateur/alignements/form/' + alignement.id">
-                  <mat-icon aria-label="Edit">edit</mat-icon>
-                </button>
-                <button mat-icon-button (click)="confirmDelete(alignement)" disabled>
-                  <mat-icon aria-label="Delete">delete</mat-icon>
-                </button>
-              </div>
-            </td>
+            <td [innerHtml]="alignement"></td>
+            <td></td>
           </tr>
         </tbody>
       </table>

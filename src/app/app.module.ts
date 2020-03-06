@@ -92,7 +92,6 @@ import { JoueurPersonnageCreationProgressionSortsComponent } from './content/jou
 import { JoueurPersonnageCreationProgressionSortsDomaineComponent } from './content/joueur/personnages/creation-progression/sorts-domaine/sorts-domaine.component';
 
 import { OrganisateurAdminComponent } from './content/organisateur/admin/admin.component';
-import { OrganisateurAlignementsFormComponent } from './content/organisateur/alignements/form/form.component';
 import { OrganisateurAlignementsListComponent } from './content/organisateur/alignements/list/list.component';
 import { OrganisateurAptitudesFormComponent } from './content/organisateur/aptitudes/form/form.component';
 import { OrganisateurAptitudesListComponent } from './content/organisateur/aptitudes/list/list.component';
@@ -170,8 +169,6 @@ const appRoutes: Routes = [
 
       { path: 'admin', component: OrganisateurAdminComponent },
 
-      { path: 'alignements/form', component: OrganisateurAlignementsFormComponent },
-      { path: 'alignements/form/:id', component: OrganisateurAlignementsFormComponent },
       { path: 'alignements/list', component: OrganisateurAlignementsListComponent },
 
       { path: 'aptitudes/form', component: OrganisateurAptitudesFormComponent },
@@ -294,7 +291,6 @@ const appRoutes: Routes = [
     JoueurPersonnageCreationProgressionSortsComponent,
     JoueurPersonnageCreationProgressionSortsDomaineComponent,
     OrganisateurAdminComponent,
-    OrganisateurAlignementsFormComponent,
     OrganisateurAlignementsListComponent,
     OrganisateurAptitudesFormComponent,
     OrganisateurAptitudesListComponent,
