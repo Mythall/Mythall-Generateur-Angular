@@ -1,5 +1,7 @@
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Injectable } from "@angular/core";
 
+@Injectable()
 export class Snackbar extends MatSnackBar {
   
   add(name) {

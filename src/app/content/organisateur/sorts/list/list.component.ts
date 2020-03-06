@@ -23,7 +23,7 @@ export class OrganisateurSortsListComponent implements OnInit {
     public dialog: MatDialog
   ) { }
 
-  @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
   length = 0;
   pageSize = 50;
   pageSizeOptions = [50, 100, 200];

@@ -13,7 +13,7 @@ export class AppComponent implements OnInit {
     private mediaMatcher: MediaMatcher
   ) { }
 
-  @ViewChild("sidenav", {static: false}) sidenav: MatSidenav;
+  @ViewChild("sidenav") sidenav: MatSidenav;
   mediaQueryList;
 
   ngOnInit(){
