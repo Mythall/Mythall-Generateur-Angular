@@ -20,7 +20,7 @@ export class AnimateurPersonnagesListComponent implements OnInit {
     public dialog: MatDialog
   ){}
 
-  @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
   length = 0;
   pageSize = 1000;
   pageSizeOptions = [1000, 10000];
