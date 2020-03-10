@@ -29,11 +29,11 @@ export class PorteService {
   }
 
   getPortes(): Observable<Porte[]> {
-    return this.http.get(this.url).pipe(map((res: Porte[]) => res));
+    return this.getPortes$();
   }
 
   getPorte(id: string): Observable<Porte> {
-    return this.http.get(this.url + id).pipe(map((res: Porte) => res));
+    return this.afs.doc<Porte>(`portes/${id}`).valueChanges();    
   }
 
   addPorte(porte: Porte): Observable<Porte> {

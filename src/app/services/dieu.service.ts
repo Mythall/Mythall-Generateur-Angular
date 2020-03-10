@@ -29,11 +29,11 @@ export class DieuService {
   }
 
   getDieux(): Observable<Dieu[]> {
-    return this.http.get(this.url).pipe(map((res: Dieu[]) => res));
+    return this.getDieux$();
   }
 
   getDieu(id: string): Observable<Dieu> {
-    return this.http.get(this.url + id).pipe(map((res: Dieu) => res));
+    return this.afs.doc<Dieu>(`dieux/${id}`).valueChanges();
   }
 
   addDieu(dieu: Dieu): Observable<Dieu> {

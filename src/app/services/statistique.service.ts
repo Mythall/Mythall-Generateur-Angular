@@ -29,11 +29,11 @@ export class StatistiqueService {
   }
 
   getStatistiques(): Observable<Statistique[]> {
-    return this.http.get(this.url).pipe(map((res: Statistique[]) => res));
+    return this.getStatistiques$();
   }
 
   getStatistique(id: string): Observable<Statistique> {
-    return this.http.get(this.url + id).pipe(map((res: Statistique) => res));
+    return this.afs.doc<Statistique>(`statistiques/${id}`).valueChanges();
   }
 
   addStatistique(statistique: Statistique): Observable<Statistique> {

@@ -29,11 +29,11 @@ export class ZoneService {
   }
 
   getZones(): Observable<Zone[]> {
-    return this.http.get(this.url).pipe(map((res: Zone[]) => res));
+    return this.getZones$();
   }
 
   getZone(id: string): Observable<Zone> {
-    return this.http.get(this.url + id).pipe(map((res: Zone) => res));
+    return this.afs.doc<Zone>(`zones/${id}`).valueChanges();
   }
 
   addZone(zone: Zone): Observable<Zone> {
