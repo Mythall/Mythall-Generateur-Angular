@@ -29,11 +29,11 @@ export class EcoleService {
   }
 
   getEcoles(): Observable<Ecole[]> {
-    return this.http.get(this.url).pipe(map((res: Ecole[]) => res));
+    return this.getEcoles$();
   }
 
   getEcole(id: string): Observable<Ecole> {
-    return this.http.get(this.url + id).pipe(map((res: Ecole) => res));
+    return this.afs.doc<Ecole>(`ecoles/${id}`).valueChanges();
   }
 
   addEcole(ecole: Ecole): Observable<Ecole> {

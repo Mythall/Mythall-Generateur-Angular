@@ -29,15 +29,11 @@ export class AlignementService {
     }
 
     getAlignements(): Observable<Alignement[]> {
-        return this.http.get(this.url).pipe(
-            map((res: Alignement[]) => res)
-        )
+        return this.getAlignements$();
     }
 
     getAlignement(id: string): Observable<Alignement> {
-        return this.http.get(this.url + id).pipe(
-            map((res: Alignement) => res)
-        );
+        return this.afs.doc<Alignement>(`alignements/${id}`).valueChanges();
     }
 
     addAlignement(alignement: Alignement): Observable<Alignement> {

@@ -29,11 +29,11 @@ export class ResistanceService {
   }
 
   getResistances(): Observable<Resistance[]> {
-    return this.http.get(this.url).pipe(map((res: Resistance[]) => res));
+    return this.getResistances$();
   }
 
   getResistance(id: string): Observable<Resistance> {
-    return this.http.get(this.url + id).pipe(map((res: Resistance) => res));
+    return this.afs.doc<Resistance>(`resistances/${id}`).valueChanges();
   }
 
   addResistance(resistance: Resistance): Observable<Resistance> {

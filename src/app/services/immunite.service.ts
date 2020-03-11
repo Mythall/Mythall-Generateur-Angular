@@ -29,11 +29,11 @@ export class ImmuniteService {
   }
 
   getImmunites(): Observable<Immunite[]> {
-    return this.http.get(this.url).pipe(map((res: Immunite[]) => res));
+    return this.getImmunites$();
   }
 
   getImmunite(id: string): Observable<Immunite> {
-    return this.http.get(this.url + id).pipe(map((res: Immunite) => res));
+    return this.afs.doc<Immunite>(`immunites/${id}`).valueChanges();
   }
 
   addImmunite(immunite: Immunite): Observable<Immunite> {

@@ -29,11 +29,11 @@ export class DureeService {
   }
 
   getDurees(): Observable<Duree[]> {
-    return this.http.get(this.url).pipe(map((res: Duree[]) => res));
+    return this.getDurees$();
   }
 
   getDuree(id: string): Observable<Duree> {
-    return this.http.get(this.url + id).pipe(map((res: Duree) => res));
+    return this.afs.doc<Duree>(`durees/${id}`).valueChanges();
   }
 
   addDuree(duree: Duree): Observable<Duree> {
