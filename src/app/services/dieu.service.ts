@@ -1,51 +1,80 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { environment } from '../../environments/environment';
-import { Dieu } from '../models/dieu';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { IAlignement } from "../services/alignement.service";
+import { Domaine } from "../services/domaines/models/domaine";
+
+export interface IDieu extends IDieuDB {
+  id: string;
+  alignement: IAlignement;
+  alignementPermis: IAlignement[];
+  domaines: Domaine[];
+}
+
+export interface IDieuDB {
+  nom: string;
+  prononciation: string;
+  titre: string;
+  rang: string;
+  alignementRef: string;
+  alignementPermisRef: string[];
+  domainesRef: string[];
+  armeDePredilection: string;
+  relations: string;
+  dogmes: string;
+}
 
 @Injectable()
 export class DieuService {
 
   constructor(
-    private http: HttpClient,
     private afs: AngularFirestore
   ) { }
 
-  private url = environment.api + 'dieux/';
-
-  getDieux$(): Observable<Dieu[]> {
-    return this.afs.collection<Dieu>('dieux').snapshotChanges().pipe(
-      map(actions => {
-        return actions.map(a => {
-          const data = a.payload.doc.data() as Dieu;
-          data.id = a.payload.doc.id;
-          return data;
-        });
-      })
-    );
+  public async getDieux(): Promise<IDieu[]> {
+    return (await this.afs.collection<IDieu>('dieux').ref.get()).docs.map(doc => {
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as IDieu;
+    });
   }
 
-  getDieux(): Observable<Dieu[]> {
-    return this.getDieux$();
+  public async getDieu(id: string): Promise<IDieu> {
+    const data = await this.afs.doc<IDieu>(`dieux/${id}`).ref.get();
+    return {
+      id: data.id,
+      ...data.data()
+    } as IDieu;
   }
 
-  getDieu(id: string): Observable<Dieu> {
-    return this.afs.doc<Dieu>(`dieux/${id}`).valueChanges();
+  public async addDieu(dieu: IDieu): Promise<IDieu> {
+    const data = await this.afs.collection(`dieux`).add(this._saveState(dieu));
+    return { id: data.id, ...dieu } as IDieu;
   }
 
-  addDieu(dieu: Dieu): Observable<Dieu> {
-    return this.http.post(this.url, dieu.saveState()).pipe(map((res: Dieu) => res));
+  public async updateDieu(dieu: IDieu): Promise<IDieu> {
+    await this.afs.doc<IDieu>(`dieux/${dieu.id}`).update(this._saveState(dieu));
+    return dieu;
   }
 
-  updateDieu(dieu: Dieu): Observable<Dieu> {
-    return this.http.put(this.url, { id: dieu.id, data: dieu.saveState() }).pipe(map((res: Dieu) => res));
+  public async deleteDieu(id: string): Promise<boolean> {
+    await this.afs.doc<IDieu>(`dieux/${id}`).delete();
+    return true;
   }
 
-  deleteDieu(id: string): Observable<boolean> {
-    return this.http.delete(this.url, { params: new HttpParams().set('id', id) }).pipe(map((res: boolean) => res));
+  private _saveState(item: IDieu): IDieuDB {
+    return {
+      nom: item.nom,
+      prononciation: item.prononciation,
+      titre: item.titre,
+      rang: item.rang,
+      alignementRef: item.alignementRef,
+      alignementPermisRef: item.alignementPermisRef,
+      domainesRef: item.domainesRef,
+      armeDePredilection: item.armeDePredilection,
+      relations: item.relations,
+      dogmes: item.dogmes,
+    };
   }
 
 }

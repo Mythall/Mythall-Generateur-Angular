@@ -8,17 +8,15 @@ import { DonService } from '../../../../services/dons/don.service';
 import { ImmuniteService } from '../../../../services/immunite.service';
 import { ResistanceService }  from '../../../../services/resistance.service';
 import { StatistiqueService } from '../../../../services/statistique.service';
-import { SortService } from '../../../../services/sorts/sort.service';
+import { SortService, ISort } from '../../../../services/sort.service';
 import { Classe } from '../../../../services/classes/models/classe';
 import { Resistance, ResistanceItem } from '../../../../models/resistance';
 import { Immunite } from '../../../../models/immunite';
-import { Sort } from '../../../../services/sorts/models/sort';
 import { Statistique, StatistiqueItem } from '../../../../models/statistique';
 import { Don } from '../../../../services/dons/models/don';
 import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
 import { Aptitude } from '../../../../services/aptitudes/models/aptitude';
-import { Alignement } from '../../../../models/alignement';
-import { AlignementService } from '../../../../services/alignement.service';
+import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 
 @Component({
   selector: 'app-organisateur-races-form',
@@ -44,17 +42,17 @@ export class OrganisateurRacesFormComponent implements OnInit {
   id: string;
   race: Race = new Race();
   classes: Observable<Classe[]>;
-  alignements: Alignement[];
+  alignements: IAlignement[];
   aptitudes: Aptitude[];
   dons: Don[];
   resistances: Resistance[];
   statistiques: Statistique[];
   immunites: Immunite[];
-  sorts: Sort[];
+  sorts: ISort[];
 
   ngOnInit() {
     this.getRace();
-    this.getAlignements();
+    this._getAlignements();
     this.getClasses();
     this.getAptitudes();
     this.getDons();
@@ -75,10 +73,8 @@ export class OrganisateurRacesFormComponent implements OnInit {
     });
   }
 
-  getAlignements() {
-    this.alignementService.getAlignements().subscribe(response => {
-      this.alignements = response;
-    })
+  private async _getAlignements(): Promise<void> {
+    this.alignements =  await this.alignementService.getAlignements();
   }
 
   getClasses() {
@@ -115,10 +111,8 @@ export class OrganisateurRacesFormComponent implements OnInit {
     })
   }
 
-  getSorts(){
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = response;
-    })
+  private async getSorts(): Promise<void>{
+    this.sorts = await this.sortService.getSorts();
   }
 
   submit() {

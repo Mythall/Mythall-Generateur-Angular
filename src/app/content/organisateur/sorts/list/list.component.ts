@@ -2,13 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { Sort as MatSort } from '@angular/material/sort';
-
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
-
-import { EcoleService } from '../../../../services/ecole.service';
-import { SortService } from '../../../../services/sorts/sort.service';
-import { Sort } from '../../../../services/sorts/models/sort';
-import { Ecole } from '../../../../models/ecole';
+import { SortService, ISort } from '../../../../services/sort.service';
 
 @Component({
   selector: 'app-organisateur-sorts-list',
@@ -18,7 +13,6 @@ import { Ecole } from '../../../../models/ecole';
 export class OrganisateurSortsListComponent implements OnInit {
 
   constructor(
-    private ecoleService: EcoleService,
     private sortService: SortService,
     public dialog: MatDialog
   ) { }
@@ -30,60 +24,37 @@ export class OrganisateurSortsListComponent implements OnInit {
   pageEvent: PageEvent;
 
   sortedData: any;
-  sorts: Sort[] = [];
+  sorts: ISort[] = [];
   filter: any = {
     nom: '',
     niveau: '',
     sommaire: ''
   };
 
-  ecoles: Ecole[] = [];
-
   ngOnInit() {
-    this.getEcoles();
-    this.getSorts();
+    this._getSorts();
   }
 
-  getSorts() {
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = new Array();
-      for (var i = 0; i < response.length; i++) {
-        var sort: Sort = new Sort();
-        sort = this.sortService.mapSummary(response[i]);
-        this.sorts.push(sort);
-      }
-      this.sortedData = this.sorts.slice(0, this.pageSize);
-      this.length = this.sorts.length;
-    });
+  private async _getSorts(): Promise<void> {
+    this.sorts = await this.sortService.getSorts();
+    this.sortedData = this.sorts.slice(0, this.pageSize);
+    this.length = this.sorts.length;
   }
 
-  getEcoles() {
-    this.ecoleService.getEcoles().subscribe(response => {
-      for (var i = 0; i < response.length; i++) {
-        this.ecoles.push(response[i]);
-      }
-    })
-  }
-
-  confirmDelete(item: Sort) {
+  public confirmDelete(item: ISort): void {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async (result) => {
       if (result) {
-        this.delete(result);
+        await this.sortService.deleteSort(result);
       }
     });
   }
 
-  delete(sort: Sort) {
-    this.sortService.deleteSort(sort);
-  }
-
-  filterResult(sort: Sort): boolean {
-
+  filterResult(sort: ISort): boolean {
     let result: boolean = true;
 
     if (this.filter.nom) {
@@ -98,14 +69,7 @@ export class OrganisateurSortsListComponent implements OnInit {
       }
     }
 
-    if (this.filter.ecole) {
-      if (!sort.ecole.id.includes(this.filter.ecole)) {
-        result = false;
-      }
-    }
-
     return result;
-
   }
 
   sortData(matSort: MatSort) {

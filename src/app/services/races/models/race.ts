@@ -2,10 +2,10 @@ import { Classe } from "../../classes/models/classe";
 import { Statistique, StatistiqueItem } from "../../../models/statistique";
 import { Resistance, ResistanceItem } from "../../../models/resistance";
 import { Immunite } from "../../../models/immunite";
-import { Sort } from "../../sorts/models/sort";
 import { Don } from "../../dons/models/don";
 import { Aptitude } from "../../aptitudes/models/aptitude";
-import { Alignement } from "../../../models/alignement";
+import { IAlignement } from "../../../services/alignement.service";
+import { ISort } from "../../sort.service";
 
 export class Race {
 
@@ -26,7 +26,7 @@ export class Race {
     obligations: string;
     avantages: string;
     desavantages: string;
-    alignementPermis: Alignement[];
+    alignementPermis: IAlignement[];
     alignementPermisRef: string[];
     classesDisponible: Classe[];
     classesDisponibleRef: string[];
@@ -35,7 +35,7 @@ export class Race {
     resistances: ResistanceItem[];
     immunites: Immunite[];
     immunitesRef: string[];
-    sortsRacial: Sort[];
+    sortsRacial: ISort[];
     sortsRacialRef: string[];
     donsRacial: Don[];
     donsRacialRef: string[];

@@ -1,9 +1,9 @@
 import { DonItem } from "../../dons/models/don";
-import { SortItem } from "../../sorts/models/sort";
 import { AptitudeItem } from "../../aptitudes/models/aptitude";
 import { Choix } from "../../personnages/models/choix";
-import { Alignement } from "../../../models/alignement";
+import { IAlignement } from "../../../services/alignement.service";
 import { Classe } from "../../classes/models/classe";
+import { SortItem } from "../../sort.service";
 
 export class Domaine {
 
@@ -21,7 +21,7 @@ export class Domaine {
     bonus: string;
     domaineContraire: Domaine;
     domaineContraireRef: string;
-    alignementPermis: Alignement[];
+    alignementPermis: IAlignement[];
     alignementPermisRef: string[];
     multiclassement: Classe[];
     multiclassementRef: string[];

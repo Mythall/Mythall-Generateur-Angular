@@ -4,11 +4,10 @@ import { map, flatMap, first } from 'rxjs/operators';
 import { FirestoreService } from '../firestore/firestore.service';
 import { AptitudeService } from '../aptitudes/aptitude.service';
 import { DonService } from '../dons/don.service';
-import { SortService } from '../sorts/sort.service';
+import { SortService, ISort } from '../sort.service';
 import { Aptitude } from '../aptitudes/models/aptitude';
 import { Don } from '../dons/models/don';
 import { Esprit } from './models/esprit';
-import { Sort } from '../sorts/models/sort';
 
 @Injectable()
 export class EspritService {
@@ -32,7 +31,7 @@ export class EspritService {
         observableBatch.push(of(esprit));
 
         this.getAptitudees(esprit, observableBatch);
-        this.getSorts(esprit, observableBatch);
+        this.getSorts(esprit);
         this.getDons(esprit, observableBatch);
 
         return forkJoin(observableBatch).pipe(
@@ -97,15 +96,10 @@ export class EspritService {
     }
   }
 
-  private getSorts(esprit: Esprit, observableBatch: any[]) {
+  private getSorts(esprit: Esprit) {
     if (esprit.sorts && esprit.sorts.length > 0) {
-      esprit.sorts.forEach(sortItem => {
-        observableBatch.push(this.sortService.getSort(sortItem.sortRef).pipe(
-          map((sort: Sort) => {
-            sortItem.sort = sort;
-          }),
-          first()
-        ))
+      esprit.sorts.forEach(async (sortItem) => {
+        sortItem.sort = await this.sortService.getSort(sortItem.sortRef);
       });
     }
   }

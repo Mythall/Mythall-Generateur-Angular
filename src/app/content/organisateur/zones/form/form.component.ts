@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { ToastService } from '../../../../services/@core/toast.service';
-import { ZoneService } from '../../../../services/zone.service';
-import { Zone } from '../../../../models/zone';
+import { ZoneService, IZone } from '../../../../services/zone.service';
 
 @Component({
   selector: 'app-organisateur-zones-form',
@@ -19,44 +18,40 @@ export class OrganisateurZonesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  zone: Zone = new Zone();
+  zone: IZone = {} as IZone;
 
   ngOnInit() {
     this.getZone();
   }
 
-  getZone() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  public getZone(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.zoneService.getZone(this.id).subscribe(response => {
-          this.zone = response;
-        });
+        this.zone = await this.zoneService.getZone(this.id);
       }
     });
   }
 
-  submit() {
+  public async submit(): Promise<void> {
 
     if (this.id) {
 
       // Update
-      this.zoneService.updateZone(this.zone).subscribe(result => {
-        if (result) {
-          this.toast.update(this.zone.nom);
-          this.router.navigate(["/organisateur/zones/list"]);
-        }
-      });
+      const result = await this.zoneService.updateZone(this.zone);
+      if (result) {
+        this.toast.update(this.zone.nom);
+        this.router.navigate(["/organisateur/zones/list"]);
+      }
 
     } else {
 
       // Add
-      this.zoneService.addZone(this.zone).subscribe(result => {
-        if (result) {
-          this.toast.add(this.zone.nom);
-          this.router.navigate(["/organisateur/zones/list"]);
-        }
-      });
+      const result = await this.zoneService.addZone(this.zone);
+      if (result) {
+        this.toast.add(this.zone.nom);
+        this.router.navigate(["/organisateur/zones/list"]);
+      }
 
     }
   }

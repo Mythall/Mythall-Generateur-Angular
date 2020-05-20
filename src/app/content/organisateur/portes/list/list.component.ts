@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 import { ToastService } from '../../../../services/@core/toast.service';
-import { PorteService } from '../../../../services/porte.service';
-import { Porte } from '../../../../models/porte';
+import { PorteService, IPorte } from '../../../../services/porte.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -19,21 +18,26 @@ export class OrganisateurPortesListComponent implements OnInit {
     private toast: ToastService
   ) { }
 
-  portes: Observable<Porte[]>;
+  portes: IPorte[];
 
   ngOnInit() {
-    this.portes = this.porteService.getPortes$();
+    this._getPortes();
   }
 
-  confirmDelete(item: Porte) {
+  private async _getPortes(): Promise<void> {
+    this.portes = await this.porteService.getPortes();
+  }
+
+  confirmDelete(item: IPorte) {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async (result) => {
       if (result) {
-        this.porteService.deletePorte(result.id).subscribe(res => this.toast.delete(result.nom));
+        await this.porteService.deletePorte(result.id);
+        this.toast.delete(result.nom);
       }
     });
   }

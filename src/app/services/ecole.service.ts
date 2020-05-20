@@ -1,51 +1,56 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { environment } from '../../environments/environment';
-import { Ecole } from '../models/ecole';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+
+export interface IEcole extends IEcoleDB {
+  id: string;
+}
+
+export interface IEcoleDB {
+  nom: string;
+}
 
 @Injectable()
 export class EcoleService {
 
   constructor(
-    private http: HttpClient,
     private afs: AngularFirestore
   ) { }
 
-  private url = environment.api + 'ecoles/';
-
-  getEcoles$(): Observable<Ecole[]> {
-    return this.afs.collection<Ecole>('ecoles', ref => ref.orderBy("nom")).snapshotChanges().pipe(
-      map(actions => {
-        return actions.map(a => {
-          const data = a.payload.doc.data() as Ecole;
-          data.id = a.payload.doc.id;
-          return data;
-        });
-      })
-    );
+  public async getEcoles(): Promise<IEcole[]> {
+    return (await this.afs.collection<IEcole>('ecoles').ref.orderBy('nom').get()).docs.map(doc => {
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as IEcole;
+    });
   }
 
-  getEcoles(): Observable<Ecole[]> {
-    return this.getEcoles$();
+  public async getEcole(id: string): Promise<IEcole> {
+    const data = await this.afs.doc<IEcole>(`ecoles/${id}`).ref.get();
+    return {
+      id: data.id,
+      ...data.data()
+    } as IEcole;
   }
 
-  getEcole(id: string): Observable<Ecole> {
-    return this.afs.doc<Ecole>(`ecoles/${id}`).valueChanges();
+  public async addEcole(ecole: IEcole): Promise<IEcole> {
+    const data = await this.afs.collection(`ecoles`).add(this._saveState(ecole));
+    return { id: data.id, ...ecole } as IEcole;
   }
 
-  addEcole(ecole: Ecole): Observable<Ecole> {
-    return this.http.post(this.url, ecole.saveState()).pipe(map((res: Ecole) => res));
+  public async updateEcole(ecole: IEcole): Promise<IEcole> {
+    await this.afs.doc<IEcole>(`ecoles/${ecole.id}`).update(this._saveState(ecole));
+    return ecole;
   }
 
-  updateEcole(ecole: Ecole): Observable<Ecole> {
-    return this.http.put(this.url, { id: ecole.id, data: ecole.saveState() }).pipe(map((res: Ecole) => res));
+  public async deleteEcole(id: string): Promise<boolean> {
+    await this.afs.doc<IEcole>(`ecoles/${id}`).delete();
+    return true;
   }
 
-  deleteEcole(id: string): Observable<boolean> {
-    return this.http.delete(this.url, { params: new HttpParams().set('id', id) }).pipe(map((res: boolean) => res));
+  private _saveState(item: IEcole): IEcoleDB {
+    return {
+      nom: item.nom,
+    };
   }
-
 }

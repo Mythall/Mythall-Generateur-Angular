@@ -1,16 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs';
-import { EcoleService } from '../../../../services/ecole.service';
-import { PorteService } from '../../../../services/porte.service';
-import { SortService } from '../../../../services/sorts/sort.service';
-import { DureeService } from '../../../../services/duree.service';
-import { ZoneService } from '../../../../services/zone.service';
-import { Sort } from '../../../../services/sorts/models/sort';
-import { Ecole } from '../../../../models/ecole';
-import { Porte } from '../../../../models/porte';
-import { Duree } from '../../../../models/duree';
-import { Zone } from '../../../../models/zone';
+import { IEcole, EcoleService } from '../../../../services/ecole.service';
+import { PorteService, IPorte } from '../../../../services/porte.service';
+import { SortService, ISort } from '../../../../services/sort.service';
+import { IDuree, DureeService } from '../../../../services/duree.service';
+import { ZoneService, IZone } from '../../../../services/zone.service';
 
 @Component({
   selector: 'app-organisateur-sorts-form',
@@ -27,64 +21,60 @@ export class OrganisateurSortsFormComponent implements OnInit {
     private dureeService: DureeService,
     private zoneService: ZoneService,
     private router: Router
-  ){}
+  ) { }
 
   id: string;
-  sort: Sort = new Sort();
-  ecoles: Observable<Ecole[]>;
-  portes: Observable<Porte[]>;
-  durees: Observable<Duree[]>;
-  zones: Observable<Zone[]>;
+  sort = {} as ISort;
+  ecoles: IEcole[];
+  portes: IPorte[];
+  durees: IDuree[];
+  zones: IZone[];
 
   ngOnInit() {
     this.getSort();
-    this.getEcoles();
-    this.getPortes();
-    this.getDurees();
-    this.getZones();
+    this._getEcoles();
+    this._getPortes();
+    this._getDurees();
+    this._getZones();
   }
 
-  getSort() {
-    this.activatedRoute.params.subscribe((params: Params) => {
-      if(params['id']){
+  public getSort(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
+      if (params['id']) {
         this.id = params['id'];
-        this.sortService.getSort(this.id).subscribe(response => {
-          this.sort = this.sortService.map(response);
-        });
+        this.sort = await this.sortService.getSort(this.id);
       }
     });
   }
 
-  getEcoles() {
-    this.ecoles = this.ecoleService.getEcoles();
+  private async _getEcoles(): Promise<void> {
+    this.ecoles = await this.ecoleService.getEcoles();
   }
 
-  getPortes() {
-    this.portes = this.porteService.getPortes();
+  private async _getPortes(): Promise<void> {
+    this.portes = await this.porteService.getPortes();
   }
 
-  getDurees() {
-    this.durees = this.dureeService.getDurees();
+  private async _getDurees(): Promise<void> {
+    this.durees = await this.dureeService.getDurees();
   }
 
-  getZones() {
-    this.zones = this.zoneService.getZones();
+  private async _getZones(): Promise<void> {
+    this.zones = await this.zoneService.getZones();
   }
 
-  submit() {
-    if(this.id){
-      this.sortService.updateSort(this.id, this.sort.saveState()).then(result => {
-        if(result){
-          this.router.navigate(["/organisateur/sorts/list"]);
-        }
-      });
+  public async submit() {
+    if (this.id) {
+      const result = await this.sortService.updateSort(this.sort);
+      if (result) {
+        this.router.navigate(["/organisateur/sorts/list"]);
+      }
     } else {
-      this.sortService.addSort(this.sort.saveState()).then(result => {
-        if(result){
-          this.router.navigate(["/organisateur/sorts/list"]);
-        }
-      });
-    }    
+      const result = await this.sortService.addSort(this.sort);
+      if (result) {
+        this.router.navigate(["/organisateur/sorts/list"]);
+      }
+    }
   }
 
 }

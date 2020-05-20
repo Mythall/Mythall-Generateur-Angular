@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { DieuService } from '../../../../services/dieu.service';
-import { Dieu } from '../../../../models/dieu';
-import { AlignementService } from '../../../../services/alignement.service';
-import { Alignement } from '../../../../models/alignement';
+import { IDieu, DieuService } from '../../../../services/dieu.service';
+import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 import { Domaine } from '../../../../services/domaines/models/domaine';
 import { DomaineService } from '../../../../services/domaines/domaine-service';
 import { ToastService } from '../../../../services/@core/toast.service';
@@ -25,23 +23,21 @@ export class OrganisateurDieuxFormComponent implements OnInit {
   ) { }
 
   id: string;
-  dieu: Dieu = new Dieu();
-  alignements: Alignement[];
+  dieu: IDieu = {} as IDieu;
+  alignements: IAlignement[];
   domaines: Domaine[];
 
   ngOnInit() {
-    this.getDieu();
+    this._getDieu();
     this.getDomains();
-    this.alignementService.getAlignements().subscribe(result => this.alignements = result);
+    this._getAlignements();
   }
 
-  getDieu() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private async _getDieu(): Promise<void> {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.dieuService.getDieu(this.id).subscribe(response => {
-          this.dieu = response;
-        });
+        this.dieu = await this.dieuService.getDieu(this.id);
       }
     });
   }
@@ -52,27 +48,29 @@ export class OrganisateurDieuxFormComponent implements OnInit {
     })
   }
 
-  submit() {
+  private async _getAlignements(): Promise<void> {
+    this.alignements = await this.alignementService.getAlignements();
+  }
+
+  public async submit() {
 
     if (this.id) {
 
       // Update
-      this.dieuService.updateDieu(this.dieu).subscribe(result => {
-        if (result) {
-          this.toast.update(this.dieu.nom);
-          this.router.navigate(["/organisateur/dieux/list"]);
-        }
-      });
+      const result = await this.dieuService.updateDieu(this.dieu)
+      if (result) {
+        this.toast.update(this.dieu.nom);
+        this.router.navigate(["/organisateur/dieux/list"]);
+      }
 
     } else {
 
       // Add
-      this.dieuService.addDieu(this.dieu).subscribe(result => {
-        if (result) {
-          this.toast.add(this.dieu.nom);
-          this.router.navigate(["/organisateur/dieux/list"]);
-        }
-      });
+      const result = await this.dieuService.addDieu(this.dieu)
+      if (result) {
+        this.toast.add(this.dieu.nom);
+        this.router.navigate(["/organisateur/dieux/list"]);
+      }
 
     }
   }

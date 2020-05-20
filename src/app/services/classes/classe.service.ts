@@ -5,9 +5,8 @@ import { FirestoreService } from '../firestore/firestore.service';
 import { Classe } from './models/classe';
 import { Aptitude } from '../aptitudes/models/aptitude';
 import { Don } from '../dons/models/don';
-import { Sort } from '../sorts/models/sort';
 import { AptitudeService } from '../aptitudes/aptitude.service';
-import { SortService } from '../sorts/sort.service';
+import { SortService } from '../sort.service';
 import { ImmuniteService } from '../immunite.service';
 import { ResistanceService } from '../resistance.service';
 import { StatistiqueService } from '../statistique.service';
@@ -28,13 +27,13 @@ export class ClasseService {
   ) { }
 
   getClasses(): Observable<Classe[]> {
-	return this.db.colWithIds$('classes', ref => ref.orderBy("nom")).pipe(
-		tap(results => {
-			results.sort((a: Classe, b: Classe) => {
-				return a.nom.localeCompare(b.nom);
-			})
-		})
-	);
+    return this.db.colWithIds$('classes', ref => ref.orderBy("nom")).pipe(
+      tap(results => {
+        results.sort((a: Classe, b: Classe) => {
+          return a.nom.localeCompare(b.nom);
+        })
+      })
+    );
   }
 
   getClasse(id: string): Observable<Classe> {
@@ -46,7 +45,7 @@ export class ClasseService {
 
         this.getMulticlassement(classe, observableBatch);
         this.getAptitudees(classe, observableBatch);
-        this.getSorts(classe, observableBatch);
+        this.getSorts(classe);
         this.getDons(classe, observableBatch);
         this.getResistances(classe, observableBatch);
         this.getStatistiques(classe, observableBatch);
@@ -54,8 +53,8 @@ export class ClasseService {
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
-           let classe: Classe = this.map(data[0]);
-           return classe;
+            let classe: Classe = this.map(data[0]);
+            return classe;
           })
         )
 
@@ -94,13 +93,13 @@ export class ClasseService {
   }
 
   getClassesPrestige(): Observable<Classe[]> {
-	return this.db.colWithIds$('classes', ref => ref.where('prestige', '==', true).orderBy("nom")).pipe(
-		tap(results => {
-			results.sort((a: Classe, b: Classe) => {
-				return a.nom.localeCompare(b.nom);
-			})
-		})
-	);
+    return this.db.colWithIds$('classes', ref => ref.where('prestige', '==', true).orderBy("nom")).pipe(
+      tap(results => {
+        results.sort((a: Classe, b: Classe) => {
+          return a.nom.localeCompare(b.nom);
+        })
+      })
+    );
   }
 
   //#region Maps
@@ -120,8 +119,8 @@ export class ClasseService {
       classe.multiclassementRef.forEach(classeRef => {
         observableBatch.push(this.getClasseSummary(classeRef).pipe(
           map((classe: Classe) => {
-          if (!classe.multiclassement) classe.multiclassement = [];
-          classe.multiclassement.push(classe);
+            if (!classe.multiclassement) classe.multiclassement = [];
+            classe.multiclassement.push(classe);
           }),
           first()
         ))
@@ -133,10 +132,10 @@ export class ClasseService {
     if (classe.aptitudes && classe.aptitudes.length > 0) {
       classe.aptitudes.forEach(aptitudeItem => {
         observableBatch.push(this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef).pipe(
-        map((aptitude: Aptitude) => {
-          aptitudeItem.aptitude = aptitude;
-        }),
-        first()
+          map((aptitude: Aptitude) => {
+            aptitudeItem.aptitude = aptitude;
+          }),
+          first()
         ))
       });
     }
@@ -155,15 +154,10 @@ export class ClasseService {
     }
   }
 
-  private getSorts(classe: Classe, observableBatch: any[]) {
+  private getSorts(classe: Classe) {
     if (classe.sorts && classe.sorts.length > 0) {
-      classe.sorts.forEach(sortItem => {
-        observableBatch.push(this.sortService.getSort(sortItem.sortRef).pipe(
-          map((sort: Sort) => {
-            sortItem.sort = sort;
-          }),
-          first()
-        ))
+      classe.sorts.forEach(async (sortItem) => {
+        sortItem.sort = await this.sortService.getSort(sortItem.sortRef);
       });
     }
   }
@@ -173,9 +167,9 @@ export class ClasseService {
       classe.resistances.forEach(resistanceItem => {
         observableBatch.push(this.resistanceService.getResistance(resistanceItem.resistanceRef).pipe(
           map((resistance: Resistance) => {
-          resistanceItem.resistance = resistance;
-        }),
-        first()
+            resistanceItem.resistance = resistance;
+          }),
+          first()
         ))
       });
     }
@@ -186,8 +180,8 @@ export class ClasseService {
       classe.statistiques.forEach(statistiqueItem => {
         observableBatch.push(this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef).pipe(
           map((statistique: Statistique) => {
-          statistiqueItem.statistique = statistique;
-        }),first()
+            statistiqueItem.statistique = statistique;
+          }), first()
         ))
       });
     }
@@ -198,10 +192,10 @@ export class ClasseService {
       classe.immunitesRef.forEach(immuniteRef => {
         observableBatch.push(this.immuniteService.getImmunite(immuniteRef).pipe(
           map((immunite: Immunite) => {
-          if (!classe.immunites) classe.immunites = [];
-          classe.immunites.push(immunite);
-        }),
-        first()
+            if (!classe.immunites) classe.immunites = [];
+            classe.immunites.push(immunite);
+          }),
+          first()
         ))
       });
     }

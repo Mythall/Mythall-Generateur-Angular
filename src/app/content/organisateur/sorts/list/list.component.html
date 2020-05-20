@@ -20,7 +20,6 @@
           <tr>
             <th mat-sort-header="nom">Nom</th>
             <th mat-sort-header="niveau">Niveau</th>
-            <th mat-sort-header="ecole">École</th>
             <th class="text-center">Actions</th>
           </tr>
         </thead>
@@ -36,20 +35,11 @@
                 <input matInput placeholder="Filtre" [(ngModel)]="filter.niveau">
               </mat-form-field>
             </td>
-            <td>
-              <mat-form-field>
-                <mat-select [(ngModel)]="filter.ecole" placeholder="École">
-                  <mat-option value=""></mat-option>
-                  <mat-option *ngFor="let e of ecoles" [value]="e.id">{{e.nom}}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </td>
           </tr>
           <ng-template ngFor let-sort [ngForOf]="sortedData">
             <tr *ngIf="filterResult(sort)">
               <td [innerHtml]="sort.nom"></td>
               <td [innerHtml]="sort.niveau"></td>
-              <td [innerHtml]="sort?.ecole?.nom"></td>
               <td>
                 <div class="button-row">
                   <button mat-icon-button [routerLink]="'/joueur/sort/' + sort.id">

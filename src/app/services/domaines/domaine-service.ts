@@ -3,11 +3,10 @@ import { Observable, of, forkJoin } from 'rxjs';
 import { FirestoreService } from '../firestore/firestore.service';
 import { AptitudeService } from '../aptitudes/aptitude.service';
 import { DonService } from '../dons/don.service';
-import { SortService } from '../sorts/sort.service';
+import { SortService } from '../sort.service';
 import { Aptitude } from '../aptitudes/models/aptitude';
 import { Don } from '../dons/models/don';
 import { Domaine } from './models/domaine';
-import { Sort } from '../sorts/models/sort';
 import { Classe } from '../classes/models/classe';
 import { ClasseService } from '../classes/classe.service';
 import { tap, map, flatMap, first } from 'rxjs/operators';
@@ -43,7 +42,7 @@ export class DomaineService {
         this.getClasses(domaine, observableBatch);
         this.getDomaineContraire(domaine, observableBatch);
         this.getAptitudees(domaine, observableBatch);
-        this.getSorts(domaine, observableBatch);
+        this.getSorts(domaine);
         this.getDons(domaine, observableBatch);
 
         return forkJoin(observableBatch).pipe(
@@ -134,15 +133,10 @@ export class DomaineService {
     }
   }
 
-  private getSorts(domaine: Domaine, observableBatch: any[]) {
+  private getSorts(domaine: Domaine) {
     if (domaine.sorts && domaine.sorts.length > 0) {
-      domaine.sorts.forEach(sortItem => {
-        observableBatch.push(this.sortService.getSort(sortItem.sortRef).pipe(
-          map((sort: Sort) => {
-            sortItem.sort = sort;
-          }),
-          first()
-        ))
+      domaine.sorts.forEach(async (sortItem) => {
+        sortItem.sort = await this.sortService.getSort(sortItem.sortRef);
       });
     }
   }

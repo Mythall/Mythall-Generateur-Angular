@@ -18,11 +18,10 @@ import { StatistiqueValue } from '../../models/statistique';
 import { ResistanceValue } from '../../models/resistance';
 import { StatistiquesIds } from '../../models/statistiqueIds';
 import { DomaineService } from '../domaines/domaine-service';
-import { DieuService } from '../dieu.service';
-import { AlignementService } from '../alignement.service';
+import { IDieu, DieuService } from '../dieu.service';
+import { IAlignement, AlignementService } from '../alignement.service';
 import { EspritService } from '../esprits/esprit-service';
-import { SortService } from '../sorts/sort.service';
-import { SortItem, Sort } from '../sorts/models/sort';
+import { SortService, SortItem, ISort } from '../sort.service';
 import { OrdreService } from '../ordres/ordre.service';
 import { Build } from './models/build';
 import { FourberieService } from '../fourberies/fourberie.service';
@@ -30,11 +29,8 @@ import { rejects } from 'assert';
 import { Esprit } from '../esprits/models/esprit';
 import { Choix } from './models/choix';
 import { Domaine } from '../domaines/models/domaine';
-import { Ecole } from '../../models/ecole';
-import { EcoleService } from '../ecole.service';
-import { Alignement } from '../../models/alignement';
+import { EcoleService, IEcole } from '../ecole.service';
 import { Fourberie } from '../fourberies/models/fourberie';
-import { Dieu } from '../../models/dieu';
 import { Ordre } from '../ordres/models/ordre';
 
 @Injectable()
@@ -284,35 +280,27 @@ export class PersonnageService {
 
   }
 
-  getAvailableAlignements(personnage: Personnage): Promise<Alignement[]> {
+  public async getAvailableAlignements(personnage: Personnage): Promise<IAlignement[]> {
 
-    return new Promise((resolve) => {
+    let alignements = await this.alignementService.getAlignements();
 
-      this.db.getCollection('alignements').then(alignements => {
-
-        let list: Alignement[] = alignements;
-
-        // Filtre selon la race
-        if (personnage.race) {
-          list = list.filter(function (alignement) {
-            return personnage.race.alignementPermisRef.includes(alignement.id);
-          });
-        }
-
-        // Filtre selon les classes
-        if (personnage.classes) {
-          personnage.classes.forEach(classe => {
-            list = list.filter(function (alignement) {
-              return classe.classe.alignementPermisRef.includes(alignement.id);
-            });
-          });
-        }
-
-        resolve(list);
-
+    // Filtre selon la race
+    if (personnage.race) {
+      alignements = alignements.filter((alignement) => {
+        return personnage.race.alignementPermisRef.includes(alignement.id);
       });
+    }
 
-    });
+    // Filtre selon les classes
+    if (personnage.classes) {
+      personnage.classes.forEach(classe => {
+        alignements = alignements.filter((alignement) => {
+          return classe.classe.alignementPermisRef.includes(alignement.id);
+        });
+      });
+    }
+
+    return alignements;
 
   }
 
@@ -680,14 +668,8 @@ export class PersonnageService {
 
   }
 
-  getAvailableEcoles(personnage: Personnage): Promise<Ecole[]> {
-
-    return new Promise((resolve) => {
-
-      this.ecoleService.getEcoles().subscribe(ecoles => resolve(ecoles));
-
-    });
-
+  public async getAvailableEcoles(personnage: Personnage): Promise<IEcole[]> {
+    return await this.ecoleService.getEcoles();
   }
 
   getAvailableEsprits(personnage: Personnage): Promise<Esprit[]> {
@@ -812,88 +794,72 @@ export class PersonnageService {
 
   }
 
-  getAvailableSorts(personnage: Personnage): Promise<Sort[]> {
+  public async getAvailableSorts(personnage: Personnage): Promise<ISort[]> {
 
-    return new Promise((resolve) => {
+    let list: ISort[] = [];
 
-      let list: Sort[] = [];
-      let listRef: string[] = [];
+    // Get list de sort disponible
+    if (personnage.classes) {
 
-      // Get list de sort disponible
-      if (personnage.classes) {
-
-        personnage.classes.forEach(classe => {
-          classe.classe.sortsDisponible.forEach(sortDispo => {
-            if (sortDispo.niveauObtention <= classe.niveau) {
-              this.sortService.getSort(sortDispo.sortRef).subscribe(sort => {
-                list.push(sort);
-              });
-            }
-          });
+      personnage.classes.forEach((classe) => {
+        classe.classe.sortsDisponible.forEach(async (sortDispo) => {
+          if (sortDispo.niveauObtention <= classe.niveau) {
+            list.push(await this.sortService.getSort(sortDispo.sortRef));
+          }
         });
-
-      }
-
-      // Filtre les sorts déjà existant
-      if (personnage.sorts && personnage.sorts.length > 0) {
-        personnage.sorts.forEach(sortPerso => {
-
-          list = list.filter(sort => {
-            return sort.id != sortPerso.sortRef;
-          })
-
-        });
-      }
-
-      // Trie en Ordre Alphabetic
-      list = list.sort((a, b) => {
-        if (a.nom > b.nom) {
-          return 1;
-        }
-        if (a.nom < b.nom) {
-          return -1;
-        }
-        return 0;
       });
 
-      resolve(list);
+    }
 
+    // Filtre les sorts déjà existant
+    if (personnage.sorts && personnage.sorts.length > 0) {
+      personnage.sorts.forEach(sortPerso => {
+
+        list = list.filter(sort => {
+          return sort.id != sortPerso.sortRef;
+        })
+
+      });
+    }
+
+    // Trie en Ordre Alphabetic
+    list = list.sort((a, b) => {
+      if (a.nom > b.nom) {
+        return 1;
+      }
+      if (a.nom < b.nom) {
+        return -1;
+      }
+      return 0;
     });
+
+    return list;
 
   }
 
-  getAvailableDieux(personnage: Personnage): Promise<Dieu[]> {
+  public async getAvailableDieux(personnage: Personnage): Promise<IDieu[]> {
 
-    return new Promise((resolve) => {
+    let list = await this.dieuService.getDieux();
 
-      this.db.getCollection('dieux').then(dieux => {
-
-        let list: Dieu[] = dieux;
-
-        // Filtre selon l'alignement du personnage
-        if (personnage.alignementRef) {
-          list = list.filter(function (dieu) {
-            return dieu.alignementPermisRef.includes(personnage.alignementRef);
-          });
-        }
-
-        // Trie en Ordre Alphabetic
-        list = list.sort((a, b) => {
-          if (a.nom > b.nom) {
-            return 1;
-          }
-          if (a.nom < b.nom) {
-            return -1;
-          }
-          return 0;
-        });
-
-        resolve(list);
-
+    // Filtre selon l'alignement du personnage
+    if (personnage.alignementRef) {
+      list = list.filter(function (dieu) {
+        return dieu.alignementPermisRef.includes(personnage.alignementRef);
       });
+    }
 
+    // Trie en Ordre Alphabetic
+    list = list.sort((a, b) => {
+      if (a.nom > b.nom) {
+        return 1;
+      }
+      if (a.nom < b.nom) {
+        return -1;
+      }
+      return 0;
     });
 
+    return list;
   }
 
   //#endregion
@@ -911,8 +877,8 @@ export class PersonnageService {
         this.getUser(personnage),
         this.getRace(personnage),
         this.getClasses(personnage),
-        this.getAlignement(personnage),
-        this.getDieu(personnage),
+        this._getAlignement(personnage),
+        this._getDieu(personnage),
         this.getOrdres(personnage),
         this.getAllFourberies(personnage)
       ]).then((results) => {
@@ -1057,48 +1023,26 @@ export class PersonnageService {
 
   }
 
-  private getAlignement(personnage: Personnage): Promise<Personnage> {
-
-    return new Promise((resolve, reject) => {
-
-      if (personnage.alignementRef) {
-        this.alignementService.getAlignement(personnage.alignementRef).subscribe(response => {
-
-          personnage.alignement = response;
-          resolve(personnage);
-
-        }, error => {
-          reject(error);
-        });
-
-      } else {
-        resolve(personnage);
+  private async _getAlignement(personnage: Personnage): Promise<Personnage> {
+    if (personnage.alignementRef) {
+      try {
+        personnage.alignement = await this.alignementService.getAlignement(personnage.alignementRef);
+      } catch (e) {
+        console.log('Une erreure est survenue lors de la requete pour l\'alignement du personnage');
       }
-
-    });
-
+    }
+    return personnage;
   }
 
-  private getDieu(personnage: Personnage): Promise<Personnage> {
-
-    return new Promise((resolve, reject) => {
-
-      if (personnage.dieuRef) {
-        this.dieuService.getDieu(personnage.dieuRef).subscribe(response => {
-
-          personnage.dieu = response;
-          resolve(personnage);
-
-        }, error => {
-          reject(error);
-        });
-
-      } else {
-        resolve(personnage);
+  private async _getDieu(personnage: Personnage): Promise<Personnage> {
+    if (personnage.dieuRef) {
+      try {
+        personnage.dieu = await this.dieuService.getDieu(personnage.dieuRef);
+      } catch (e) {
+        console.log('Une erreure est survenue lors de la requete pour le dieu du personnage');
       }
-
-    });
-
+    }
+    return personnage;
   }
 
   private getOrdres(personnage: Personnage): Promise<Personnage> {
@@ -1422,113 +1366,99 @@ export class PersonnageService {
 
   }
 
-  private getAllSorts(personnage: Personnage): Promise<Personnage> {
+  private async getAllSorts(personnage: Personnage): Promise<Personnage> {
 
-    return new Promise((resolve, reject) => {
-
-      // Sorts Classes
-      if (personnage.classes && personnage.classes.length > 0) {
-        personnage.classes.forEach(classeItem => {
-          if (classeItem.classe.sorts && classeItem.classe.sorts.length > 0) {
-            classeItem.classe.sorts.forEach(sortItem => {
-              if (classeItem.niveau >= sortItem.niveauObtention) {
-                personnage.sorts.push(sortItem);
-              }
-            })
-          }
-        });
-      }
-
-      // Sorts Domaines
-      if (personnage.domaines && personnage.domaines.length > 0) {
-        personnage.domaines.forEach(domaine => {
-          if (domaine.sorts && domaine.sorts.length > 0) {
-            domaine.sorts.forEach(sortItem => {
-              personnage.classes.forEach(classe => {
-                if (classe.classeRef == 'fNqknNgq0QmHzUaYEvEd' && classe.niveau >= sortItem.niveauObtention) {
-                  personnage.sorts.push(sortItem);
-                }
-              })
-            })
-          }
-        });
-      }
-
-      // Sorts Esprit
-      if (personnage.esprit && personnage.esprit.sorts && personnage.esprit.sorts.length > 0) {
-        personnage.esprit.sorts.forEach(sortItem => {
-          personnage.classes.forEach(classe => {
-            if (classe.classeRef == 'wW48swrqmr77awfyADMX' && classe.niveau >= sortItem.niveauObtention) {
+    // Sorts Classes
+    if (personnage.classes && personnage.classes.length > 0) {
+      personnage.classes.forEach(classeItem => {
+        if (classeItem.classe.sorts && classeItem.classe.sorts.length > 0) {
+          classeItem.classe.sorts.forEach(sortItem => {
+            if (classeItem.niveau >= sortItem.niveauObtention) {
               personnage.sorts.push(sortItem);
             }
           })
-        })
-      };
+        }
+      });
+    }
 
-      // Sorts Aptitudes (Équivalence)
-      if (personnage.aptitudes && personnage.aptitudes.length > 0) {
-        personnage.aptitudes.forEach(aptitudeItem => {
-          if (aptitudeItem.aptitude.sortsEquivalentRef && aptitudeItem.aptitude.sortsEquivalentRef.length > 0) {
-            aptitudeItem.aptitude.sortsEquivalentRef.forEach(aptSortRef => {
-              let sortItem: SortItem = new SortItem();
-              sortItem.niveauObtention = aptitudeItem.niveauObtention;
-              sortItem.sortRef = aptSortRef;
-              personnage.sorts.push(sortItem);
-            });
-          }
-        })
-      }
-
-      // Remplis la liste de sorts complète
-      let count: number = 0;
-      if (!personnage.sorts) personnage.sorts = [];
-      if (personnage.sorts && personnage.sorts.length > 0) {
-        personnage.sorts.forEach(sortItem => {
-
-          if (!sortItem.sort) { //Avoid fetching Sort if already fetch
-            this.sortService.getSort(sortItem.sortRef).pipe(
-              map(sort => {
-
-                sortItem.sort = sort;
-
-              })
-            ).subscribe(response => {
-              count++;
-              if (count == personnage.sorts.length) {
-
-                // Filter duplicated
-                personnage.sorts = personnage.sorts.filter((sort, index, self) =>
-                  index === self.findIndex((d) => (
-                    d.sortRef === sort.sortRef
-                  ))
-                )
-
-                resolve(personnage);
+    // Sorts Domaines
+    if (personnage.domaines && personnage.domaines.length > 0) {
+      personnage.domaines.forEach(domaine => {
+        if (domaine.sorts && domaine.sorts.length > 0) {
+          domaine.sorts.forEach(sortItem => {
+            personnage.classes.forEach(classe => {
+              if (classe.classeRef == 'fNqknNgq0QmHzUaYEvEd' && classe.niveau >= sortItem.niveauObtention) {
+                personnage.sorts.push(sortItem);
               }
-            });
-          } else {
-            count++;
-            if (count == personnage.sorts.length) {
+            })
+          })
+        }
+      });
+    }
 
-              personnage.sorts = personnage.sorts.filter((sort, index, self) =>
-                index === self.findIndex((d) => (
-                  d.sortRef === sort.sortRef
-                ))
-              )
-
-              resolve(personnage);
-            }
+    // Sorts Esprit
+    if (personnage.esprit && personnage.esprit.sorts && personnage.esprit.sorts.length > 0) {
+      personnage.esprit.sorts.forEach(sortItem => {
+        personnage.classes.forEach(classe => {
+          if (classe.classeRef == 'wW48swrqmr77awfyADMX' && classe.niveau >= sortItem.niveauObtention) {
+            personnage.sorts.push(sortItem);
           }
+        })
+      })
+    };
 
-        }, error => {
-          reject(error);
-        });
-      } else {
-        resolve(personnage);
-      }
+    // Sorts Aptitudes (Équivalence)
+    if (personnage.aptitudes && personnage.aptitudes.length > 0) {
+      personnage.aptitudes.forEach(aptitudeItem => {
+        if (aptitudeItem.aptitude.sortsEquivalentRef && aptitudeItem.aptitude.sortsEquivalentRef.length > 0) {
+          aptitudeItem.aptitude.sortsEquivalentRef.forEach(aptSortRef => {
+            let sortItem: SortItem = new SortItem();
+            sortItem.niveauObtention = aptitudeItem.niveauObtention;
+            sortItem.sortRef = aptSortRef;
+            personnage.sorts.push(sortItem);
+          });
+        }
+      })
+    }
 
-    });
+    // Remplis la liste de sorts complète
+    let count = 0;
+    if (!personnage.sorts) personnage.sorts = [];
+    if (personnage.sorts && personnage.sorts.length > 0) {
+      personnage.sorts.forEach(async (sortItem: SortItem) => {
 
+        if (!sortItem.sort) { //Avoid fetching Sort if already fetch
+          sortItem.sort = await this.sortService.getSort(sortItem.sortRef);
+          count++;
+          if (count == personnage.sorts.length) {
+
+            // Filter duplicated
+            personnage.sorts = personnage.sorts.filter((sort, index, self) =>
+              index === self.findIndex((d) => (
+                d.sortRef === sort.sortRef
+              ))
+            )
+
+            return personnage;
+          }
+        } else {
+          count++;
+          if (count == personnage.sorts.length) {
+
+            personnage.sorts = personnage.sorts.filter((sort, index, self) =>
+              index === self.findIndex((d) => (
+                d.sortRef === sort.sortRef
+              ))
+            )
+
+            return personnage;
+          }
+        }
+
+      });
+    } else {
+      return personnage;
+    }
   }
 
   private getDons(personnage: Personnage): Promise<Personnage> {

@@ -4,13 +4,12 @@ import { FirestoreService } from '../firestore/firestore.service';
 import { ImmuniteService } from '../immunite.service';
 import { ResistanceService } from '../resistance.service';
 import { StatistiqueService } from '../statistique.service';
-import { SortService } from '../sorts/sort.service';
+import { SortService, ISort } from '../sort.service';
 import { Race } from './models/race';
 import { Resistance } from '../../models/resistance';
 import { Classe } from '../classes/models/classe';
 import { Don } from '../dons/models/don';
 import { Immunite } from '../../models/immunite';
-import { Sort } from '../sorts/models/sort';
 import { Statistique } from '../../models/statistique';
 import { tap, map, mergeMap, flatMap, first } from 'rxjs/operators';
 
@@ -75,12 +74,12 @@ export class RaceService {
         this.getResistances(race, observableBatch);
         this.getStatistiques(race, observableBatch);
         this.getImmunites(race, observableBatch);
-        this.getSortsRaciaux(race, observableBatch);
         this.getDonsRaciaux(race, observableBatch);
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
             let race: Race = this.map(data[0]);
+            this.getSortsRaciaux(race);
             return race;
           })
         )
@@ -169,15 +168,11 @@ export class RaceService {
     }
   }
 
-  private getSortsRaciaux(race: Race, observableBatch: any[]) {
+  private async getSortsRaciaux(race: Race): Promise<void> {
     if (race.sortsRacialRef) {
-      race.sortsRacialRef.forEach(sortRaciauxRef => {
-        observableBatch.push(this.sortService.getSort(sortRaciauxRef).pipe(
-          map((sort: Sort) => {
-            if (!race.sortsRacial) race.sortsRacial = [];
-            race.sortsRacial.push(sort);
-          }), first()
-        ))
+      race.sortsRacialRef.forEach(async (sortRaciauxRef) => {
+        if (!race.sortsRacial) race.sortsRacial = [];
+        race.sortsRacial.push(await this.sortService.getSort(sortRaciauxRef));
       });
     }
   }

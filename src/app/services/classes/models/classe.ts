@@ -1,11 +1,11 @@
-import { Alignement } from "../../../models/alignement";
+import { IAlignement } from "../../../services/alignement.service";
 import { AptitudeItem } from "../../aptitudes/models/aptitude";
 import { DonItem } from "../../dons/models/don";
-import { SortItem } from "../../sorts/models/sort";
 import { Choix } from "../../personnages/models/choix";
 import { StatistiqueItem } from "../../../models/statistique";
 import { ResistanceItem } from "../../../models/resistance";
 import { Immunite } from "../../../models/immunite";
+import { SortItem } from "../../sort.service";
 
 export class Classe {
 
@@ -29,7 +29,7 @@ export class Classe {
     obligations: string;
     avantages: string;
     desavantages: string;
-    alignementPermis: Alignement[];
+    alignementPermis: IAlignement[];
     alignementPermisRef: string[];
     multiclassement: Classe[];
     multiclassementRef: string[];

@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { ToastService } from '../../../../services/@core/toast.service';
-import { DureeService } from '../../../../services/duree.service';
-import { Duree } from '../../../../models/duree';
+import { IDuree, DureeService, IDureeDB } from '../../../../services/duree.service';
 
 @Component({
   selector: 'app-organisateur-durees-form',
@@ -19,43 +18,39 @@ export class OrganisateurDureesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  duree: Duree = new Duree();
+  duree: IDuree = {} as IDuree;
 
   ngOnInit() {
-    this.getDuree();
+    this._getDuree();
   }
 
-  getDuree() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private async _getDuree(): Promise<void> {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.dureeService.getDuree(this.id).subscribe(response => {
-          this.duree = response;
-        });
+        this.duree = await this.dureeService.getDuree(this.id);
       }
     });
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
 
       // Update
-      this.dureeService.updateDuree(this.duree).subscribe(result => {
-        if (result) {
-          this.toast.update(result.nom);
-          this.router.navigate(["/organisateur/durees/list"]);
-        }
-      });
+      const result = await this.dureeService.updateDuree(this.duree);
+      if (result) {
+        this.toast.update(result.nom);
+        this.router.navigate(["/organisateur/durees/list"]);
+      }
 
     } else {
 
       // Add
-      this.dureeService.addDuree(this.duree.saveState()).subscribe(result => {
-        if (result) {
-          this.toast.add(result.nom);
-          this.router.navigate(["/organisateur/durees/list"]);
-        }
-      });
+      const result = await this.dureeService.addDuree(this.duree);
+      if (result) {
+        this.toast.add(result.nom);
+        this.router.navigate(["/organisateur/durees/list"]);
+      }
 
     }
   }

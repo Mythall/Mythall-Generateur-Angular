@@ -3,70 +3,61 @@ import { MatStepper } from '@angular/material/stepper';
 
 import { Personnage } from '../../../../../services/personnages/models/personnage';
 import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Dieu } from '../../../../../models/dieu';
+import { IDieu } from '../../../../../services/dieu.service';
 
 @Component({
-    selector: 'creation-progression-dieus',
-    templateUrl: './dieu.component.html'
+  selector: 'creation-progression-dieus',
+  templateUrl: './dieu.component.html'
 })
 export class JoueurPersonnageCreationProgressionDieuComponent implements OnInit {
 
-    constructor(
-        private personnageService: PersonnageService
-    ) { }
+  constructor(
+    private personnageService: PersonnageService
+  ) { }
 
-    @Input() stepper: MatStepper;
-    @Input() progression: boolean;
-    @Input() personnage: Personnage;
+  @Input() stepper: MatStepper;
+  @Input() progression: boolean;
+  @Input() personnage: Personnage;
 
-    @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
-    @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
+  @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-    selectedDieu: Dieu;
-    availableDieus: Dieu[] = [];
+  selectedDieu: IDieu;
+  availableDieus: IDieu[] = [];
 
-    ngOnInit() {
-        this.getAvailableDieus();
-    }
+  ngOnInit() {
+    this._getAvailableDieux();
+  }
 
-    isCompleted(): boolean {
+  public get isCompleted(): boolean {
+    return this.selectedDieu ? true : false;
+  }
 
-        if (this.selectedDieu) {
-            return true;
-        }
+  private async _getAvailableDieux(): Promise<void> {
+    this.availableDieus = await this.personnageService.getAvailableDieux(this.personnage);
+  }
 
-        return false;
+  setDieu() {
+    this.personnage.dieuRef = this.selectedDieu.id;
+    this.personnage.dieu = this.selectedDieu;
+  }
 
-    }
+  next() {
+    if (this.isCompleted) {
 
-    getAvailableDieus() {
-        this.personnageService.getAvailableDieux(this.personnage).then(response => {
-            this.availableDieus = response;
+      // Rebuild Personnage
+      this.personnageService.buildPromise(this.personnage).then(personnage => {
+
+        // Emit & Allow next step
+        this.personnageChange.emit(personnage);
+        this.completedChange.emit(true);
+        setTimeout(() => {
+          this.stepper.next();
         });
+
+      });
+
     }
-
-
-    setDieu() {
-        this.personnage.dieuRef = this.selectedDieu.id;
-        this.personnage.dieu = this.selectedDieu;
-    }
-
-    next() {
-        if (this.isCompleted()) {
-
-            // Rebuild Personnage
-            this.personnageService.buildPromise(this.personnage).then(personnage => {
-
-                // Emit & Allow next step
-                this.personnageChange.emit(personnage);
-                this.completedChange.emit(true);
-                setTimeout(()=> {
-                    this.stepper.next();
-                });
-                
-            });
-
-        }
-    }
+  }
 
 }

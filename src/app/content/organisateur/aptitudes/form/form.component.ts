@@ -14,8 +14,7 @@ import { Immunite } from '../../../../models/immunite';
 import { Race } from '../../../../services/races/models/race';
 import { Resistance, ResistanceItem } from '../../../../models/resistance';
 import { Statistique, StatistiqueItem } from '../../../../models/statistique';
-import { SortService } from '../../../../services/sorts/sort.service';
-import { Sort } from '../../../../services/sorts/models/sort';
+import { SortService, ISort } from '../../../../services/sort.service';
 import { Choix, ChoixTypes } from '../../../../services/personnages/models/choix';
 
 @Component({
@@ -41,7 +40,7 @@ export class OrganisateurAptitudesFormComponent implements OnInit {
   aptitudes: Aptitude[];
   classes: Classe[];
   dons: Don[];
-  sorts: Sort[];
+  sorts: ISort[];
   races: Race[];
   resistances: Resistance[];
   statistiques: Statistique[];
@@ -82,10 +81,8 @@ export class OrganisateurAptitudesFormComponent implements OnInit {
     })
   }
 
-  getSorts() {
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = response;
-    })
+  private async getSorts(): Promise<void> {
+    this.sorts = await this.sortService.getSorts();
   }
 
   getImmunites() {

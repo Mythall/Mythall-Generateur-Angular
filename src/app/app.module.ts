@@ -29,7 +29,7 @@ import { PorteService } from './services/porte.service';
 import { RaceService } from './services/races/race.service';
 import { ResistanceService } from './services/resistance.service';
 import { StatistiqueService } from './services/statistique.service';
-import { SortService } from './services/sorts/sort.service';
+import { SortService } from './services/sort.service';
 import { UserService } from './services/@core/user.service';
 import { ZoneService } from './services/zone.service';
 

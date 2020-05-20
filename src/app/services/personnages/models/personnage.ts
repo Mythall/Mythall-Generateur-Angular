@@ -7,13 +7,13 @@ import { Statistique, StatistiqueValue } from "../../../models/statistique";
 import { User } from "../../@core/models/user";
 import { AptitudeItem } from "../../aptitudes/models/aptitude";
 import { Esprit } from "../../esprits/models/esprit";
-import { Dieu } from "../../../models/dieu";
-import { Alignement } from "../../../models/alignement";
-import { SortItem } from "../../sorts/models/sort";
+import { IDieu } from "../../../services/dieu.service";
+import { IAlignement } from "../../alignement.service";
 import { Ordre } from "../../ordres/models/ordre";
 import { Domaine } from "../../domaines/models/domaine";
 import { FourberieItem } from "../../fourberies/models/fourberie";
-import { Ecole } from "../../../models/ecole";
+import { IEcole } from "../../ecole.service";
+import { SortItem } from "../../sort.service";
 
 export class Personnage {
 
@@ -38,7 +38,7 @@ export class Personnage {
     user: User;
     userRef: string;
     classes: ClasseItem[];
-    alignement: Alignement;
+    alignement: IAlignement;
     alignementRef: string;
     dons: DonItem[];
     aptitudes: AptitudeItem[];
@@ -58,9 +58,9 @@ export class Personnage {
     immunites: Immunite[];
     esprit: Esprit;
     espritRef: string;
-    ecole: Ecole;
+    ecole: IEcole;
     ecoleRef: string;
-    dieu: Dieu;
+    dieu: IDieu;
     dieuRef: string;
     ordres: Ordre[];
     ordresRef: string[];

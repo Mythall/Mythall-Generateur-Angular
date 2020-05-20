@@ -1,5 +1,5 @@
 import { Classe } from "../../classes/models/classe";
-import { Alignement } from "../../../models/alignement";
+import { IAlignement } from "../../alignement.service";
 
 export class Ordre {
 
@@ -14,7 +14,7 @@ export class Ordre {
     classeRef: string[];
     multiclassement: Classe[];
     multiclassementRef: string[];
-    alignementPermis: Alignement[];
+    alignementPermis: IAlignement[];
     alignementPermisRef: string[];
 
     saveState(): any {

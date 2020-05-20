@@ -3,7 +3,7 @@ import { MatStepper } from '@angular/material/stepper';
 
 import { Personnage } from '../../../../../services/personnages/models/personnage';
 import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Alignement } from '../../../../../models/alignement';
+import { IAlignement } from '../../../../../services/alignement.service';
 
 @Component({
     selector: 'creation-progression-alignements',
@@ -22,8 +22,8 @@ export class JoueurPersonnageCreationProgressionAlignementComponent implements O
     @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
     @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-    selectedAlignement: Alignement;
-    availableAlignements: Alignement[] = [];
+    selectedAlignement: IAlignement;
+    availableAlignements: IAlignement[] = [];
 
     ngOnInit() {
         this.getAvailableAlignements();

@@ -4,8 +4,7 @@ import { OrdreService } from '../../../../services/ordres/ordre.service';
 import { Ordre } from '../../../../services/ordres/models/ordre';
 import { ClasseService } from '../../../../services/classes/classe.service';
 import { Classe } from '../../../../services/classes/models/classe';
-import { Alignement } from '../../../../models/alignement';
-import { AlignementService } from '../../../../services/alignement.service';
+import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 
 @Component({
   selector: 'app-organisateur-ordres-form',
@@ -25,12 +24,12 @@ export class OrganisateurOrdresFormComponent implements OnInit {
   id: string;
   ordre: Ordre = new Ordre();
   classes: Classe[];
-  alignements: Alignement[];
+  alignements: IAlignement[];
 
   ngOnInit() {
     this.getOrdre();
     this.getClasses();
-    this.getAlignements();
+    this._getAlignements();
   }
 
   getOrdre() {
@@ -50,10 +49,8 @@ export class OrganisateurOrdresFormComponent implements OnInit {
     })
   }
 
-  getAlignements() {
-    this.alignementService.getAlignements().subscribe(response => {
-      this.alignements = response;
-    })
+  private async _getAlignements(): Promise<void> {
+    this.alignements =  await this.alignementService.getAlignements();
   }
 
   submit() {

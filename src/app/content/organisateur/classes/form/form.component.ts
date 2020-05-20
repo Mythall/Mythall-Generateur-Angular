@@ -5,15 +5,13 @@ import { ClasseService } from '../../../../services/classes/classe.service';
 import { Classe, ClasseTypes, ClasseSort } from '../../../../services/classes/models/classe';
 import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
 import { Don, DonItem, DonCategories } from '../../../../services/dons/models/don';
-import { Sort, SortItem } from '../../../../services/sorts/models/sort';
-import { Alignement } from '../../../../models/alignement';
-import { AlignementService } from '../../../../services/alignement.service';
+import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 import { ChoixTypes, Choix } from '../../../../services/personnages/models/choix';
 import { Fourberie } from '../../../../services/fourberies/models/fourberie';
 import { FourberieService } from '../../../../services/fourberies/fourberie.service';
 import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
 import { DonService } from '../../../../services/dons/don.service';
-import { SortService } from '../../../../services/sorts/sort.service';
+import { SortService, ISort, SortItem } from '../../../../services/sort.service';
 import { ImmuniteService } from '../../../../services/immunite.service';
 import { ResistanceService } from '../../../../services/resistance.service';
 import { StatistiqueService } from '../../../../services/statistique.service';
@@ -45,10 +43,10 @@ export class OrganisateurClassesFormComponent implements OnInit {
   id: string;
   classe: Classe = new Classe();
   classes: Observable<Classe[]>;
-  alignements: Alignement[];
+  alignements: IAlignement[];
   aptitudes: Aptitude[];
   dons: Don[];
-  sorts: Sort[];
+  sorts: ISort[];
   fourberies: Fourberie[];
   choix: string[] = ChoixTypes;
   categories: string[] = DonCategories;
@@ -62,9 +60,9 @@ export class OrganisateurClassesFormComponent implements OnInit {
     this.getClasse();
     this.getClasses()
     this.getaptitudes();
-    this.getAlignements();
+    this._getAlignements();
     this.getDons();
-    this.getSorts();
+    this._getSorts();
     this.getFourberies();
     this.getResistances();
     this.getStatistiques();
@@ -86,10 +84,8 @@ export class OrganisateurClassesFormComponent implements OnInit {
     this.classes = this.classeService.getClasses();
   }
 
-  getAlignements() {
-    this.alignementService.getAlignements().subscribe(response => {
-      this.alignements = response;
-    })
+  private async _getAlignements(): Promise<void> {
+    this.alignements = await this.alignementService.getAlignements();
   }
 
   getaptitudes() {
@@ -110,10 +106,8 @@ export class OrganisateurClassesFormComponent implements OnInit {
     })
   }
 
-  getSorts() {
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = response;
-    })
+  private async _getSorts(): Promise<void> {
+    this.sorts = await this.sortService.getSorts();
   }
 
   getResistances() {
@@ -122,13 +116,13 @@ export class OrganisateurClassesFormComponent implements OnInit {
     });
   }
 
-  getStatistiques(){
+  getStatistiques() {
     this.statistiqueService.getStatistiques().subscribe(response => {
       this.statistiques = response;
     })
   }
 
-  getImmunites(){
+  getImmunites() {
     this.immuniteService.getImmunites().subscribe(response => {
       this.immunites = response;
     })
@@ -168,21 +162,21 @@ export class OrganisateurClassesFormComponent implements OnInit {
     this.classe.dons.splice(index, 1);
   }
 
-  addSort() {
+  public addSort(): void {
     if (!this.classe.sorts) this.classe.sorts = [];
     this.classe.sorts.push(new SortItem());
   }
 
-  deleteSort(index: number) {
+  public deleteSort(index: number): void {
     this.classe.sorts.splice(index, 1);
   }
 
-  addSortDisponible() {
+  public addSortDisponible(): void {
     if (!this.classe.sortsDisponible) this.classe.sortsDisponible = [];
     this.classe.sortsDisponible.push(new SortItem());
   }
 
-  deleteSortDisponible(index: number) {
+  public deleteSortDisponible(index: number): void {
     this.classe.sortsDisponible.splice(index, 1);
   }
 
@@ -202,21 +196,21 @@ export class OrganisateurClassesFormComponent implements OnInit {
     delete this.classe.choix[index].categorie;
   }
 
-  addResistance(){
-    if(!this.classe.resistances) this.classe.resistances = [];
+  addResistance() {
+    if (!this.classe.resistances) this.classe.resistances = [];
     this.classe.resistances.push(new ResistanceItem());
   }
 
-  deleteResistance(index: number){
+  deleteResistance(index: number) {
     this.classe.resistances.splice(index, 1);
   }
 
-  addStatistique(){
-    if(!this.classe.statistiques) this.classe.statistiques = [];
+  addStatistique() {
+    if (!this.classe.statistiques) this.classe.statistiques = [];
     this.classe.statistiques.push(new StatistiqueItem());
   }
 
-  deleteStatistique(index: number){
+  deleteStatistique(index: number) {
     this.classe.statistiques.splice(index, 1);
   }
 

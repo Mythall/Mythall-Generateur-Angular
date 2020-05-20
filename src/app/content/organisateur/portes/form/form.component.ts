@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { ToastService } from '../../../../services/@core/toast.service';
-import { PorteService } from '../../../../services/porte.service';
-import { Porte } from '../../../../models/porte';
+import { PorteService, IPorte } from '../../../../services/porte.service';
 
 
 @Component({
@@ -20,38 +19,34 @@ export class OrganisateurPortesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  porte: Porte = new Porte();
+  porte: IPorte = {} as IPorte;
 
   ngOnInit() {
-    this.getPorte();
+    this._getPorte();
   }
 
-  getPorte() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getPorte(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.porteService.getPorte(this.id).subscribe(response => {
-          this.porte = response;
-        });
+        this.porte = await this.porteService.getPorte(this.id);
       }
     });
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
-      this.porteService.updatePorte(this.porte).subscribe(result => {
-        if (result) {
-          this.toast.update(result.nom);
-          this.router.navigate(["/organisateur/portes/list"]);
-        }
-      });
+      const result = await this.porteService.updatePorte(this.porte)
+      if (result) {
+        this.toast.update(result.nom);
+        this.router.navigate(["/organisateur/portes/list"]);
+      }
     } else {
-      this.porteService.addPorte(this.porte.saveState()).subscribe(result => {
-        if (result) {
-          this.toast.add(result.nom);
-          this.router.navigate(["/organisateur/portes/list"]);
-        }
-      });
+      const result = await this.porteService.addPorte(this.porte)
+      if (result) {
+        this.toast.add(result.nom);
+        this.router.navigate(["/organisateur/portes/list"]);
+      }
     }
   }
 

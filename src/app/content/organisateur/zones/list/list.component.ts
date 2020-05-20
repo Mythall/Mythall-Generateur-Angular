@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ZoneService } from '../../../../services/zone.service';
-import { Zone } from '../../../../models/zone';
+import { ZoneService, IZone } from '../../../../services/zone.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 import { ToastService } from '../../../../services/@core/toast.service';
@@ -19,21 +17,26 @@ export class OrganisateurZonesListComponent implements OnInit {
     private toast: ToastService
   ) { }
 
-  zones: Observable<Zone[]>;
+  zones: IZone[];
 
   ngOnInit() {
-    this.zones = this.zoneService.getZones$();
+    this._getZones();
   }
 
-  confirmDelete(item: Zone) {
+  private async _getZones(): Promise<void> {
+    this.zones = await this.zoneService.getZones();
+  }
+
+  public confirm(item: IZone): void {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async (result) => {
       if (result) {
-        this.zoneService.deleteZone(result.id).subscribe(res => this.toast.delete(result.nom));
+        await this.zoneService.deleteZone(result.id);
+        this.toast.delete(result.nom);
       }
     });
   }

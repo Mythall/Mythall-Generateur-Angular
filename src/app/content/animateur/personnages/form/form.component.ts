@@ -6,20 +6,17 @@ import { AptitudeService } from '../../../../services/aptitudes/aptitude.service
 import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
 import { PersonnageService } from '../../../../services/personnages/personnage.service';
 import { Personnage } from '../../../../services/personnages/models/personnage';
-import { AlignementService } from '../../../../services/alignement.service';
-import { Alignement } from '../../../../models/alignement';
+import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 import { ClasseService } from '../../../../services/classes/classe.service';
 import { Classe, ClasseItem } from '../../../../services/classes/models/classe';
-import { DieuService } from '../../../../services/dieu.service';
-import { Dieu } from '../../../../models/dieu';
+import { IDieu, DieuService } from '../../../../services/dieu.service';
 import { DonService } from '../../../../services/dons/don.service';
 import { Don, DonItem } from '../../../../services/dons/models/don';
 import { EspritService } from '../../../../services/esprits/esprit-service';
 import { Esprit } from '../../../../services/esprits/models/esprit';
 import { RaceService } from '../../../../services/races/race.service';
 import { Race } from '../../../../services/races/models/race';
-import { SortService } from '../../../../services/sorts/sort.service';
-import { Sort, SortItem } from '../../../../services/sorts/models/sort';
+import { SortService, ISort, SortItem } from '../../../../services/sort.service';
 import { UserService } from '../../../../services/@core/user.service';
 import { User } from '../../../../services/@core/models/user';
 import { Ordre } from '../../../../services/ordres/models/ordre';
@@ -61,31 +58,31 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
   id: string;
   personnage: Personnage = new Personnage();
   classes: Classe[];
-  alignements: Alignement[];
+  alignements: IAlignement[];
   aptitudes: Aptitude[];
-  dieux: Dieu[];
+  dieux: IDieu[];
   domaines: Domaine[];
   dons: Don[];
   fourberies: Fourberie[];
   ordres: Ordre[];
   races: Race[];
-  sorts: Sort[];
+  sorts: ISort[];
   users: User[];
   esprits: Esprit[];
 
   ngOnInit() {
     this.getPersonnage();
     this.getClasses();
-    this.getAlignements();
+    this._getAlignements();
     this.getAptitudes();
     this.getDomaines();
     this.getDons();
-    this.getDieux();
+    this._getDieux();
     this.getEsprits();
     this.getFourberies();
     this.getOrdres();
     this.getRaces();
-    this.getSorts();
+    this._getSorts();
     this.getUsers();
   }
 
@@ -106,10 +103,8 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     });
   }
 
-  getAlignements() {
-    this.alignementService.getAlignements().subscribe(response => {
-      this.alignements = response;
-    })
+  private async _getAlignements(): Promise<void> {
+    this.alignements = await this.alignementService.getAlignements();
   }
 
   getAptitudes() {
@@ -118,10 +113,8 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     });
   }
 
-  getDieux() {
-    this.dieuService.getDieux().subscribe(response => {
-      this.dieux = response;
-    });
+  private async _getDieux(): Promise<void> {
+    this.dieux = await this.dieuService.getDieux();
   }
 
   getDomaines() {
@@ -160,10 +153,8 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     });
   }
 
-  getSorts() {
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = response;
-    })
+  private async _getSorts(): Promise<void> {
+    this.sorts = await this.sortService.getSorts();
   }
 
   getUsers() {
@@ -216,11 +207,11 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     this.personnage.aptitudes.splice(index, 1);
   }
 
-  addSort() {
+  public addSort(): void {
     this.personnage.sorts.push(new SortItem());
   }
 
-  deleteSort(index: number) {
+  public deleteSort(index: number): void {
     this.personnage.sorts.splice(index, 1);
   }
 

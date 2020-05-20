@@ -36,7 +36,7 @@
 
                         <mat-form-field>
                             <mat-select placeholder="École" name="sort.ecoleRef" [(ngModel)]="sort.ecoleRef" required>
-                                <mat-option *ngFor="let e of ecoles | async" [value]="e.id">{{e.nom}}</mat-option>
+                                <mat-option *ngFor="let e of ecoles" [value]="e.id">{{e.nom}}</mat-option>
                             </mat-select>
                         </mat-form-field>
 
@@ -48,7 +48,7 @@
 
                         <mat-form-field>
                             <mat-select placeholder="Durée" name="sort.dureeRef" [(ngModel)]="sort.dureeRef" required>
-                                <mat-option *ngFor="let d of durees | async" [value]="d.id">{{d.nom}}</mat-option>
+                                <mat-option *ngFor="let d of durees" [value]="d.id">{{d.nom}}</mat-option>
                             </mat-select>
                         </mat-form-field>
 

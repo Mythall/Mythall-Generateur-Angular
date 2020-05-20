@@ -1,19 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-
 import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
 import { DonService } from '../../../../services/dons/don.service';
 import { DomaineService } from '../../../../services/domaines/domaine-service';
-import { SortService } from '../../../../services/sorts/sort.service';
-
+import { SortService, ISort, SortItem } from '../../../../services/sort.service';
 import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
 import { Don, DonItem, DonCategories } from '../../../../services/dons/models/don';
 import { Domaine } from '../../../../services/domaines/models/domaine';
-import { Sort, SortItem } from '../../../../services/sorts/models/sort';
 import { ClasseService } from '../../../../services/classes/classe.service';
 import { Classe } from '../../../../services/classes/models/classe';
-import { Alignement } from '../../../../models/alignement';
-import { AlignementService } from '../../../../services/alignement.service';
+import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 import { ChoixTypes, Choix } from '../../../../services/personnages/models/choix';
 import { Fourberie } from '../../../../services/fourberies/models/fourberie';
 import { FourberieService } from '../../../../services/fourberies/fourberie.service';
@@ -41,10 +37,10 @@ export class OrganisateurDomainesFormComponent implements OnInit {
   domaine: Domaine = new Domaine();
   domaines: Domaine[];
   classes: Classe[];
-  alignements: Alignement[];
+  alignements: IAlignement[];
   aptitudes: Aptitude[];
   dons: Don[];
-  sorts: Sort[];
+  sorts: ISort[];
   fourberies: Fourberie[];
   choix: string[] = ChoixTypes;
   categories: string[] = DonCategories;
@@ -54,9 +50,9 @@ export class OrganisateurDomainesFormComponent implements OnInit {
     this.getDomaines();
     this.getaptitudes();
     this.getClasses();
-    this.getAlignements();
+    this._getAlignements();
     this.getDons();
-    this.getSorts();
+    this._getSorts();
     this.getFourberies();
   }
 
@@ -83,10 +79,8 @@ export class OrganisateurDomainesFormComponent implements OnInit {
     })
   }
 
-  getAlignements() {
-    this.alignementService.getAlignements().subscribe(response => {
-      this.alignements = response;
-    })
+  private async _getAlignements(): Promise<void> {
+    this.alignements =  await this.alignementService.getAlignements();
   }
 
   getaptitudes() {
@@ -107,10 +101,8 @@ export class OrganisateurDomainesFormComponent implements OnInit {
     })
   }
 
-  getSorts() {
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = response;
-    })
+  private async _getSorts(): Promise<void> {
+    this.sorts = await this.sortService.getSorts();
   }
 
   submit() {
@@ -147,12 +139,12 @@ export class OrganisateurDomainesFormComponent implements OnInit {
     this.domaine.dons.splice(index, 1);
   }
 
-  addSort() {
+  public addSort(): void {
     if (!this.domaine.sorts) this.domaine.sorts = [];
     this.domaine.sorts.push(new SortItem());
   }
 
-  deleteSort(index: number) {
+  public deleteSort(index: number): void {
     this.domaine.sorts.splice(index, 1);
   }
 

@@ -4,12 +4,11 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
 import { DonService } from '../../../../services/dons/don.service';
 import { EspritService } from '../../../../services/esprits/esprit-service';
-import { SortService } from '../../../../services/sorts/sort.service';
+import { SortService, ISort, SortItem } from '../../../../services/sort.service';
 
 import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
 import { Don, DonItem } from '../../../../services/dons/models/don';
 import { Esprit } from '../../../../services/esprits/models/esprit';
-import { Sort, SortItem } from '../../../../services/sorts/models/sort';
 
 @Component({
   selector: 'app-organisateur-esprits-form',
@@ -25,13 +24,13 @@ export class OrganisateurEspritsFormComponent implements OnInit {
     private espritService: EspritService,
     private sortService: SortService,
     private router: Router
-  ){}
+  ) { }
 
   id: string;
   esprit: Esprit = new Esprit();
   aptitudes: Aptitude[];
   dons: Don[];
-  sorts: Sort[];
+  sorts: ISort[];
 
   ngOnInit() {
     this.getEsprit();
@@ -42,7 +41,7 @@ export class OrganisateurEspritsFormComponent implements OnInit {
 
   getEsprit() {
     this.activatedRoute.params.subscribe((params: Params) => {
-      if(params['id']){
+      if (params['id']) {
         this.id = params['id'];
         this.espritService.getEsprit(this.id).subscribe(response => {
           this.esprit = response;
@@ -63,52 +62,50 @@ export class OrganisateurEspritsFormComponent implements OnInit {
     })
   }
 
-  getSorts(){
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = response;
-    })
+  private async getSorts(): Promise<void> {
+    this.sorts = await this.sortService.getSorts();
   }
 
   submit() {
-    if(this.id){
+    if (this.id) {
       this.espritService.updateEsprit(this.id, this.esprit.saveState()).then(result => {
-        if(result){
+        if (result) {
           this.router.navigate(["/organisateur/esprits/list"]);
         }
       });
     } else {
       this.espritService.addEsprit(this.esprit.saveState()).then(result => {
-        if(result){
+        if (result) {
           this.router.navigate(["/organisateur/esprits/list"]);
         }
       });
-    }    
+    }
   }
 
-  addAptitude(){
-    if(!this.esprit.aptitudes) this.esprit.aptitudes = [];
+  addAptitude() {
+    if (!this.esprit.aptitudes) this.esprit.aptitudes = [];
     this.esprit.aptitudes.push(new AptitudeItem());
   }
 
-  deleteAptitude(index: number){
+  deleteAptitude(index: number) {
     this.esprit.aptitudes.splice(index, 1);
   }
 
-  addDon(){
-    if(!this.esprit.dons) this.esprit.dons = [];
+  addDon() {
+    if (!this.esprit.dons) this.esprit.dons = [];
     this.esprit.dons.push(new DonItem());
   }
 
-  deleteDon(index: number){
+  deleteDon(index: number) {
     this.esprit.dons.splice(index, 1);
   }
 
-  addSort(){
-    if(!this.esprit.sorts) this.esprit.sorts = [];
+  addSort() {
+    if (!this.esprit.sorts) this.esprit.sorts = [];
     this.esprit.sorts.push(new SortItem());
   }
 
-  deleteSort(index: number){
+  deleteSort(index: number) {
     this.esprit.sorts.splice(index, 1);
   }
 
