@@ -2,14 +2,11 @@ import { Injectable } from '@angular/core';
 import { FirestoreService } from '../firestore/firestore.service';
 import 'firebase/firestore';
 import { ImmuniteService } from '../immunite.service';
-import { ResistanceService } from '../resistance.service';
-import { StatistiqueService } from '../statistique.service';
+import { ResistanceService, ResistanceItem } from '../resistance.service';
+import { StatistiqueService, StatistiqueItem } from '../statistique.service';
 import { Aptitude } from './models/aptitude';
-import { Immunite } from '../../models/immunite';
-import { Resistance } from '../../models/resistance';
-import { Statistique } from '../../models/statistique';
 import { Observable, of, forkJoin } from 'rxjs';
-import { tap, flatMap, map, first } from 'rxjs/operators';
+import { tap, flatMap, map } from 'rxjs/operators';
 
 @Injectable()
 export class AptitudeService {
@@ -38,9 +35,9 @@ export class AptitudeService {
         let observableBatch: Observable<Aptitude>[] = [];
         observableBatch.push(of(aptitude));
 
-        this.getImmunites(aptitude, observableBatch);
-        this.getResistances(aptitude, observableBatch);
-        this.getStatistiques(aptitude, observableBatch);
+        this._getImmunites(aptitude);
+        this._getResistances(aptitude);
+        this._getStatistiques(aptitude);
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
@@ -77,45 +74,31 @@ export class AptitudeService {
 
   //#region Private Methods
 
-  private getImmunites(aptitude: Aptitude, observableBatch: any[]) {
+  private _getImmunites(aptitude: Aptitude) {
     if (aptitude.immunitesRef) {
-      aptitude.immunitesRef.forEach(immuniteRef => {
-        observableBatch.push(this.immuniteService.getImmunite(immuniteRef).pipe(
-          map((immunite: Immunite) => {
-            if (!aptitude.immunites) aptitude.immunites = [];
-            aptitude.immunites.push(immunite);
-          }),
-          first()
-        ))
+      aptitude.immunitesRef.forEach(async (immuniteRef) => {
+        if (!aptitude.immunites) aptitude.immunites = [];
+        aptitude.immunites.push(await this.immuniteService.getImmunite(immuniteRef));
       });
     }
   }
 
-  private getResistances(aptitude: Aptitude, observableBatch: any[]) {
+  private _getResistances(aptitude: Aptitude): void {
     if (aptitude.resistances && aptitude.resistances.length > 0) {
-      aptitude.resistances.forEach(resistanceItem => {
-        observableBatch.push(this.resistanceService.getResistance(resistanceItem.resistanceRef).pipe(
-          map((resistance: Resistance) => {
-            resistanceItem.resistance = resistance;
-          }),
-          first()
-        ))
+      aptitude.resistances.forEach(async (resistanceItem: ResistanceItem) => {
+        resistanceItem.resistance = await this.resistanceService.getResistance(resistanceItem.resistanceRef);
       });
     }
-  }
+  }  
 
-  private getStatistiques(aptitude: Aptitude, observableBatch: any[]) {
+  
+  private _getStatistiques(aptitude: Aptitude) {
     if (aptitude.statistiques && aptitude.statistiques.length > 0) {
-      aptitude.statistiques.forEach(statistiqueItem => {
-        observableBatch.push(this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef).pipe(
-          map((statistique: Statistique) => {
-            statistiqueItem.statistique = statistique;
-          }),
-          first()
-        ))
+      aptitude.statistiques.forEach(async (statistiqueItem: StatistiqueItem) => {
+        statistiqueItem.statistique = await this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef);
       });
     }
-  }
+  }  
 
   //#endregion
 

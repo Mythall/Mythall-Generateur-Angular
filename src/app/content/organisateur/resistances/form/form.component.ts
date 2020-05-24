@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { ResistanceService } from '../../../../services/resistance.service';
-import { Resistance } from '../../../../models/resistance';
+import { ResistanceService, IResistance } from '../../../../services/resistance.service';
 import { ToastService } from '../../../../services/@core/toast.service';
 
 @Component({
@@ -19,43 +18,39 @@ export class OrganisateurResistancesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  resistance: Resistance = new Resistance();
+  resistance = {} as IResistance;
 
   ngOnInit() {
-    this.getResistance();
+    this._getResistance();
   }
 
-  getResistance() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getResistance(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.resistanceService.getResistance(this.id).subscribe(response => {
-          this.resistance = response;
-        });
+        this.resistance = await this.resistanceService.getResistance(this.id);
       }
     });
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
 
       // Update
-      this.resistanceService.updateResistance(this.resistance).subscribe(result => {
-        if (result) {
-          this.toast.update(result.nom);
-          this.router.navigate(["/organisateur/resistances/list"]);
-        }
-      });
+      const result = await this.resistanceService.updateResistance(this.resistance);
+      if (result) {
+        this.toast.update(result.nom);
+        this.router.navigate(["/organisateur/resistances/list"]);
+      }
 
     } else {
 
       // Add
-      this.resistanceService.addResistance(this.resistance).subscribe(result => {
-        if (result) {
-          this.toast.add(result.nom);
-          this.router.navigate(["/organisateur/resistances/list"]);
-        }
-      });
+      const result = await this.resistanceService.addResistance(this.resistance);
+      if (result) {
+        this.toast.add(result.nom);
+        this.router.navigate(["/organisateur/resistances/list"]);
+      }
     }
   }
 

@@ -1,8 +1,8 @@
-import { StatistiqueItem } from "../../../models/statistique";
-import { ResistanceItem } from "../../../models/resistance";
-import { Immunite } from "../../../models/immunite";
 import { Don } from "../../dons/models/don";
 import { Choix } from "../../personnages/models/choix";
+import { IImmunite } from "../../immunite.service";
+import { ResistanceItem } from "../../resistance.service";
+import { StatistiqueItem } from "../../statistique.service";
 
 export class Aptitude {
 
@@ -19,7 +19,7 @@ export class Aptitude {
     donsEquivalentRef: string[];
     sortsEquivalent: Don[];
     sortsEquivalentRef: string[];
-    immunites: Immunite[];
+    immunites: IImmunite[];
     immunitesRef: string[];
     resistances: ResistanceItem[];
     statistiques: StatistiqueItem[];

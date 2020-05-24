@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { StatistiqueService } from '../../../../services/statistique.service';
-import { Statistique } from '../../../../models/statistique';
+import { StatistiqueService, IStatistique } from '../../../../services/statistique.service';
 import { ToastService } from '../../../../services/@core/toast.service';
 
 @Component({
@@ -19,43 +18,39 @@ export class OrganisateurStatistiquesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  statistique: Statistique = new Statistique();
+  statistique = {} as IStatistique;
 
   ngOnInit() {
-    this.getStatistique();
+    this._getStatistique();
   }
 
-  getStatistique() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getStatistique(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.statistiqueService.getStatistique(this.id).subscribe(response => {
-          this.statistique = response;
-        });
+        this.statistique = await this.statistiqueService.getStatistique(this.id);
       }
     });
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
 
       // Update
-      this.statistiqueService.updateStatistique(this.statistique).subscribe(result => {
-        if (result) {
-          this.toast.update(result.nom);
-          this.router.navigate(["/organisateur/statistiques/list"]);
-        }
-      });
+      const result = await this.statistiqueService.updateStatistique(this.statistique);
+      if (result) {
+        this.toast.update(result.nom);
+        this.router.navigate(["/organisateur/statistiques/list"]);
+      }
 
     } else {
 
       // Add
-      this.statistiqueService.addStatistique(this.statistique).subscribe(result => {
-        if (result) {
-          this.toast.add(result.nom);
-          this.router.navigate(["/organisateur/statistiques/list"]);
-        }
-      });
+      const result = await this.statistiqueService.addStatistique(this.statistique);
+      if (result) {
+        this.toast.add(result.nom);
+        this.router.navigate(["/organisateur/statistiques/list"]);
+      }
 
     }
   }

@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { ToastService } from '../../../../services/@core/toast.service';
-import { ImmuniteService } from '../../../../services/immunite.service';
-import { Immunite } from '../../../../models/immunite';
+import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
 
 @Component({
   selector: 'app-organisateur-immunites-form',
@@ -19,44 +18,40 @@ export class OrganisateurImmunitesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  immunite: Immunite = new Immunite();
+  immunite = {} as IImmunite;
 
   ngOnInit() {
     this.getImmunite();
   }
 
-  getImmunite() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private getImmunite(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.immuniteService.getImmunite(this.id).subscribe(response => {
-          this.immunite = response;
-        });
+        this.immunite = await this.immuniteService.getImmunite(this.id);
       }
     });
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
 
       // Update
-      this.immuniteService.updateImmunite(this.immunite).subscribe(result => {
-        if (result) {
-          this.toast.update(result.nom);
-          this.router.navigate(["/organisateur/immunites/list"]);
-        }
-      });
+      const result = await this.immuniteService.updateImmunite(this.immunite);
+      if (result) {
+        this.toast.update(result.nom);
+        this.router.navigate(["/organisateur/immunites/list"]);
+      }
 
     } else {
 
       // Add
-      this.immuniteService.addImmunite(this.immunite).subscribe(result => {
-        if (result) {
-          this.toast.add(result.nom);
-          this.router.navigate(["/organisateur/immunites/list"]);
-        }
-      });
-      
+      const result = await this.immuniteService.addImmunite(this.immunite);
+      if (result) {
+        this.toast.add(result.nom);
+        this.router.navigate(["/organisateur/immunites/list"]);
+      }
+
     }
   }
 

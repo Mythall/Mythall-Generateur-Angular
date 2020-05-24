@@ -1,51 +1,101 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { environment } from '../../environments/environment';
-import { Statistique } from '../models/statistique';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+
+export interface IStatistique extends IStatistiqueDB {
+  id: string;
+}
+
+export interface IStatistiqueDB {
+  nom: string;
+}
+
+export class StatistiqueItem {
+
+  constructor() {
+    this.statistique = null;
+    this.statistiqueRef = '';
+    this.niveau = 1;
+    this.valeur = 0;
+    this.cummulable = false;
+  }
+
+  statistique: IStatistique;
+  statistiqueRef: string;
+  niveau: number;
+  valeur: number;
+  cummulable: boolean;
+}
+
+
+export class StatistiqueValue {
+
+  constructor() {
+    this.statistique = null;
+    this.valeur = 0;
+  }
+
+  statistique: IStatistique;
+  valeur: number;
+}
+
+export enum StatistiqueIds {
+  Constitution = 'OdzM6YHkYw41HXMIcTsw',
+  Dextérité = 'oFeJq3NgdDDEwi0Y1rdR',
+  Force = 'gOg0TFSbU8mvlv8baCXE',
+  Intelligence = 'yKfNuFBQY5UknrTNOxpA',
+  Sagesse = 'HkaChqWpHOlINdla02ja',
+  PVTorse = 'sCcNIQDoWKUIIcSpkB2m',
+  PVBras = 'ZSnV9s6cyzYihdFR6wfr',
+  PVJambes = '69jKTq64XUCk51EmY0Z1',
+  Lutte = 'Rp8BG8OtlNKl8aeuojdi',
+  Mana = '3f75skgSz3CWqdERXcqG',
+  Ki = 'py44fmGyDCUnkkBZmto9'
+}
 
 @Injectable()
 export class StatistiqueService {
 
   constructor(
-    private http: HttpClient,
     private afs: AngularFirestore
   ) { }
 
-  private url = environment.api + 'statistiques/';
-
-  getStatistiques$(): Observable<Statistique[]> {
-    return this.afs.collection<Statistique>('statistiques', ref => ref.orderBy("nom")).snapshotChanges().pipe(
-      map(actions => {
-        return actions.map(a => {
-          const data = a.payload.doc.data() as Statistique;
-          data.id = a.payload.doc.id;
-          return data;
-        });
-      })
-    );
+  public async getStatistiques(): Promise<IStatistique[]> {
+    return (await this.afs.collection<IStatistique>('statistiques').ref.orderBy('nom').get()).docs
+      .map((doc) => {
+        return {
+          id: doc.id,
+          ...doc.data()
+        } as IStatistique;
+      });
   }
 
-  getStatistiques(): Observable<Statistique[]> {
-    return this.getStatistiques$();
+  public async getStatistique(id: string): Promise<IStatistique> {
+    const data = await this.afs.doc<IStatistique>(`statistiques/${id}`).ref.get();
+    return {
+      id: data.id,
+      ...data.data()
+    } as IStatistique;
   }
 
-  getStatistique(id: string): Observable<Statistique> {
-    return this.afs.doc<Statistique>(`statistiques/${id}`).valueChanges();
+  public async addStatistique(statistique: IStatistique): Promise<IStatistique> {
+    const data = await this.afs.collection(`statistiques`).add(this._saveState(statistique));
+    return { id: data.id, ...statistique } as IStatistique;
   }
 
-  addStatistique(statistique: Statistique): Observable<Statistique> {
-    return this.http.post(this.url, statistique.saveState()).pipe(map((res: Statistique) => res));
+  public async updateStatistique(statistique: IStatistique): Promise<IStatistique> {
+    await this.afs.doc<IStatistique>(`statistiques/${statistique.id}`).update(this._saveState(statistique));
+    return statistique;
   }
 
-  updateStatistique(statistique: Statistique): Observable<Statistique> {
-    return this.http.put(this.url, { id: statistique.id, data: statistique.saveState() }).pipe(map((res: Statistique) => res));
+  public async deleteStatistique(id: string): Promise<boolean> {
+    await this.afs.doc<IStatistique>(`statistiques/${id}`).delete();
+    return true;
   }
 
-  deleteStatistique(id: string): Observable<boolean> {
-    return this.http.delete(this.url, { params: new HttpParams().set('id', id) }).pipe(map((res: boolean) => res));
+  private _saveState(item: IStatistique): IStatistiqueDB {
+    return {
+      nom: item.nom,
+    };
   }
 
 }

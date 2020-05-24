@@ -2,15 +2,12 @@ import { Injectable } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
 import { FirestoreService } from '../firestore/firestore.service';
 import { ImmuniteService } from '../immunite.service';
-import { ResistanceService } from '../resistance.service';
-import { StatistiqueService } from '../statistique.service';
-import { SortService, ISort } from '../sort.service';
+import { ResistanceService, ResistanceItem } from '../resistance.service';
+import { StatistiqueService, StatistiqueItem } from '../statistique.service';
+import { SortService } from '../sort.service';
 import { Race } from './models/race';
-import { Resistance } from '../../models/resistance';
 import { Classe } from '../classes/models/classe';
 import { Don } from '../dons/models/don';
-import { Immunite } from '../../models/immunite';
-import { Statistique } from '../../models/statistique';
 import { tap, map, mergeMap, flatMap, first } from 'rxjs/operators';
 
 @Injectable()
@@ -71,15 +68,15 @@ export class RaceService {
         observableBatch.push(of(race));
 
         this.getClasses(race, observableBatch);
-        this.getResistances(race, observableBatch);
-        this.getStatistiques(race, observableBatch);
-        this.getImmunites(race, observableBatch);
+        this._getResistances(race);
+        this._getStatistiques(race);
+        this._getImmunites(race);
         this.getDonsRaciaux(race, observableBatch);
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
             let race: Race = this.map(data[0]);
-            this.getSortsRaciaux(race);
+            this._getSortsRaciaux(race);
             return race;
           })
         )
@@ -128,47 +125,32 @@ export class RaceService {
     }
   }
 
-  private getResistances(race: Race, observableBatch: any[]) {
+  private _getResistances(race: Race) {
     if (race.resistances && race.resistances.length > 0) {
-      race.resistances.forEach(resistanceItem => {
-        observableBatch.push(this.resistanceService.getResistance(resistanceItem.resistanceRef).pipe(
-          map((resistance: Resistance) => {
-            resistanceItem.resistance = resistance;
-          }),
-          first()
-        ))
+      race.resistances.forEach(async (resistanceItem: ResistanceItem) => {
+        resistanceItem.resistance = await this.resistanceService.getResistance(resistanceItem.resistanceRef);
       });
     }
   }
 
-  private getStatistiques(race: Race, observableBatch: any[]) {
+  private _getStatistiques(race: Race) {
     if (race.statistiques && race.statistiques.length > 0) {
-      race.statistiques.forEach(statistiqueItem => {
-        observableBatch.push(this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef).pipe(
-          map((statistique: Statistique) => {
-            statistiqueItem.statistique = statistique;
-          }),
-          first()
-        ))
+      race.statistiques.forEach(async (statistiqueItem: StatistiqueItem) => {
+        statistiqueItem.statistique = await this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef);
       });
     }
   }
 
-  private getImmunites(race: Race, observableBatch: any[]) {
+  private _getImmunites(race: Race) {
     if (race.immunitesRef) {
-      race.immunitesRef.forEach(immuniteRef => {
-        observableBatch.push(this.immuniteService.getImmunite(immuniteRef).pipe(
-          map((immunite: Immunite) => {
-            if (!race.immunites) race.immunites = [];
-            race.immunites.push(immunite);
-          }),
-          first()
-        ))
+      race.immunitesRef.forEach(async (immuniteRef) => {
+        if (!race.immunites) race.immunites = [];
+        race.immunites.push(await this.immuniteService.getImmunite(immuniteRef));
       });
     }
   }
 
-  private async getSortsRaciaux(race: Race): Promise<void> {
+  private async _getSortsRaciaux(race: Race): Promise<void> {
     if (race.sortsRacialRef) {
       race.sortsRacialRef.forEach(async (sortRaciauxRef) => {
         if (!race.sortsRacial) race.sortsRacial = [];

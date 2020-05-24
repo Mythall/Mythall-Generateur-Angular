@@ -1,19 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { ClasseService } from '../../../../services/classes/classe.service';
 import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
 import { DonService } from '../../../../services/dons/don.service';
-import { ImmuniteService } from '../../../../services/immunite.service';
-import { RaceService } from '../../../../services/races/race.service';
-import { ResistanceService } from '../../../../services/resistance.service';
-import { StatistiqueService } from '../../../../services/statistique.service';
+import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
+import { ResistanceService, IResistance, ResistanceItem } from '../../../../services/resistance.service';
+import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
 import { Aptitude } from '../../../../services/aptitudes/models/aptitude';
 import { Classe } from '../../../../services/classes/models/classe';
 import { Don, DonCategories } from '../../../../services/dons/models/don';
-import { Immunite } from '../../../../models/immunite';
 import { Race } from '../../../../services/races/models/race';
-import { Resistance, ResistanceItem } from '../../../../models/resistance';
-import { Statistique, StatistiqueItem } from '../../../../models/statistique';
 import { SortService, ISort } from '../../../../services/sort.service';
 import { Choix, ChoixTypes } from '../../../../services/personnages/models/choix';
 
@@ -42,9 +37,9 @@ export class OrganisateurAptitudesFormComponent implements OnInit {
   dons: Don[];
   sorts: ISort[];
   races: Race[];
-  resistances: Resistance[];
-  statistiques: Statistique[];
-  immunites: Immunite[];
+  resistances: IResistance[];
+  statistiques: IStatistique[];
+  immunites: IImmunite[];
   choix: string[] = ChoixTypes;
   categories: string[] = DonCategories;
 
@@ -53,9 +48,9 @@ export class OrganisateurAptitudesFormComponent implements OnInit {
     this.getAptitudes();
     this.getDons();
     this.getSorts();
-    this.getImmunites();
-    this.getResistances();
-    this.getStatistiques();
+    this._getImmunites();
+    this._getResistances();
+    this._getStatistiques();
   }
 
   getAptitude() {
@@ -85,37 +80,29 @@ export class OrganisateurAptitudesFormComponent implements OnInit {
     this.sorts = await this.sortService.getSorts();
   }
 
-  getImmunites() {
-    this.immuniteService.getImmunites().subscribe(response => {
-      this.immunites = response;
-    })
+  private async _getImmunites(): Promise<void> {
+    this.immunites = await this.immuniteService.getImmunites();
   }
 
-  getResistances() {
-    this.resistanceService.getResistances().subscribe(response => {
-      this.resistances = response;
-    });
+  private async _getResistances(): Promise<void> {
+    this.resistances = await this.resistanceService.getResistances();
   }
 
-  getStatistiques() {
-    this.statistiqueService.getStatistiques().subscribe(response => {
-      this.statistiques = response;
-    })
+  private async _getStatistiques(): Promise<void> {
+    this.statistiques = await this.statistiqueService.getStatistiques();
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
-      this.aptitudeService.updateAptitude(this.id, this.aptitude.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/aptitudes/list"]);
-        }
-      });
+      const result = await this.aptitudeService.updateAptitude(this.id, this.aptitude.saveState());
+      if (result) {
+        this.router.navigate(["/organisateur/aptitudes/list"]);
+      }
     } else {
-      this.aptitudeService.addAptitude(this.aptitude.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/aptitudes/list"]);
-        }
-      });
+      const result = await this.aptitudeService.addAptitude(this.aptitude.saveState());
+      if (result) {
+        this.router.navigate(["/organisateur/aptitudes/list"]);
+      }
     }
   }
 

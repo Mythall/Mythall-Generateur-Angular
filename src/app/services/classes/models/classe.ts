@@ -2,10 +2,10 @@ import { IAlignement } from "../../../services/alignement.service";
 import { AptitudeItem } from "../../aptitudes/models/aptitude";
 import { DonItem } from "../../dons/models/don";
 import { Choix } from "../../personnages/models/choix";
-import { StatistiqueItem } from "../../../models/statistique";
-import { ResistanceItem } from "../../../models/resistance";
-import { Immunite } from "../../../models/immunite";
 import { SortItem } from "../../sort.service";
+import { IImmunite } from "../../immunite.service";
+import { ResistanceItem } from "../../resistance.service";
+import { StatistiqueItem } from "../../statistique.service";
 
 export class Classe {
 
@@ -40,7 +40,7 @@ export class Classe {
     choix: Choix[];
     statistiques: StatistiqueItem[];
     resistances: ResistanceItem[];
-    immunites: Immunite[];
+    immunites: IImmunite[];
     immunitesRef: string[];
     type: string;
     sort: string;

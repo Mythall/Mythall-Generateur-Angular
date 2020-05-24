@@ -2,9 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 import { ToastService } from '../../../../services/@core/toast.service';
-import { ResistanceService } from '../../../../services/resistance.service';
-import { Resistance } from '../../../../models/resistance';
-import { Observable } from 'rxjs';
+import { ResistanceService, IResistance } from '../../../../services/resistance.service';
 
 @Component({
   selector: 'app-organisateur-resistances-list',
@@ -19,21 +17,26 @@ export class OrganisateurResistancesListComponent implements OnInit {
     private toast: ToastService
   ) { }
 
-  resistances: Observable<Resistance[]>;
+  resistances: IResistance[];
 
   ngOnInit() {
-    this.resistances = this.resistanceService.getResistances$();
+    this._getResistances();
   }
 
-  confirmDelete(item: Resistance) {
+  private async _getResistances(): Promise<void> {
+    this.resistances = await this.resistanceService.getResistances();
+  }
+
+  public confirmDelete(item: IResistance) {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async (result) => {
       if (result) {
-        this.resistanceService.deleteResistance(result.id).subscribe(res => this.toast.delete(result.nom));
+        await this.resistanceService.deleteResistance(result.id);
+        this.toast.delete(result.nom);
       }
     });
   }

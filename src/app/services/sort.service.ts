@@ -48,7 +48,7 @@ export class SortService {
   ) { }
 
   public async getSorts(): Promise<ISort[]> {
-    return (await this.afs.collection<IEcole>('ecoles').ref.orderBy('nom').get()).docs
+    return (await this.afs.collection<IEcole>('sorts').ref.orderBy('nom').get()).docs
       .map((doc) => {
         return {
           id: doc.id,

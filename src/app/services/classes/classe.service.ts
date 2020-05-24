@@ -8,11 +8,8 @@ import { Don } from '../dons/models/don';
 import { AptitudeService } from '../aptitudes/aptitude.service';
 import { SortService } from '../sort.service';
 import { ImmuniteService } from '../immunite.service';
-import { ResistanceService } from '../resistance.service';
-import { StatistiqueService } from '../statistique.service';
-import { Resistance } from '../../models/resistance';
-import { Statistique } from '../../models/statistique';
-import { Immunite } from '../../models/immunite';
+import { ResistanceService, ResistanceItem } from '../resistance.service';
+import { StatistiqueService, StatistiqueItem } from '../statistique.service';
 
 @Injectable()
 export class ClasseService {
@@ -47,9 +44,9 @@ export class ClasseService {
         this.getAptitudees(classe, observableBatch);
         this.getSorts(classe);
         this.getDons(classe, observableBatch);
-        this.getResistances(classe, observableBatch);
-        this.getStatistiques(classe, observableBatch);
-        this.getImmunites(classe, observableBatch);
+        this._getResistances(classe);
+        this._getStatistiques(classe);
+        this._getImmunites(classe);
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
@@ -162,41 +159,27 @@ export class ClasseService {
     }
   }
 
-  private getResistances(classe: Classe, observableBatch: any[]) {
+  private _getResistances(classe: Classe): void {
     if (classe.resistances && classe.resistances.length > 0) {
-      classe.resistances.forEach(resistanceItem => {
-        observableBatch.push(this.resistanceService.getResistance(resistanceItem.resistanceRef).pipe(
-          map((resistance: Resistance) => {
-            resistanceItem.resistance = resistance;
-          }),
-          first()
-        ))
+      classe.resistances.forEach(async (resistanceItem: ResistanceItem) => {
+        resistanceItem.resistance = await this.resistanceService.getResistance(resistanceItem.resistanceRef);
       });
     }
   }
 
-  private getStatistiques(classe: Classe, observableBatch: any[]) {
+  private _getStatistiques(classe: Classe) {
     if (classe.statistiques && classe.statistiques.length > 0) {
-      classe.statistiques.forEach(statistiqueItem => {
-        observableBatch.push(this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef).pipe(
-          map((statistique: Statistique) => {
-            statistiqueItem.statistique = statistique;
-          }), first()
-        ))
+      classe.statistiques.forEach(async (statistiqueItem: StatistiqueItem) => {
+        statistiqueItem.statistique = await this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef);
       });
     }
   }
 
-  private getImmunites(classe: Classe, observableBatch: any[]) {
+  private _getImmunites(classe: Classe) {
     if (classe.immunitesRef) {
-      classe.immunitesRef.forEach(immuniteRef => {
-        observableBatch.push(this.immuniteService.getImmunite(immuniteRef).pipe(
-          map((immunite: Immunite) => {
-            if (!classe.immunites) classe.immunites = [];
-            classe.immunites.push(immunite);
-          }),
-          first()
-        ))
+      classe.immunitesRef.forEach(async (immuniteRef) => {
+        if (!classe.immunites) classe.immunites = [];
+        classe.immunites.push(await this.immuniteService.getImmunite(immuniteRef));
       });
     }
   }

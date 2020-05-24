@@ -4,7 +4,6 @@ import { map, flatMap, first } from 'rxjs/operators';
 import { FirestoreService } from '../firestore/firestore.service';
 import { StatistiqueService } from '../statistique.service';
 import { Fourberie } from './models/fourberie';
-import { Statistique } from '../../models/statistique';
 
 @Injectable()
 export class FourberieService {
@@ -26,7 +25,7 @@ export class FourberieService {
         observableBatch.push(of(fourberie));
 
         this.getFourberiesRequis(fourberie, observableBatch);
-        this.getModificateur(fourberie, observableBatch);
+        this._getModificateur(fourberie);
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
@@ -46,7 +45,7 @@ export class FourberieService {
         let observableBatch: Observable<any>[] = [];
         observableBatch.push(of(fourberie));
 
-        this.getModificateur(fourberie, observableBatch);
+        this._getModificateur(fourberie);
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
@@ -98,14 +97,9 @@ export class FourberieService {
     }
   }
 
-  private getModificateur(fourberie: Fourberie, observableBatch: any[]) {
+  private async _getModificateur(fourberie: Fourberie): Promise<void> {
     if (fourberie.modificateurRef) {
-      observableBatch.push(this.statistiqueService.getStatistique(fourberie.modificateurRef).pipe(
-        map((statistique: Statistique) => {
-          fourberie.modificateur = statistique;
-        }),
-        first()
-      ))
+      fourberie.modificateur = await this.statistiqueService.getStatistique(fourberie.modificateurRef);
     }
   }
   //#endregion

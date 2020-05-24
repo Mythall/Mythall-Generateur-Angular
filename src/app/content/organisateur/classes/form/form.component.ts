@@ -12,12 +12,9 @@ import { FourberieService } from '../../../../services/fourberies/fourberie.serv
 import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
 import { DonService } from '../../../../services/dons/don.service';
 import { SortService, ISort, SortItem } from '../../../../services/sort.service';
-import { ImmuniteService } from '../../../../services/immunite.service';
-import { ResistanceService } from '../../../../services/resistance.service';
-import { StatistiqueService } from '../../../../services/statistique.service';
-import { Resistance, ResistanceItem } from '../../../../models/resistance';
-import { Statistique, StatistiqueItem } from '../../../../models/statistique';
-import { Immunite } from '../../../../models/immunite';
+import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
+import { ResistanceService, IResistance, ResistanceItem } from '../../../../services/resistance.service';
+import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
 
 @Component({
   selector: 'app-organisateur-classes-form',
@@ -50,9 +47,9 @@ export class OrganisateurClassesFormComponent implements OnInit {
   fourberies: Fourberie[];
   choix: string[] = ChoixTypes;
   categories: string[] = DonCategories;
-  resistances: Resistance[];
-  statistiques: Statistique[];
-  immunites: Immunite[];
+  resistances: IResistance[];
+  statistiques: IStatistique[];
+  immunites: IImmunite[];
   classeTypes: string[] = ClasseTypes;
   classeSorts: string[] = ClasseSort;
 
@@ -64,9 +61,9 @@ export class OrganisateurClassesFormComponent implements OnInit {
     this.getDons();
     this._getSorts();
     this.getFourberies();
-    this.getResistances();
-    this.getStatistiques();
-    this.getImmunites();
+    this._getResistances();
+    this._getStatistiques();
+    this._getImmunites();
   }
 
   getClasse() {
@@ -110,22 +107,16 @@ export class OrganisateurClassesFormComponent implements OnInit {
     this.sorts = await this.sortService.getSorts();
   }
 
-  getResistances() {
-    this.resistanceService.getResistances().subscribe(response => {
-      this.resistances = response;
-    });
+  private async _getResistances(): Promise<void> {
+    this.resistances =  await this.resistanceService.getResistances();
   }
 
-  getStatistiques() {
-    this.statistiqueService.getStatistiques().subscribe(response => {
-      this.statistiques = response;
-    })
+  private async _getStatistiques(): Promise<void> {
+    this.statistiques =  await this.statistiqueService.getStatistiques();
   }
 
-  getImmunites() {
-    this.immuniteService.getImmunites().subscribe(response => {
-      this.immunites = response;
-    })
+  private async _getImmunites(): Promise<void> {
+    this.immunites = await this.immuniteService.getImmunites();
   }
 
   submit() {

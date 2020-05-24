@@ -1,11 +1,11 @@
 import { Classe } from "../../classes/models/classe";
-import { Statistique, StatistiqueItem } from "../../../models/statistique";
-import { Resistance, ResistanceItem } from "../../../models/resistance";
-import { Immunite } from "../../../models/immunite";
 import { Don } from "../../dons/models/don";
 import { Aptitude } from "../../aptitudes/models/aptitude";
 import { IAlignement } from "../../../services/alignement.service";
 import { ISort } from "../../sort.service";
+import { IImmunite } from "../../immunite.service";
+import { ResistanceItem } from "../../resistance.service";
+import { StatistiqueItem } from "../../statistique.service";
 
 export class Race {
 
@@ -33,7 +33,7 @@ export class Race {
     ajustement: number;
     statistiques: StatistiqueItem[];
     resistances: ResistanceItem[];
-    immunites: Immunite[];
+    immunites: IImmunite[];
     immunitesRef: string[];
     sortsRacial: ISort[];
     sortsRacialRef: string[];

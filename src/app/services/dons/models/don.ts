@@ -1,8 +1,8 @@
-import { StatistiqueItem, Statistique } from "../../../models/statistique";
-import { ResistanceItem } from "../../../models/resistance";
-import { Immunite } from "../../../models/immunite";
 import { Race } from "../../races/models/race";
-import { Classe, ClasseAuthorise } from "../../classes/models/classe";
+import { ClasseAuthorise } from "../../classes/models/classe";
+import { IImmunite } from "../../immunite.service";
+import { ResistanceItem } from "../../resistance.service";
+import { IStatistique, StatistiqueItem } from "../../statistique.service";
 
 export class Don {
 
@@ -24,14 +24,14 @@ export class Don {
     niveauMaxObtention: number;
     categorie: string;
     afficherNiveau: boolean;
-    modificateur: Statistique[];
+    modificateur: IStatistique[];
     modificateurRef: string[];
-    modificateurs: Statistique[];
+    modificateurs: IStatistique[];
     modificateursRef: string[];
     classesAutorise: ClasseAuthorise[];
     donsRequis: Don[];
     donsRequisRef: string[];
-    immunites: Immunite[];
+    immunites: IImmunite[];
     immunitesRef: string[];
     racesAutorise: Race[];
     racesAutoriseRef: string[];

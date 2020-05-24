@@ -37,6 +37,7 @@ export class OrganisateurSortsListComponent implements OnInit {
 
   private async _getSorts(): Promise<void> {
     this.sorts = await this.sortService.getSorts();
+    console.log(this.sorts);
     this.sortedData = this.sorts.slice(0, this.pageSize);
     this.length = this.sorts.length;
   }

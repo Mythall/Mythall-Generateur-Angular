@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { DonService } from '../../../../services/dons/don.service';
 import { FourberieService } from '../../../../services/fourberies/fourberie.service';
-import { StatistiqueService } from '../../../../services/statistique.service';
+import { StatistiqueService, IStatistique } from '../../../../services/statistique.service';
 import { Fourberie } from '../../../../services/fourberies/models/fourberie';
-import { Statistique } from '../../../../models/statistique';
 import { Don } from '../../../../services/dons/models/don';
 
 @Component({
@@ -26,13 +25,13 @@ export class OrganisateurFourberiesFormComponent implements OnInit {
   dons: Don[]
   fourberie: Fourberie = new Fourberie();
   fourberies: Fourberie[];
-  statistiques: Statistique[];
+  statistiques: IStatistique[];
 
   ngOnInit() {
     this.getFourberie();
     this.getFourberies();
     this.getDons();
-    this.getStatistiques();
+    this._getStatistiques();
   }
 
   getFourberie() {
@@ -58,10 +57,8 @@ export class OrganisateurFourberiesFormComponent implements OnInit {
     })
   }
 
-  getStatistiques() {
-    this.statistiqueService.getStatistiques().subscribe(response => {
-      this.statistiques = response;
-    })
+  private async _getStatistiques(): Promise<void> {
+    this.statistiques =  await this.statistiqueService.getStatistiques();
   }
 
   submit() {

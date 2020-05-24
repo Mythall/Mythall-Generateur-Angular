@@ -5,14 +5,11 @@ import { RaceService } from '../../../../services/races/race.service';
 import { Race } from '../../../../services/races/models/race';
 import { ClasseService } from '../../../../services/classes/classe.service';
 import { DonService } from '../../../../services/dons/don.service';
-import { ImmuniteService } from '../../../../services/immunite.service';
-import { ResistanceService }  from '../../../../services/resistance.service';
-import { StatistiqueService } from '../../../../services/statistique.service';
+import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
+import { ResistanceService, IResistance, ResistanceItem }  from '../../../../services/resistance.service';
+import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
 import { SortService, ISort } from '../../../../services/sort.service';
 import { Classe } from '../../../../services/classes/models/classe';
-import { Resistance, ResistanceItem } from '../../../../models/resistance';
-import { Immunite } from '../../../../models/immunite';
-import { Statistique, StatistiqueItem } from '../../../../models/statistique';
 import { Don } from '../../../../services/dons/models/don';
 import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
 import { Aptitude } from '../../../../services/aptitudes/models/aptitude';
@@ -45,9 +42,9 @@ export class OrganisateurRacesFormComponent implements OnInit {
   alignements: IAlignement[];
   aptitudes: Aptitude[];
   dons: Don[];
-  resistances: Resistance[];
-  statistiques: Statistique[];
-  immunites: Immunite[];
+  resistances: IResistance[];
+  statistiques: IStatistique[];
+  immunites: IImmunite[];
   sorts: ISort[];
 
   ngOnInit() {
@@ -56,9 +53,9 @@ export class OrganisateurRacesFormComponent implements OnInit {
     this.getClasses();
     this.getAptitudes();
     this.getDons();
-    this.getResistances();
-    this.getStatistiques();
-    this.getImmunites();
+    this._getResistances();
+    this._getStatistiques();
+    this._getImmunites();
     this.getSorts();
   }
 
@@ -93,22 +90,16 @@ export class OrganisateurRacesFormComponent implements OnInit {
     })
   }
 
-  getResistances() {
-    this.resistanceService.getResistances().subscribe(response => {
-      this.resistances = response;
-    });
+  private async _getResistances(): Promise<void> {
+    this.resistances =  await this.resistanceService.getResistances();
   }
 
-  getStatistiques(){
-    this.statistiqueService.getStatistiques().subscribe(response => {
-      this.statistiques = response;
-    })
+  private async _getStatistiques(): Promise<void> {
+    this.statistiques =  await this.statistiqueService.getStatistiques();
   }
-
-  getImmunites(){
-    this.immuniteService.getImmunites().subscribe(response => {
-      this.immunites = response;
-    })
+  
+  private async _getImmunites(): Promise<void> {
+    this.immunites =  await this.immuniteService.getImmunites();
   }
 
   private async getSorts(): Promise<void>{

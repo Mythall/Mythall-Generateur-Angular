@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { StatistiqueService } from '../../../../services/statistique.service';
-import { Statistique } from '../../../../models/statistique';
+import { StatistiqueService, IStatistique } from '../../../../services/statistique.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 import { ToastService } from '../../../../services/@core/toast.service';
@@ -19,21 +17,26 @@ export class OrganisateurStatistiquesListComponent implements OnInit {
     private toast: ToastService
   ) { }
 
-  statistiques: Observable<Statistique[]>;
+  statistiques: IStatistique[];
 
   ngOnInit() {
-    this.statistiques = this.statistiqueService.getStatistiques$();
+    this._getStatistiques();
   }
 
-  confirmDelete(item: Statistique) {
+  private async _getStatistiques(): Promise<void> {
+    this.statistiques = await this.statistiqueService.getStatistiques();
+  }
+
+  public confirmDelete(item: IStatistique): void {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async (result) => {
       if (result) {
-        this.statistiqueService.deleteStatistique(result.id).subscribe(res => this.toast.delete(result.nom));
+        await this.statistiqueService.deleteStatistique(result.id);
+        this.toast.delete(result.nom);
       }
     });
   }

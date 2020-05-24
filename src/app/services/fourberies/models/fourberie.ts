@@ -1,5 +1,5 @@
-import { Statistique } from "../../../models/statistique";
 import { Don } from "../../dons/models/don";
+import { IStatistique } from "../../statistique.service";
 
 export class Fourberie {
 
@@ -10,7 +10,7 @@ export class Fourberie {
     nom: string;
     description: string;
     afficherNiveau: boolean;
-    modificateur: Statistique;
+    modificateur: IStatistique;
     modificateurRef: string;
     fourberiesRequis: Fourberie[];
     fourberiesRequisRef: string[];    

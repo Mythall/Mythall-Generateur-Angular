@@ -1,9 +1,6 @@
 import { Classe, ClasseItem } from "../../classes/models/classe";
 import { Don, DonItem } from "../../dons/models/don";
 import { Race } from "../../races/models/race";
-import { Immunite } from "../../../models/immunite";
-import { Resistance, ResistanceValue } from "../../../models/resistance";
-import { Statistique, StatistiqueValue } from "../../../models/statistique";
 import { User } from "../../@core/models/user";
 import { AptitudeItem } from "../../aptitudes/models/aptitude";
 import { Esprit } from "../../esprits/models/esprit";
@@ -14,6 +11,9 @@ import { Domaine } from "../../domaines/models/domaine";
 import { FourberieItem } from "../../fourberies/models/fourberie";
 import { IEcole } from "../../ecole.service";
 import { SortItem } from "../../sort.service";
+import { IImmunite } from "../../immunite.service";
+import { ResistanceValue } from "../../resistance.service";
+import { StatistiqueValue } from "../../statistique.service";
 
 export class Personnage {
 
@@ -55,7 +55,7 @@ export class Personnage {
     statistiques: StatistiqueValue[];
     capaciteSpeciales: StatistiqueValue[]; //Display Only, not saved
     resistances: ResistanceValue[];
-    immunites: Immunite[];
+    immunites: IImmunite[];
     esprit: Esprit;
     espritRef: string;
     ecole: IEcole;

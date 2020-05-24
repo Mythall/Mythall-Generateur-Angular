@@ -2,14 +2,11 @@ import { Injectable } from '@angular/core';
 import { Observable, of, forkJoin } from 'rxjs';
 import { FirestoreService } from '../firestore/firestore.service';
 import { ImmuniteService } from '../immunite.service';
-import { ResistanceService } from '../resistance.service';
-import { StatistiqueService } from '../statistique.service';
+import { ResistanceService, ResistanceItem } from '../resistance.service';
+import { StatistiqueService, StatistiqueItem } from '../statistique.service';
 import { Classe } from '../classes/models/classe';
 import { Don } from './models/don';
-import { Immunite } from '../../models/immunite';
 import { Race } from '../races/models/race';
-import { Resistance } from '../../models/resistance';
-import { Statistique } from '../../models/statistique';
 import { tap, map, flatMap, first } from 'rxjs/operators';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
@@ -43,11 +40,11 @@ export class DonService {
 
         this.getClassesAuthorise(don, observableBatch);
         this.getDonsRequis(don, observableBatch);
-        this.getImmunites(don, observableBatch);
+        this._getImmunites(don);
         this.getRaces(don, observableBatch);
-        this.getResistances(don, observableBatch);
-        this.getStatistiques(don, observableBatch);
-        this.getModificateur(don, observableBatch);
+        this._getResistances(don);
+        this._getStatistiques(don);
+        this._getModificateur(don);
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
@@ -97,10 +94,10 @@ export class DonService {
         let observableBatch: Observable<any>[] = [];
         observableBatch.push(of(don));
 
-        this.getImmunites(don, observableBatch);
-        this.getResistances(don, observableBatch);
-        this.getStatistiques(don, observableBatch);
-        this.getModificateur(don, observableBatch);
+        this._getImmunites(don);
+        this._getResistances(don);
+        this._getStatistiques(don);
+        this._getModificateur(don);
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
@@ -150,16 +147,11 @@ export class DonService {
     }
   }
 
-  private getImmunites(don: Don, observableBatch: any[]) {
+  private _getImmunites(don: Don) {
     if (don.immunitesRef) {
-      don.immunitesRef.forEach(immuniteRef => {
-        observableBatch.push(this.immuniteService.getImmunite(immuniteRef).pipe(
-          map((immunite: Immunite) => {
-            if (!don.immunites) don.immunites = [];
-            don.immunites.push(immunite);
-          }),
-          first()
-        ))
+      don.immunitesRef.forEach(async (immuniteRef) => {
+        if (!don.immunites) don.immunites = [];
+        don.immunites.push(await this.immuniteService.getImmunite(immuniteRef));
       });
     }
   }
@@ -178,42 +170,27 @@ export class DonService {
     }
   }
 
-  private getResistances(don: Don, observableBatch: any[]) {
+  private _getResistances(don: Don): void {
     if (don.resistances && don.resistances.length > 0) {
-      don.resistances.forEach(resistanceItem => {
-        observableBatch.push(this.resistanceService.getResistance(resistanceItem.resistanceRef).pipe(
-          map((resistance: Resistance) => {
-            resistanceItem.resistance = resistance;
-          }),
-          first()
-        ))
+      don.resistances.forEach(async (resistanceItem: ResistanceItem) => {
+        resistanceItem.resistance = await this.resistanceService.getResistance(resistanceItem.resistanceRef);
       });
     }
   }
 
-  private getStatistiques(don: Don, observableBatch: any[]) {
+  private _getStatistiques(don: Don) {
     if (don.statistiques && don.statistiques.length > 0) {
-      don.statistiques.forEach(statistiqueItem => {
-        observableBatch.push(this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef).pipe(
-          map((statistique: Statistique) => {
-            statistiqueItem.statistique = statistique;
-          }),
-          first()
-        ))
+      don.statistiques.forEach(async (statistiqueItem: StatistiqueItem) => {
+        statistiqueItem.statistique = await this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef);
       });
     }
   }
 
-  private getModificateur(don: Don, observableBatch: any[]) {
+  private _getModificateur(don: Don): void {
     if (don.modificateursRef && don.modificateursRef.length > 0) {
-      don.modificateursRef.forEach(modificateurRef => {
-        observableBatch.push(this.statistiqueService.getStatistique(modificateurRef).pipe(
-          map((statistique: Statistique) => {
-            if (!don.modificateurs) don.modificateurs = [];
-            don.modificateurs.push(statistique);
-          }),
-          first()
-        ))
+      don.modificateursRef.forEach(async (modificateurRef) => {
+        if (!don.modificateurs) don.modificateurs = [];
+        don.modificateurs.push(await this.statistiqueService.getStatistique(modificateurRef));
       });
     }
   }
