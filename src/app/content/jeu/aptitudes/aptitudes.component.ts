@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
-import { AptitudeService } from '../../../services/aptitudes/aptitude.service';
-import { Aptitude } from '../../../services/aptitudes/models/aptitude';
+import { AptitudeService, IAptitude } from '../../../services/aptitude.service';
 
 @Component({
   selector: 'app-jeu-aptitudes',
@@ -12,22 +10,16 @@ export class JeuAptitudesComponent implements OnInit {
 
   constructor(
     private aptitudeService: AptitudeService
-  ){}
+  ) { }
 
-  aptitudes: Aptitude[];
+  aptitudes: IAptitude[];
 
-  ngOnInit(){
-
-    // Get Aptitudes
-    this.aptitudeService.getAptitudes().subscribe(response => {
-      this.aptitudes = response;
-    });
-
+  ngOnInit() {
+    this._getAptitudes();
   }
 
-  scroll(el) {
-    console.log(el);
-    el.scrollIntoView();
-}
+  private async _getAptitudes(): Promise<void> {
+    this.aptitudes = await this.aptitudeService.getAptitudes();
+  }
 
 }

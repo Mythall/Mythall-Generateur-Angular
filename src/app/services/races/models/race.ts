@@ -1,11 +1,11 @@
 import { Classe } from "../../classes/models/classe";
-import { Don } from "../../dons/models/don";
-import { Aptitude } from "../../aptitudes/models/aptitude";
 import { IAlignement } from "../../../services/alignement.service";
 import { ISort } from "../../sort.service";
 import { IImmunite } from "../../immunite.service";
 import { ResistanceItem } from "../../resistance.service";
 import { StatistiqueItem } from "../../statistique.service";
+import { IAptitude } from "../../aptitude.service";
+import { IDon } from "../../don.service";
 
 export class Race {
 
@@ -37,9 +37,9 @@ export class Race {
     immunitesRef: string[];
     sortsRacial: ISort[];
     sortsRacialRef: string[];
-    donsRacial: Don[];
+    donsRacial: IDon[];
     donsRacialRef: string[];
-    aptitudesRacial: Aptitude[];
+    aptitudesRacial: IAptitude[];
     aptitudesRacialRef: string[];
 
 

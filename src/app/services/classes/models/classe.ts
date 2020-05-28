@@ -1,11 +1,11 @@
 import { IAlignement } from "../../../services/alignement.service";
-import { AptitudeItem } from "../../aptitudes/models/aptitude";
-import { DonItem } from "../../dons/models/don";
 import { Choix } from "../../personnages/models/choix";
 import { SortItem } from "../../sort.service";
 import { IImmunite } from "../../immunite.service";
 import { ResistanceItem } from "../../resistance.service";
 import { StatistiqueItem } from "../../statistique.service";
+import { AptitudeItem } from "../../aptitude.service";
+import { DonItem } from "../../don.service";
 
 export class Classe {
 

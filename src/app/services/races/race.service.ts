@@ -7,8 +7,8 @@ import { StatistiqueService, StatistiqueItem } from '../statistique.service';
 import { SortService } from '../sort.service';
 import { Race } from './models/race';
 import { Classe } from '../classes/models/classe';
-import { Don } from '../dons/models/don';
 import { tap, map, mergeMap, flatMap, first } from 'rxjs/operators';
+import { IDon } from '../don.service';
 
 @Injectable()
 export class RaceService {
@@ -163,7 +163,7 @@ export class RaceService {
     if (race.donsRacialRef) {
       race.donsRacialRef.forEach(donRaciauxRef => {
         observableBatch.push(this.db.doc$('dons/' + donRaciauxRef).pipe(
-          map((don: Don) => {
+          map((don: IDon) => {
             if (!race.donsRacial) race.donsRacial = [];
             race.donsRacial.push(don);
           }),

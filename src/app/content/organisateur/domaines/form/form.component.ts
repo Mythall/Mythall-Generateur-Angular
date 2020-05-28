@@ -1,18 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
-import { DonService } from '../../../../services/dons/don.service';
+import { AptitudeService, IAptitude, AptitudeItem } from '../../../../services/aptitude.service';
+import { DonService, IDon, DonCategories, DonItem } from '../../../../services/don.service';
 import { DomaineService } from '../../../../services/domaines/domaine-service';
 import { SortService, ISort, SortItem } from '../../../../services/sort.service';
-import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
-import { Don, DonItem, DonCategories } from '../../../../services/dons/models/don';
 import { Domaine } from '../../../../services/domaines/models/domaine';
 import { ClasseService } from '../../../../services/classes/classe.service';
 import { Classe } from '../../../../services/classes/models/classe';
 import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 import { ChoixTypes, Choix } from '../../../../services/personnages/models/choix';
-import { Fourberie } from '../../../../services/fourberies/models/fourberie';
-import { FourberieService } from '../../../../services/fourberies/fourberie.service';
+import { FourberieService, IFourberie } from '../../../../services/fourberie.service';
 
 @Component({
   selector: 'app-organisateur-domaines-form',
@@ -38,22 +35,22 @@ export class OrganisateurDomainesFormComponent implements OnInit {
   domaines: Domaine[];
   classes: Classe[];
   alignements: IAlignement[];
-  aptitudes: Aptitude[];
-  dons: Don[];
+  aptitudes: IAptitude[];
+  dons: IDon[];
   sorts: ISort[];
-  fourberies: Fourberie[];
+  fourberies: IFourberie[];
   choix: string[] = ChoixTypes;
   categories: string[] = DonCategories;
 
   ngOnInit() {
     this.getDomaine();
     this.getDomaines();
-    this.getaptitudes();
+    this._getAptitudes();
     this.getClasses();
     this._getAlignements();
-    this.getDons();
+    this._getDons();
     this._getSorts();
-    this.getFourberies();
+    this._getFourberies();
   }
 
   getDomaine() {
@@ -80,62 +77,54 @@ export class OrganisateurDomainesFormComponent implements OnInit {
   }
 
   private async _getAlignements(): Promise<void> {
-    this.alignements =  await this.alignementService.getAlignements();
+    this.alignements = await this.alignementService.getAlignements();
   }
 
-  getaptitudes() {
-    this.aptitudeService.getAptitudes().subscribe(response => {
-      this.aptitudes = response;
-    })
+  private async _getAptitudes(): Promise<void> {
+    this.aptitudes = await this.aptitudeService.getAptitudes();
   }
 
-  getFourberies() {
-    this.fourberieService.getFourberies().subscribe(response => {
-      this.fourberies = response;
-    })
+  private async _getFourberies(): Promise<void> {
+    this.fourberies = await this.fourberieService.getFourberies();
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons = await this.donService.getDons();
   }
 
   private async _getSorts(): Promise<void> {
     this.sorts = await this.sortService.getSorts();
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
-      this.domaineService.updateDomaine(this.id, this.domaine.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/domaines/list"]);
-        }
-      });
+      const result = await this.domaineService.updateDomaine(this.domaine);
+      if (result) {
+        this.router.navigate(["/organisateur/domaines/list"]);
+      }
     } else {
-      this.domaineService.addDomaine(this.domaine.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/domaines/list"]);
-        }
-      });
+      const result = await this.domaineService.addDomaine(this.domaine);
+      if (result) {
+        this.router.navigate(["/organisateur/domaines/list"]);
+      }
     }
   }
 
-  addAptitude() {
+  public addAptitude(): void {
     if (!this.domaine.aptitudes) this.domaine.aptitudes = [];
     this.domaine.aptitudes.push(new AptitudeItem());
   }
 
-  deleteAptitude(index: number) {
+  public deleteAptitude(index: number): void {
     this.domaine.aptitudes.splice(index, 1);
   }
 
-  addDon() {
+  public addDon(): void {
     if (!this.domaine.dons) this.domaine.dons = [];
     this.domaine.dons.push(new DonItem());
   }
 
-  deleteDon(index: number) {
+  public deleteDon(index: number): void {
     this.domaine.dons.splice(index, 1);
   }
 

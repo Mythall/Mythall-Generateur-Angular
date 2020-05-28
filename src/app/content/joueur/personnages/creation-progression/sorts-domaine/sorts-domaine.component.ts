@@ -1,10 +1,9 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-
 import { Personnage } from '../../../../../services/personnages/models/personnage';
 import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Don, DonItem } from '../../../../../services/dons/models/don';
 import { Choix } from '../../../../../services/personnages/models/choix';
+import { IDon } from '../../../../../services/don.service';
 
 @Component({
     selector: 'creation-progression-sorts-domaine',
@@ -24,7 +23,7 @@ export class JoueurPersonnageCreationProgressionSortsDomaineComponent implements
     @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
     @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-    selectedDons: Don[] = [];
+    selectedDons: IDon[] = [];
     availableDons = [];
     quantity = [];
     currentIndex: number = 0;

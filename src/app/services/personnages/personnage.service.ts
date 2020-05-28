@@ -5,12 +5,10 @@ import { FirestoreService } from '../firestore/firestore.service';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingDialogComponent } from '../../layout/dialogs/loading/loading.dialog.component';
 import { Personnage } from './models/personnage';
-import { AptitudeService } from '../aptitudes/aptitude.service';
-import { AptitudeItem } from '../aptitudes/models/aptitude';
+import { AptitudeService, AptitudeItem } from '../aptitude.service';
 import { ClasseService } from '../classes/classe.service';
 import { Classe, ClasseItem } from '../classes/models/classe';
-import { DonService } from '../dons/don.service';
-import { Don, DonItem } from '../dons/models/don';
+import { DonService, IDon, DonItem } from '../don.service';
 import { RaceService } from '../races/race.service';
 import { UserService } from '../@core/user.service';
 import { StatistiqueService, StatistiqueValue, StatistiqueIds } from '../statistique.service';
@@ -19,16 +17,12 @@ import { IDieu, DieuService } from '../dieu.service';
 import { IAlignement, AlignementService } from '../alignement.service';
 import { EspritService } from '../esprits/esprit-service';
 import { SortService, SortItem, ISort } from '../sort.service';
-import { OrdreService } from '../ordres/ordre.service';
-import { Build } from './models/build';
-import { FourberieService } from '../fourberies/fourberie.service';
-import { rejects } from 'assert';
+import { OrdreService, IOrdre } from '../ordre.service';
+import { FourberieService, IFourberie } from '../fourberie.service';
 import { Esprit } from '../esprits/models/esprit';
 import { Choix } from './models/choix';
 import { Domaine } from '../domaines/models/domaine';
 import { EcoleService, IEcole } from '../ecole.service';
-import { Fourberie } from '../fourberies/models/fourberie';
-import { Ordre } from '../ordres/models/ordre';
 import { ResistanceValue } from '../resistance.service';
 
 @Injectable()
@@ -53,19 +47,6 @@ export class PersonnageService {
     private userService: UserService
   ) { }
 
-  //#region Progress Utilities
-  private build: Build = new Build();
-  private fullBuild: boolean = false;
-  private totalAmountOfStatistiques: number = 10;
-
-  private resetBuild() {
-    this.fullBuild = false;
-    this.build = new Build();
-  }
-
-  //#endregion
-
-  //#region Service
   getPersonnages(): Observable<Personnage[]> {
     return this.db.colWithIds$('personnages', ref => ref.orderBy('createdAt'));
   }
@@ -88,21 +69,6 @@ export class PersonnageService {
 
   getPersonnagesByUser(userUid: string): Observable<Personnage[]> {
     return this.db.colWithIds$('personnages', ref => ref.where('userRef', '==', userUid).orderBy('createdAt'));
-  }
-
-  //#endregion
-
-  //#region Maps
-  map(data: Personnage): Personnage {
-    this.resetBuild();
-    this.fullBuild = true;
-    var personnage: Personnage = new Personnage();
-    for (var key in data) {
-      personnage[key] = data[key]
-    }
-    this.dialog.open(LoadingDialogComponent);
-    this.buildPromise(personnage);
-    return personnage;
   }
 
   mapDefault(data: Personnage): Personnage {
@@ -133,10 +99,6 @@ export class PersonnageService {
     });
 
   }
-
-  //#endregion
-
-  //#region Availabilities
 
   getChoixPersonnage(personnage: Personnage, progressingClasse: ClasseItem): Promise<Choix[]> {
 
@@ -396,233 +358,219 @@ export class PersonnageService {
 
   }
 
-  getAvailableConnaissances(personnage: Personnage): Promise<Don[]> {
+  public async getAvailableConnaissances(personnage: Personnage): Promise<IDon[]> {
 
-    return new Promise((resolve) => {
+    const dons = await this.donService.getDons('Connaissance');
 
-      this.donService.getDonsByCategorie('Connaissance').then(dons => {
+    let list: IDon[] = dons;
 
-        let list: Don[] = dons;
+    // Filtre les dons déjà existant
+    if (personnage.dons && personnage.dons.length > 0) {
+      personnage.dons.forEach(donPerso => {
 
-        // Filtre les dons déjà existant
-        if (personnage.dons && personnage.dons.length > 0) {
-          personnage.dons.forEach(donPerso => {
+        list = list.filter(don => {
+          return don.id != donPerso.donRef;
+        })
 
-            list = list.filter(don => {
-              return don.id != donPerso.donRef;
-            })
+      });
+    }
 
-          });
-        }
+    // Filtre les prérequis de dons
+    if (personnage.dons) {
 
-        // Filtre les prérequis de dons
-        if (personnage.dons) {
+      let result: IDon[] = [];
 
-          let result: Don[] = [];
+      list.forEach(don => {
 
-          list.forEach(don => {
+        let add: boolean = true;
 
-            let add: boolean = true;
+        // No requirements
+        if (don.donsRequisRef && don.donsRequisRef.length > 0) {
 
-            // No requirements
-            if (don.donsRequisRef && don.donsRequisRef.length > 0) {
+          // Make sure all requirements is filled
+          don.donsRequisRef.forEach(donReqRef => {
 
-              // Make sure all requirements is filled
-              don.donsRequisRef.forEach(donReqRef => {
+            let found: boolean = false;
 
-                let found: boolean = false;
+            personnage.dons.forEach(donPerso => {
 
-                personnage.dons.forEach(donPerso => {
+              if (donReqRef == donPerso.donRef) {
+                found = true;
+              }
 
-                  if (donReqRef == donPerso.donRef) {
-                    found = true;
-                  }
+            });
 
-                });
-
-                if (!found) {
-                  add = false;
-                }
-
-              });
-            }
-
-            if (add) {
-              result.push(don);
+            if (!found) {
+              add = false;
             }
 
           });
-
-          list = result;
-
         }
 
-        // Filtre les restrictions de niveaux
-        if (personnage.niveauReel) {
-
-          // Filtre Niveau Max D'Obtention
-          list = list.filter(don => {
-            return don.niveauMaxObtention <= personnage.niveauReel
-          });
-
-          // Filtre Niveau Requis
-          list = list.filter(don => {
-            return don.niveauRequis <= personnage.niveauReel;
-          });
-
+        if (add) {
+          result.push(don);
         }
-
-        // Trie en Ordre Alphabetic
-        list = list.sort((a, b) => {
-          if (a.nom > b.nom) {
-            return 1;
-          }
-          if (a.nom < b.nom) {
-            return -1;
-          }
-          return 0;
-        });
-
-        resolve(list);
 
       });
 
+      list = result;
+
+    }
+
+    // Filtre les restrictions de niveaux
+    if (personnage.niveauReel) {
+
+      // Filtre Niveau Max D'Obtention
+      list = list.filter(don => {
+        return don.niveauMaxObtention <= personnage.niveauReel
+      });
+
+      // Filtre Niveau Requis
+      list = list.filter(don => {
+        return don.niveauRequis <= personnage.niveauReel;
+      });
+
+    }
+
+    // Trie en Ordre Alphabetic
+    list = list.sort((a, b) => {
+      if (a.nom > b.nom) {
+        return 1;
+      }
+      if (a.nom < b.nom) {
+        return -1;
+      }
+      return 0;
     });
+
+    return list;
 
   }
 
-  getAvailableDons(personnage: Personnage): Promise<Don[]> {
+  public async getAvailableDons(personnage: Personnage): Promise<IDon[]> {
 
-    return new Promise((resolve) => {
+    const dons = await this.db.getCollection('dons');
 
-      this.db.getCollection('dons').then(dons => {
+    let list: IDon[] = dons;
 
-        let list: Don[] = dons;
+    // Filtre les dons déjà existant
+    if (personnage.dons && personnage.dons.length > 0) {
+      personnage.dons.forEach(donPerso => {
 
-        // Filtre les dons déjà existant
-        if (personnage.dons && personnage.dons.length > 0) {
-          personnage.dons.forEach(donPerso => {
+        list = list.filter(don => {
+          return don.id != donPerso.donRef;
+        })
 
-            list = list.filter(don => {
-              return don.id != donPerso.donRef;
-            })
+      });
+    }
 
-          });
-        }
+    // Filtre les Race Authorisé
+    if (personnage.raceRef) {
+      list = list.filter(function (don) {
+        return don.racesAutoriseRef.includes(personnage.raceRef);
+      });
+    }
 
-        // Filtre les Race Authorisé
-        if (personnage.raceRef) {
-          list = list.filter(function (don) {
-            return don.racesAutoriseRef.includes(personnage.raceRef);
-          });
-        }
+    // Filtre les classes authorisé
+    if (personnage.classes) {
 
-        // Filtre les classes authorisé
-        if (personnage.classes) {
+      let result: IDon[] = [];
 
-          let result: Don[] = [];
-
-          list.forEach(don => {
-            don.classesAutorise.forEach(ca => {
-              personnage.classes.forEach(classePerso => {
-                if (classePerso.classeRef == ca.classeRef && classePerso.niveau >= ca.niveau) {
-                  if (!result.find(r => r.id == don.id)) {
-                    result.push(don);
-                  }
-                }
-              });
-            });
-          });
-
-          list = result;
-
-        }
-
-        // Filtre les prérequis de dons
-        if (personnage.dons) {
-
-          let result: Don[] = [];
-
-          list.forEach(don => {
-
-            let add: boolean = true;
-
-            // No requirements
-            if (don.donsRequisRef && don.donsRequisRef.length > 0) {
-
-              // Make sure all requirements is filled
-              don.donsRequisRef.forEach(donReqRef => {
-
-                let found: boolean = false;
-
-                personnage.dons.forEach(donPerso => {
-
-                  if (donReqRef == donPerso.donRef) {
-                    found = true;
-                  }
-
-                });
-
-                if (!found) {
-                  add = false;
-                }
-
-              });
-            }
-
-            if (add) {
+      list.forEach(don => {
+        don.classesAutorise.forEach(ca => {
+          personnage.classes.forEach(classePerso => {
+            if (classePerso.classeRef == ca.classeRef && classePerso.niveau >= ca.niveau) {
               if (!result.find(r => r.id == don.id)) {
                 result.push(don);
               }
-              result.push(don);
+            }
+          });
+        });
+      });
+
+      list = result;
+
+    }
+
+    // Filtre les prérequis de dons
+    if (personnage.dons) {
+
+      let result: IDon[] = [];
+
+      list.forEach(don => {
+
+        let add: boolean = true;
+
+        // No requirements
+        if (don.donsRequisRef && don.donsRequisRef.length > 0) {
+
+          // Make sure all requirements is filled
+          don.donsRequisRef.forEach(donReqRef => {
+
+            let found: boolean = false;
+
+            personnage.dons.forEach(donPerso => {
+
+              if (donReqRef == donPerso.donRef) {
+                found = true;
+              }
+
+            });
+
+            if (!found) {
+              add = false;
             }
 
           });
-
-          list = result;
-
         }
 
-        // Filtre les restrictions de niveaux
-        if (personnage.niveauReel) {
-
-          // Filtre Niveau Max D'Obtention
-          list = list.filter(don => {
-            return don.niveauMaxObtention <= personnage.niveauReel
-          });
-
-          // Filtre Niveau Requis
-          list = list.filter(don => {
-            return don.niveauRequis <= personnage.niveauReel;
-          });
-
+        if (add) {
+          if (!result.find(r => r.id == don.id)) {
+            result.push(don);
+          }
+          result.push(don);
         }
-
-        // Trie en Ordre Alphabetic
-        list = list.sort((a, b) => {
-          if (a.nom > b.nom) {
-            return 1;
-          }
-          if (a.nom < b.nom) {
-            return -1;
-          }
-          return 0;
-        });
-
-        // Filter Duplicates
-        list = list.filter((don, index, self) =>
-          index === self.findIndex((d) => (
-            d.id === don.id
-          ))
-        );
-
-        resolve(list);
 
       });
 
+      list = result;
+
+    }
+
+    // Filtre les restrictions de niveaux
+    if (personnage.niveauReel) {
+
+      // Filtre Niveau Max D'Obtention
+      list = list.filter(don => {
+        return don.niveauMaxObtention <= personnage.niveauReel
+      });
+
+      // Filtre Niveau Requis
+      list = list.filter(don => {
+        return don.niveauRequis <= personnage.niveauReel;
+      });
+
+    }
+
+    // Trie en Ordre Alphabetic
+    list = list.sort((a, b) => {
+      if (a.nom > b.nom) {
+        return 1;
+      }
+      if (a.nom < b.nom) {
+        return -1;
+      }
+      return 0;
     });
 
+    // Filter Duplicates
+    list = list.filter((don, index, self) =>
+      index === self.findIndex((d) => (
+        d.id === don.id
+      ))
+    );
 
+    return list;
 
   }
 
@@ -680,115 +628,103 @@ export class PersonnageService {
 
   }
 
-  getAvailableOrdres(personnage: Personnage): Promise<Ordre[]> {
+  public async getAvailableOrdres(personnage: Personnage): Promise<IOrdre[]> {
 
-    return new Promise((resolve) => {
+    const ordres = await this.ordreService.getOrdres();
 
-      this.ordreService.getOrdres().subscribe(ordres => {
+    let list: IOrdre[] = ordres;
 
-        let list: Ordre[] = ordres;
-
-        // Filtre selon l'alignement du personnage
-        if (personnage.alignementRef) {
-          list = list.filter(function (ordre) {
-            return ordre.alignementPermisRef.includes(personnage.alignementRef);
-          });
-        }
-
-        // Filtre selon les classes
-        if (personnage.classes) {
-          personnage.classes.forEach(classe => {
-            list = list.filter(function (ordre) {
-              return ordre.classeRef.includes(classe.classeRef);
-            });
-          });
-        }
-
-        resolve(list)
-
+    // Filtre selon l'alignement du personnage
+    if (personnage.alignementRef) {
+      list = list.filter(function (ordre) {
+        return ordre.alignementPermisRef.includes(personnage.alignementRef);
       });
+    }
 
-    });
+    // Filtre selon les classes
+    if (personnage.classes) {
+      personnage.classes.forEach(classe => {
+        list = list.filter(function (ordre) {
+          return ordre.classeRef.includes(classe.classeRef);
+        });
+      });
+    }
+
+    return list;
 
   }
 
-  getAvailableFourberies(personnage: Personnage): Promise<Fourberie[]> {
+  public async getAvailableFourberies(personnage: Personnage): Promise<IFourberie[]> {
 
-    return new Promise((resolve) => {
+    const fourberies = await this.db.getCollection('fourberies');
 
-      this.db.getCollection('fourberies').then(fourberies => {
+    let list: IFourberie[] = fourberies;
 
-        let list: Fourberie[] = fourberies;
+    // Filtre les fourberies déjà existant
+    if (personnage.fourberies && personnage.fourberies.length > 0) {
+      personnage.fourberies.forEach(fourberiesPerso => {
 
-        // Filtre les fourberies déjà existant
-        if (personnage.fourberies && personnage.fourberies.length > 0) {
-          personnage.fourberies.forEach(fourberiesPerso => {
+        list = list.filter(fourberie => {
+          return fourberie.id != fourberiesPerso.fourberieRef;
+        })
 
-            list = list.filter(fourberie => {
-              return fourberie.id != fourberiesPerso.fourberieRef;
-            })
+      });
+    }
+
+    // Filtre les prérequis de fourberie
+    if (personnage.fourberies) {
+
+      let result: IFourberie[] = [];
+
+      list.forEach(fourberie => {
+
+        let add: boolean = true;
+
+        // No requirements
+        if (fourberie.fourberiesRequisRef && fourberie.fourberiesRequisRef.length > 0) {
+
+          // Make sure all requirements is filled
+          fourberie.fourberiesRequisRef.forEach(fourberieReqRef => {
+
+            let found: boolean = false;
+
+            personnage.fourberies.forEach(fourberiePerso => {
+
+              if (fourberieReqRef == fourberiePerso.fourberieRef) {
+                found = true;
+              }
+
+            });
+
+            if (!found) {
+              add = false;
+            }
 
           });
         }
 
-        // Filtre les prérequis de fourberie
-        if (personnage.fourberies) {
-
-          let result: Fourberie[] = [];
-
-          list.forEach(fourberie => {
-
-            let add: boolean = true;
-
-            // No requirements
-            if (fourberie.fourberiesRequisRef && fourberie.fourberiesRequisRef.length > 0) {
-
-              // Make sure all requirements is filled
-              fourberie.fourberiesRequisRef.forEach(fourberieReqRef => {
-
-                let found: boolean = false;
-
-                personnage.fourberies.forEach(fourberiePerso => {
-
-                  if (fourberieReqRef == fourberiePerso.fourberieRef) {
-                    found = true;
-                  }
-
-                });
-
-                if (!found) {
-                  add = false;
-                }
-
-              });
-            }
-
-            if (add) {
-              result.push(fourberie);
-            }
-
-          });
-
-          list = result;
-
+        if (add) {
+          result.push(fourberie);
         }
-
-        // Trie en Ordre Alphabetic
-        list = list.sort((a, b) => {
-          if (a.nom > b.nom) {
-            return 1;
-          }
-          if (a.nom < b.nom) {
-            return -1;
-          }
-          return 0;
-        });
-
-        resolve(list);
 
       });
 
+      list = result;
+
+    }
+
+    // Trie en Ordre Alphabetic
+    list = list.sort((a, b) => {
+      if (a.nom > b.nom) {
+        return 1;
+      }
+      if (a.nom < b.nom) {
+        return -1;
+      }
+      return 0;
     });
+
+    return list;
 
   }
 
@@ -860,9 +796,7 @@ export class PersonnageService {
     return list;
   }
 
-  //#endregion
 
-  //#region Build Personnage
 
   private async buildPersonnage(personnage: Personnage): Promise<Personnage> {
 
@@ -876,7 +810,7 @@ export class PersonnageService {
         this.getClasses(personnage),
         this._getAlignement(personnage),
         this._getDieu(personnage),
-        this.getOrdres(personnage),
+        this._getOrdres(personnage),
         this.getAllFourberies(personnage)
       ]);
 
@@ -890,7 +824,7 @@ export class PersonnageService {
       ]);
 
       console.log("Building Aptitudes...");
-      await this.getAllAptitudes(personnage);
+      await this._getAllAptitudes(personnage);
 
       console.log("Building Sorts & Dons...");
       await Promise.all([
@@ -1013,38 +947,25 @@ export class PersonnageService {
     return personnage;
   }
 
-  private getOrdres(personnage: Personnage): Promise<Personnage> {
+  private async _getOrdres(personnage: Personnage): Promise<Personnage> {
 
-    return new Promise((resolve, reject) => {
+    // Retourne seulement la liste des ordres du personnage
+    let count: number = 0;
+    if (!personnage.ordresRef) personnage.ordresRef = [];
 
-      // Retourne seulement la liste des ordres du personnage
-      let count: number = 0;
-      if (!personnage.ordresRef) personnage.ordresRef = [];
-
-      if (personnage.ordresRef && personnage.ordresRef.length > 0) {
-        personnage.ordresRef.forEach(ordreRef => {
-          this.ordreService.getOrdre(ordreRef).pipe(
-            map(ordre => {
-
-              if (!personnage.ordres) personnage.ordres = [];
-              personnage.ordres.push(ordre);
-
-            })
-          ).subscribe(response => {
-            count++;
-            if (count == personnage.ordresRef.length) {
-              resolve(personnage);
-            }
-          }, error => {
-            reject(error);
-          });
-        });
-      } else {
-        resolve(personnage);
-      }
-
-    });
-
+    if (personnage.ordresRef && personnage.ordresRef.length > 0) {
+      personnage.ordresRef.forEach(async (ordreRef) => {
+        const ordre = await this.ordreService.getOrdre(ordreRef);
+        if (!personnage.ordres) personnage.ordres = [];
+        personnage.ordres.push(ordre);
+        count++;
+        if (count == personnage.ordresRef.length) {
+          return personnage;
+        }
+      });
+    } else {
+      return personnage;
+    }
   }
 
   private async _getNiveauEffectif(personnage: Personnage): Promise<Personnage> {
@@ -1146,187 +1067,157 @@ export class PersonnageService {
 
   }
 
-  private getAllFourberies(personnage: Personnage): Promise<Personnage> {
+  private async getAllFourberies(personnage: Personnage): Promise<Personnage> {
 
-    // Remplis la liste de fourberies complète
-    return new Promise((resolve, reject) => {
+    let count: number = 0;
+    if (!personnage.fourberies) personnage.fourberies = [];
 
-      let count: number = 0;
-      if (!personnage.fourberies) personnage.fourberies = [];
+    if (personnage.fourberies && personnage.fourberies.length > 0) {
 
-      if (personnage.fourberies && personnage.fourberies.length > 0) {
+      personnage.fourberies.forEach(async (fourberieItem) => {
 
-        personnage.fourberies.forEach(fourberieItem => {
+        if (!fourberieItem.fourberie) { //Avoid fetching Fourberie if already fetch
 
-          if (!fourberieItem.fourberie) { //Avoid fetching Fourberie if already fetch
+          fourberieItem.fourberie = await this.fourberieService.getFourberie(fourberieItem.fourberieRef);
+          count++;
 
-            this.fourberieService.getFourberie(fourberieItem.fourberieRef).pipe(
-              map(fourberie => {
+          if (count == personnage.fourberies.length) {
 
-                fourberieItem.fourberie = fourberie;
+            // Filter Duplicates
+            personnage.fourberies = personnage.fourberies.filter((fourberie, index, self) =>
+              index === self.findIndex((d) => (
+                d.fourberieRef === fourberie.fourberieRef
+              ))
+            )
 
-              })
-            ).subscribe(response => {
-
-              count++;
-
-              if (count == personnage.fourberies.length) {
-
-                // Filter Duplicates
-                personnage.fourberies = personnage.fourberies.filter((fourberie, index, self) =>
-                  index === self.findIndex((d) => (
-                    d.fourberieRef === fourberie.fourberieRef
-                  ))
-                )
-
-                resolve(personnage);
-
-              }
-
-            }, error => {
-              reject(error);
-            });
-
-          } else {
-
-            count++;
-
-            if (count == personnage.fourberies.length) {
-
-              // Filter Duplicates
-              personnage.fourberies = personnage.fourberies.filter((fourberie, index, self) =>
-                index === self.findIndex((d) => (
-                  d.fourberieRef === fourberie.fourberieRef
-                ))
-              )
-
-              resolve(personnage);
-
-            }
+            return personnage;
 
           }
 
-        });
+        } else {
 
-      } else {
-        resolve(personnage);
-      }
+          count++;
 
-    });
+          if (count == personnage.fourberies.length) {
+
+            // Filter Duplicates
+            personnage.fourberies = personnage.fourberies.filter((fourberie, index, self) =>
+              index === self.findIndex((d) => (
+                d.fourberieRef === fourberie.fourberieRef
+              ))
+            )
+
+            return personnage;
+
+          }
+
+        }
+
+      });
+
+    } else {
+      return personnage;
+    }
 
   }
 
-  private getAllAptitudes(personnage: Personnage): Promise<Personnage> {
+  private async _getAllAptitudes(personnage: Personnage): Promise<Personnage> {
 
-    return new Promise((resolve, reject) => {
+    // Aptitudes Racial
+    if (personnage.race && personnage.race.aptitudesRacialRef && personnage.race.aptitudesRacialRef.length > 0) {
+      personnage.race.aptitudesRacialRef.forEach(aptitudeRef => {
+        let aptitudeItem: AptitudeItem = new AptitudeItem();
+        aptitudeItem.aptitudeRef = aptitudeRef;
+        personnage.aptitudes.push(aptitudeItem);
+      })
+    };
 
-      // Aptitudes Racial
-      if (personnage.race && personnage.race.aptitudesRacialRef && personnage.race.aptitudesRacialRef.length > 0) {
-        personnage.race.aptitudesRacialRef.forEach(aptitudeRef => {
-          let aptitudeItem: AptitudeItem = new AptitudeItem();
-          aptitudeItem.aptitudeRef = aptitudeRef;
-          personnage.aptitudes.push(aptitudeItem);
-        })
-      };
-
-      // Aptitudes Classes
-      if (personnage.classes && personnage.classes.length > 0) {
-        personnage.classes.forEach(classeItem => {
-          if (classeItem.classe.aptitudes && classeItem.classe.aptitudes.length > 0) {
-            classeItem.classe.aptitudes.forEach(aptitudeItem => {
-              if (classeItem.niveau >= aptitudeItem.niveauObtention) {
-                personnage.aptitudes.push(aptitudeItem);
-              }
-            })
-          }
-        });
-      }
-
-      // Aptitudes Domaines
-      if (personnage.domaines && personnage.domaines.length > 0) {
-        personnage.domaines.forEach(domaine => {
-          if (domaine.aptitudes && domaine.aptitudes.length > 0) {
-            domaine.aptitudes.forEach(aptitudeItem => {
-              personnage.classes.forEach(classe => {
-                if (classe.classeRef == 'fNqknNgq0QmHzUaYEvEd' && classe.niveau >= aptitudeItem.niveauObtention) {
-                  personnage.aptitudes.push(aptitudeItem);
-                }
-              })
-            })
-          }
-        });
-      }
-
-      // Aptitudes Esprit
-      if (personnage.esprit && personnage.esprit.aptitudes && personnage.esprit.aptitudes.length > 0) {
-        personnage.esprit.aptitudes.forEach(aptitudeItem => {
-          personnage.classes.forEach(classe => {
-            if (classe.classeRef == 'wW48swrqmr77awfyADMX' && classe.niveau >= aptitudeItem.niveauObtention) {
+    // Aptitudes Classes
+    if (personnage.classes && personnage.classes.length > 0) {
+      personnage.classes.forEach(classeItem => {
+        if (classeItem.classe.aptitudes && classeItem.classe.aptitudes.length > 0) {
+          classeItem.classe.aptitudes.forEach(aptitudeItem => {
+            if (classeItem.niveau >= aptitudeItem.niveauObtention) {
               personnage.aptitudes.push(aptitudeItem);
             }
           })
-        })
-      };
+        }
+      });
+    }
 
-      // Remplis la liste de aptitudes complète
-      let count: number = 0;
-      if (!personnage.aptitudes) personnage.aptitudes = [];
-
-      if (personnage.aptitudes && personnage.aptitudes.length > 0) {
-
-        personnage.aptitudes.forEach(aptitudeItem => {
-
-          if (!aptitudeItem.aptitude) {
-            this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef).pipe(
-              map(aptitude => {
-
-                aptitudeItem.aptitude = aptitude;
-
-              })
-            ).subscribe(response => {
-
-              count++;
-              if (count == personnage.aptitudes.length) {
-
-                // Filter Duplicates
-                personnage.aptitudes = personnage.aptitudes.filter((aptitude, index, self) =>
-                  index === self.findIndex((d) => (
-                    d.aptitudeRef === aptitude.aptitudeRef
-                  ))
-                )
-
-                resolve(personnage);
-
+    // Aptitudes Domaines
+    if (personnage.domaines && personnage.domaines.length > 0) {
+      personnage.domaines.forEach(domaine => {
+        if (domaine.aptitudes && domaine.aptitudes.length > 0) {
+          domaine.aptitudes.forEach(aptitudeItem => {
+            personnage.classes.forEach(classe => {
+              if (classe.classeRef == 'fNqknNgq0QmHzUaYEvEd' && classe.niveau >= aptitudeItem.niveauObtention) {
+                personnage.aptitudes.push(aptitudeItem);
               }
+            })
+          })
+        }
+      });
+    }
 
-            }, error => {
-              reject(error);
-            });
+    // Aptitudes Esprit
+    if (personnage.esprit && personnage.esprit.aptitudes && personnage.esprit.aptitudes.length > 0) {
+      personnage.esprit.aptitudes.forEach(aptitudeItem => {
+        personnage.classes.forEach(classe => {
+          if (classe.classeRef == 'wW48swrqmr77awfyADMX' && classe.niveau >= aptitudeItem.niveauObtention) {
+            personnage.aptitudes.push(aptitudeItem);
+          }
+        })
+      })
+    };
 
-          } else {
+    // Remplis la liste de aptitudes complète
+    let count: number = 0;
+    if (!personnage.aptitudes) personnage.aptitudes = [];
 
-            count++;
-            if (count == personnage.aptitudes.length) {
+    if (personnage.aptitudes && personnage.aptitudes.length > 0) {
 
-              // Filter Duplicates
-              personnage.aptitudes = personnage.aptitudes.filter((aptitude, index, self) =>
-                index === self.findIndex((d) => (
-                  d.aptitudeRef === aptitude.aptitudeRef
-                ))
-              )
+      personnage.aptitudes.forEach(async (aptitudeItem) => {
 
-              resolve(personnage);
+        if (!aptitudeItem.aptitude) {
+          const aptitude = await this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef);
+          aptitudeItem.aptitude = aptitude;
+          count++;
+          if (count == personnage.aptitudes.length) {
 
-            }
+            // Filter Duplicates
+            personnage.aptitudes = personnage.aptitudes.filter((aptitude, index, self) =>
+              index === self.findIndex((d) => (
+                d.aptitudeRef === aptitude.aptitudeRef
+              ))
+            )
+
+            return personnage;
+
           }
 
-        });
+        } else {
 
-      } else {
-        resolve(personnage);
-      }
+          count++;
+          if (count == personnage.aptitudes.length) {
 
-    });
+            // Filter Duplicates
+            personnage.aptitudes = personnage.aptitudes.filter((aptitude, index, self) =>
+              index === self.findIndex((d) => (
+                d.aptitudeRef === aptitude.aptitudeRef
+              ))
+            )
+
+            return personnage;
+
+          }
+        }
+
+      });
+
+    } else {
+      return personnage;
+    }
 
   }
 
@@ -1425,140 +1316,128 @@ export class PersonnageService {
     }
   }
 
-  private getAllDons(personnage: Personnage): Promise<Personnage> {
+  private async getAllDons(personnage: Personnage): Promise<Personnage> {
 
-    return new Promise((resolve, reject) => {
+    // Dons Racial
+    if (personnage.race && personnage.race.donsRacialRef && personnage.race.donsRacialRef.length > 0) {
+      personnage.race.donsRacialRef.forEach(donRef => {
+        let donItem: DonItem = new DonItem();
+        donItem.donRef = donRef;
+        personnage.dons.push(donItem);
+      })
+    }
 
-      // Dons Racial
-      if (personnage.race && personnage.race.donsRacialRef && personnage.race.donsRacialRef.length > 0) {
-        personnage.race.donsRacialRef.forEach(donRef => {
-          let donItem: DonItem = new DonItem();
-          donItem.donRef = donRef;
-          personnage.dons.push(donItem);
-        })
-      }
-
-      // Dons Classes
-      if (personnage.classes && personnage.classes.length > 0) {
-        personnage.classes.forEach(classeItem => {
-          if (classeItem.classe.dons && classeItem.classe.dons.length > 0) {
-            classeItem.classe.dons.forEach(donItem => {
-              if (classeItem.niveau >= donItem.niveauObtention) {
-                personnage.dons.push(donItem);
-              }
-            })
-          }
-        });
-      }
-
-      // Dons Domaines
-      if (personnage.domaines && personnage.domaines.length > 0) {
-        personnage.domaines.forEach(domaine => {
-          if (domaine.dons && domaine.dons.length > 0) {
-            domaine.dons.forEach(donItem => {
-              personnage.classes.forEach(classe => {
-                if (classe.classeRef == 'fNqknNgq0QmHzUaYEvEd' && classe.niveau >= donItem.niveauObtention) {
-                  personnage.dons.push(donItem);
-                }
-              })
-            })
-          }
-        });
-      }
-
-      // Dons Esprit
-      if (personnage.esprit && personnage.esprit.dons && personnage.esprit.dons.length > 0) {
-        personnage.esprit.dons.forEach(donItem => {
-          personnage.classes.forEach(classe => {
-            if (classe.classeRef == 'wW48swrqmr77awfyADMX' && classe.niveau >= donItem.niveauObtention) {
+    // Dons Classes
+    if (personnage.classes && personnage.classes.length > 0) {
+      personnage.classes.forEach(classeItem => {
+        if (classeItem.classe.dons && classeItem.classe.dons.length > 0) {
+          classeItem.classe.dons.forEach(donItem => {
+            if (classeItem.niveau >= donItem.niveauObtention) {
               personnage.dons.push(donItem);
             }
           })
-        })
-      };
+        }
+      });
+    }
 
-      // Dons Fourberies (Équivalence)
-      if (personnage.fourberies && personnage.fourberies.length > 0) {
-        personnage.fourberies.forEach(fourberie => {
-          if (fourberie.fourberie && fourberie.fourberie.donsEquivalentRef && fourberie.fourberie.donsEquivalentRef.length > 0) {
-            fourberie.fourberie.donsEquivalentRef.forEach(aptDonRef => {
-              let donItem: DonItem = new DonItem();
-              donItem.niveauObtention = fourberie.niveauObtention;
-              donItem.donRef = aptDonRef;
-              personnage.dons.push(donItem);
-            });
-          }
-        })
-      }
-
-      // Dons Aptitudes (Équivalence)
-      if (personnage.aptitudes && personnage.aptitudes.length > 0) {
-        personnage.aptitudes.forEach(aptitude => {
-          if (aptitude.aptitude.donsEquivalentRef && aptitude.aptitude.donsEquivalentRef.length > 0) {
-            aptitude.aptitude.donsEquivalentRef.forEach(aptDonRef => {
-              let donItem: DonItem = new DonItem();
-              donItem.niveauObtention = aptitude.niveauObtention;
-              donItem.donRef = aptDonRef;
-              personnage.dons.push(donItem);
-            });
-          }
-        })
-      }
-
-      // Remplis la liste de dons complète
-      let count: number = 0;
-      if (!personnage.dons) personnage.dons = [];
-
-      if (personnage.dons && personnage.dons.length > 0) {
-
-        personnage.dons.forEach(donItem => {
-
-          if (!donItem.don) { //Avoid fetching Don if already fetch
-            this.donService.getDonFiche(donItem.donRef).pipe(
-              map(don => {
-
-                donItem.don = don;
-
-              })
-            ).subscribe(response => {
-              count++;
-              if (count == personnage.dons.length) {
-
-                // Filter duplicated
-                personnage.dons = personnage.dons.filter((don, index, self) =>
-                  index === self.findIndex((d) => (
-                    d.donRef === don.donRef
-                  ))
-                )
-
-                resolve(personnage);
+    // Dons Domaines
+    if (personnage.domaines && personnage.domaines.length > 0) {
+      personnage.domaines.forEach(domaine => {
+        if (domaine.dons && domaine.dons.length > 0) {
+          domaine.dons.forEach(donItem => {
+            personnage.classes.forEach(classe => {
+              if (classe.classeRef == 'fNqknNgq0QmHzUaYEvEd' && classe.niveau >= donItem.niveauObtention) {
+                personnage.dons.push(donItem);
               }
-            }, error => {
-              reject(error);
-            });
+            })
+          })
+        }
+      });
+    }
 
-          } else {
-            count++;
-            if (count == personnage.dons.length) {
+    // Dons Esprit
+    if (personnage.esprit && personnage.esprit.dons && personnage.esprit.dons.length > 0) {
+      personnage.esprit.dons.forEach(donItem => {
+        personnage.classes.forEach(classe => {
+          if (classe.classeRef == 'wW48swrqmr77awfyADMX' && classe.niveau >= donItem.niveauObtention) {
+            personnage.dons.push(donItem);
+          }
+        })
+      })
+    };
 
-              // Filter duplicated
-              personnage.dons = personnage.dons.filter((don, index, self) =>
-                index === self.findIndex((d) => (
-                  d.donRef === don.donRef
-                ))
-              )
+    // Dons Fourberies (Équivalence)
+    if (personnage.fourberies && personnage.fourberies.length > 0) {
+      personnage.fourberies.forEach(fourberie => {
+        if (fourberie.fourberie && fourberie.fourberie.donsEquivalentRef && fourberie.fourberie.donsEquivalentRef.length > 0) {
+          fourberie.fourberie.donsEquivalentRef.forEach(aptDonRef => {
+            let donItem = new DonItem();
+            donItem.niveauObtention = fourberie.niveauObtention;
+            donItem.donRef = aptDonRef;
+            personnage.dons.push(donItem);
+          });
+        }
+      })
+    }
 
-              resolve(personnage);
-            }
+    // Dons Aptitudes (Équivalence)
+    if (personnage.aptitudes && personnage.aptitudes.length > 0) {
+      personnage.aptitudes.forEach(aptitude => {
+        if (aptitude.aptitude.donsEquivalentRef && aptitude.aptitude.donsEquivalentRef.length > 0) {
+          aptitude.aptitude.donsEquivalentRef.forEach(aptDonRef => {
+            let donItem = new DonItem();
+            donItem.niveauObtention = aptitude.niveauObtention;
+            donItem.donRef = aptDonRef;
+            personnage.dons.push(donItem);
+          });
+        }
+      })
+    }
+
+    // Remplis la liste de dons complète
+    let count: number = 0;
+    if (!personnage.dons) personnage.dons = [];
+
+    if (personnage.dons && personnage.dons.length > 0) {
+
+      personnage.dons.forEach(async (donItem) => {
+
+        if (!donItem.don) { //Avoid fetching Don if already fetch
+          const don = await this.donService.getDon(donItem.donRef, false, true);
+          donItem.don = don;
+          count++;
+          if (count == personnage.dons.length) {
+
+            // Filter duplicated
+            personnage.dons = personnage.dons.filter((don, index, self) =>
+              index === self.findIndex((d) => (
+                d.donRef === don.donRef
+              ))
+            )
+
+            return personnage;
           }
 
-        });
+        } else {
+          count++;
+          if (count == personnage.dons.length) {
 
-      } else {
-        resolve(personnage);
-      }
+            // Filter duplicated
+            personnage.dons = personnage.dons.filter((don, index, self) =>
+              index === self.findIndex((d) => (
+                d.donRef === don.donRef
+              ))
+            )
 
-    });
+            return personnage;
+          }
+        }
+
+      });
+
+    } else {
+      return personnage;
+    }
 
   }
 
@@ -2228,7 +2107,5 @@ export class PersonnageService {
     return personnage;
 
   }
-
-  //#endregion
 
 }

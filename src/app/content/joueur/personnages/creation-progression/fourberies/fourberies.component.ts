@@ -3,8 +3,8 @@ import { MatStepper } from '@angular/material/stepper';
 
 import { Personnage } from '../../../../../services/personnages/models/personnage';
 import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Fourberie, FourberieItem } from '../../../../../services/fourberies/models/fourberie';
 import { Choix } from '../../../../../services/personnages/models/choix';
+import { IFourberie, FourberieItem } from '../../../../../services/fourberie.service';
 
 @Component({
     selector: 'creation-progression-fourberies',
@@ -24,7 +24,7 @@ export class JoueurPersonnageCreationProgressionFourberiesComponent implements O
     @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
     @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-    selectedFourberies: Fourberie[] = [];
+    selectedFourberies: IFourberie[] = [];
     availableFourberies = [];
     quantity = [];
     currentIndex: number = 0;

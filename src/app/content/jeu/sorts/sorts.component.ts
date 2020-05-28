@@ -3,8 +3,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { JeuSortDetailsDialogComponent } from './details/details.dialog.component';
 import { SortService, ISort } from '../../../services/sort.service';
 
-
-
 @Component({
   selector: 'app-jeu-sorts',
   templateUrl: './sorts.component.html',
@@ -33,13 +31,10 @@ export class JeuSortsComponent implements OnInit {
   }
 
   displayDetails(id) {
-    let dialogRef = this.dialog.open(JeuSortDetailsDialogComponent, {
+    this.dialog.open(JeuSortDetailsDialogComponent, {
       width: 'auto',
       data: id
     });
-
-    // dialogRef.afterClosed().subscribe(result => {
-    // });
   }
 
 }

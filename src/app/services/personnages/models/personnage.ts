@@ -1,19 +1,19 @@
-import { Classe, ClasseItem } from "../../classes/models/classe";
-import { Don, DonItem } from "../../dons/models/don";
+import { ClasseItem } from "../../classes/models/classe";
 import { Race } from "../../races/models/race";
 import { User } from "../../@core/models/user";
-import { AptitudeItem } from "../../aptitudes/models/aptitude";
 import { Esprit } from "../../esprits/models/esprit";
 import { IDieu } from "../../../services/dieu.service";
 import { IAlignement } from "../../alignement.service";
-import { Ordre } from "../../ordres/models/ordre";
 import { Domaine } from "../../domaines/models/domaine";
-import { FourberieItem } from "../../fourberies/models/fourberie";
 import { IEcole } from "../../ecole.service";
 import { SortItem } from "../../sort.service";
 import { IImmunite } from "../../immunite.service";
 import { ResistanceValue } from "../../resistance.service";
 import { StatistiqueValue } from "../../statistique.service";
+import { FourberieItem } from "../../fourberie.service";
+import { IOrdre } from "../../ordre.service";
+import { AptitudeItem } from "../../aptitude.service";
+import { DonItem } from "../../don.service";
 
 export class Personnage {
 
@@ -62,7 +62,7 @@ export class Personnage {
     ecoleRef: string;
     dieu: IDieu;
     dieuRef: string;
-    ordres: Ordre[];
+    ordres: IOrdre[];
     ordresRef: string[];
     domaines: Domaine[];
     domainesRef: string[];

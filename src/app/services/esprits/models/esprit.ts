@@ -1,6 +1,6 @@
-import { DonItem } from "../../dons/models/don";
-import { AptitudeItem } from "../../aptitudes/models/aptitude";
 import { SortItem } from "../../sort.service";
+import { AptitudeItem } from "../../aptitude.service";
+import { DonItem } from "../../don.service";
 
 export class Esprit {
 

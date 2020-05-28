@@ -1,9 +1,9 @@
-import { DonItem } from "../../dons/models/don";
-import { AptitudeItem } from "../../aptitudes/models/aptitude";
 import { Choix } from "../../personnages/models/choix";
 import { IAlignement } from "../../../services/alignement.service";
 import { Classe } from "../../classes/models/classe";
 import { SortItem } from "../../sort.service";
+import { AptitudeItem } from "../../aptitude.service";
+import { DonItem } from "../../don.service";
 
 export class Domaine {
 

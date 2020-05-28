@@ -2,11 +2,9 @@ import { Injectable } from '@angular/core';
 import { Observable, of, forkJoin } from 'rxjs';
 import { map, flatMap, first } from 'rxjs/operators';
 import { FirestoreService } from '../firestore/firestore.service';
-import { AptitudeService } from '../aptitudes/aptitude.service';
-import { DonService } from '../dons/don.service';
-import { SortService, ISort } from '../sort.service';
-import { Aptitude } from '../aptitudes/models/aptitude';
-import { Don } from '../dons/models/don';
+import { AptitudeService, AptitudeItem } from '../aptitude.service';
+import { DonService, DonItem } from '../don.service';
+import { SortService, SortItem } from '../sort.service';
 import { Esprit } from './models/esprit';
 
 @Injectable()
@@ -30,9 +28,9 @@ export class EspritService {
         let observableBatch: Observable<any>[] = [];
         observableBatch.push(of(esprit));
 
-        this.getAptitudees(esprit, observableBatch);
-        this.getSorts(esprit);
-        this.getDons(esprit, observableBatch);
+        this._getAptitudees(esprit);
+        this._getSorts(esprit);
+        this._getDons(esprit);
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
@@ -57,8 +55,6 @@ export class EspritService {
     return this.db.delete('esprits/' + esprit.id, esprit.nom);
   }
 
-
-  //#region Maps
   map(data: Esprit): Esprit {
     var esprit: Esprit = new Esprit();
     for (var key in data) {
@@ -67,42 +63,28 @@ export class EspritService {
     return esprit;
   }
 
-  //#endregion
-
-  //#region Private Methods
-  private getAptitudees(esprit: Esprit, observableBatch: any[]) {
+  private _getAptitudees(esprit: Esprit): void {
     if (esprit.aptitudes && esprit.aptitudes.length > 0) {
-      esprit.aptitudes.forEach(aptitudeItem => {
-        observableBatch.push(this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef).pipe(
-          map((aptitude: Aptitude) => {
-            aptitudeItem.aptitude = aptitude;
-          }),
-          first()
-        ))
+      esprit.aptitudes.forEach(async (aptitudeItem: AptitudeItem) => {
+        aptitudeItem.aptitude = await this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef);
       });
     }
   }
 
-  private getDons(esprit: Esprit, observableBatch: any[]) {
+  private _getDons(esprit: Esprit): void {
     if (esprit.dons && esprit.dons.length > 0) {
-      esprit.dons.forEach(donItem => {
-        observableBatch.push(this.donService.getDon(donItem.donRef).pipe(
-          map((don: Don) => {
-            donItem.don = don;
-          }),
-          first()
-        ))
+      esprit.dons.forEach(async (donItem: DonItem) => {
+        donItem.don = await this.donService.getDon(donItem.donRef);
       });
     }
   }
 
-  private getSorts(esprit: Esprit) {
+  private _getSorts(esprit: Esprit): void {
     if (esprit.sorts && esprit.sorts.length > 0) {
-      esprit.sorts.forEach(async (sortItem) => {
+      esprit.sorts.forEach(async (sortItem: SortItem) => {
         sortItem.sort = await this.sortService.getSort(sortItem.sortRef);
       });
     }
   }
-  //#endregion
 
 }

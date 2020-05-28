@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 
-import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
-import { DonService } from '../../../../services/dons/don.service';
+import { AptitudeService, IAptitude, AptitudeItem } from '../../../../services/aptitude.service';
+import { DonService, IDon, DonItem } from '../../../../services/don.service';
 import { EspritService } from '../../../../services/esprits/esprit-service';
 import { SortService, ISort, SortItem } from '../../../../services/sort.service';
-
-import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
-import { Don, DonItem } from '../../../../services/dons/models/don';
 import { Esprit } from '../../../../services/esprits/models/esprit';
 
 @Component({
@@ -28,15 +25,15 @@ export class OrganisateurEspritsFormComponent implements OnInit {
 
   id: string;
   esprit: Esprit = new Esprit();
-  aptitudes: Aptitude[];
-  dons: Don[];
+  aptitudes: IAptitude[];
+  dons: IDon[];
   sorts: ISort[];
 
   ngOnInit() {
     this.getEsprit();
-    this.getaptitudes();
-    this.getDons();
-    this.getSorts();
+    this._getAptitudes();
+    this._getDons();
+    this._getSorts();
   }
 
   getEsprit() {
@@ -50,19 +47,15 @@ export class OrganisateurEspritsFormComponent implements OnInit {
     });
   }
 
-  getaptitudes() {
-    this.aptitudeService.getAptitudes().subscribe(response => {
-      this.aptitudes = response;
-    })
+  private async _getAptitudes(): Promise<void> {
+    this.aptitudes =  await this.aptitudeService.getAptitudes();
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons =  await this.donService.getDons();
   }
 
-  private async getSorts(): Promise<void> {
+  private async _getSorts(): Promise<void> {
     this.sorts = await this.sortService.getSorts();
   }
 
@@ -82,30 +75,30 @@ export class OrganisateurEspritsFormComponent implements OnInit {
     }
   }
 
-  addAptitude() {
+  public addAptitude(): void {
     if (!this.esprit.aptitudes) this.esprit.aptitudes = [];
     this.esprit.aptitudes.push(new AptitudeItem());
   }
 
-  deleteAptitude(index: number) {
+  public deleteAptitude(index: number): void {
     this.esprit.aptitudes.splice(index, 1);
   }
 
-  addDon() {
+  public addDon(): void {
     if (!this.esprit.dons) this.esprit.dons = [];
     this.esprit.dons.push(new DonItem());
   }
 
-  deleteDon(index: number) {
+  public deleteDon(index: number): void {
     this.esprit.dons.splice(index, 1);
   }
 
-  addSort() {
+  public addSort(): void {
     if (!this.esprit.sorts) this.esprit.sorts = [];
     this.esprit.sorts.push(new SortItem());
   }
 
-  deleteSort(index: number) {
+  public deleteSort(index: number): void {
     this.esprit.sorts.splice(index, 1);
   }
 

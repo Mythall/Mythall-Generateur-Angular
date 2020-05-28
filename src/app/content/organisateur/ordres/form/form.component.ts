@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { OrdreService } from '../../../../services/ordres/ordre.service';
-import { Ordre } from '../../../../services/ordres/models/ordre';
+import { OrdreService, IOrdre } from '../../../../services/ordre.service';
 import { ClasseService } from '../../../../services/classes/classe.service';
 import { Classe } from '../../../../services/classes/models/classe';
 import { IAlignement, AlignementService } from '../../../../services/alignement.service';
@@ -19,26 +18,24 @@ export class OrganisateurOrdresFormComponent implements OnInit {
     private alignementService: AlignementService,
     private classeService: ClasseService,
     private router: Router
-  ){}
+  ) { }
 
   id: string;
-  ordre: Ordre = new Ordre();
+  ordre = {} as IOrdre;
   classes: Classe[];
   alignements: IAlignement[];
 
   ngOnInit() {
-    this.getOrdre();
+    this._getOrdre();
     this.getClasses();
     this._getAlignements();
   }
 
-  getOrdre() {
-    this.activatedRoute.params.subscribe((params: Params) => {
-      if(params['id']){
+  private _getOrdre(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
+      if (params['id']) {
         this.id = params['id'];
-        this.ordreService.getOrdre(this.id).subscribe(response => {
-          this.ordre = this.ordreService.map(response);
-        });
+        this.ordre = await this.ordreService.getOrdre(this.id);
       }
     });
   }
@@ -50,23 +47,21 @@ export class OrganisateurOrdresFormComponent implements OnInit {
   }
 
   private async _getAlignements(): Promise<void> {
-    this.alignements =  await this.alignementService.getAlignements();
+    this.alignements = await this.alignementService.getAlignements();
   }
 
-  submit() {
-    if(this.id){
-      this.ordreService.updateOrdre(this.id, this.ordre.saveState()).then(result => {
-        if(result){
-          this.router.navigate(["/organisateur/ordres/list"]);
-        }
-      });
+  public async submit(): Promise<void> {
+    if (this.id) {
+      const result = await this.ordreService.updateOrdre(this.ordre)
+      if (result) {
+        this.router.navigate(["/organisateur/ordres/list"]);
+      }
     } else {
-      this.ordreService.addOrdre(this.ordre.saveState()).then(result => {
-        if(result){
-          this.router.navigate(["/organisateur/ordres/list"]);
-        }
-      });
-    }    
+      const result = await this.ordreService.addOrdre(this.ordre)
+      if (result) {
+        this.router.navigate(["/organisateur/ordres/list"]);
+      }
+    }
   }
 
 }

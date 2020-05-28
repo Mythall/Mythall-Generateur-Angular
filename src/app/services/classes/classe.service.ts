@@ -1,20 +1,22 @@
 import { Injectable } from '@angular/core';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable, of, forkJoin } from 'rxjs';
 import { mergeMap, map, tap, first } from 'rxjs/operators';
 import { FirestoreService } from '../firestore/firestore.service';
 import { Classe } from './models/classe';
-import { Aptitude } from '../aptitudes/models/aptitude';
-import { Don } from '../dons/models/don';
-import { AptitudeService } from '../aptitudes/aptitude.service';
-import { SortService } from '../sort.service';
+import { AptitudeService, AptitudeItem } from '../aptitude.service';
+import { SortService, SortItem } from '../sort.service';
 import { ImmuniteService } from '../immunite.service';
 import { ResistanceService, ResistanceItem } from '../resistance.service';
 import { StatistiqueService, StatistiqueItem } from '../statistique.service';
+import { DonItem } from '../don.service';
 
 @Injectable()
 export class ClasseService {
+  donService: any;
 
   constructor(
+    private afs: AngularFirestore,
     private db: FirestoreService,
     private aptitudeService: AptitudeService,
     private sortService: SortService,
@@ -41,9 +43,9 @@ export class ClasseService {
         observableBatch.push(of(classe));
 
         this.getMulticlassement(classe, observableBatch);
-        this.getAptitudees(classe, observableBatch);
-        this.getSorts(classe);
-        this.getDons(classe, observableBatch);
+        this._getAptitudees(classe);
+        this._getSorts(classe);
+        this._getDons(classe);
         this._getResistances(classe);
         this._getStatistiques(classe);
         this._getImmunites(classe);
@@ -111,6 +113,14 @@ export class ClasseService {
 
   //#region Private Methods
 
+  public async getClasseSummaryTemp(id: string): Promise<Classe> {
+    const data = await this.afs.doc<Classe>(`classes/${id}`).ref.get();
+    return {
+      id: data.id,
+      ...data.data()
+    } as Classe;
+  }
+
   private getMulticlassement(classe: Classe, observableBatch: any[]) {
     if (classe.multiclassementRef) {
       classe.multiclassementRef.forEach(classeRef => {
@@ -125,35 +135,25 @@ export class ClasseService {
     }
   }
 
-  private getAptitudees(classe: Classe, observableBatch: any[]) {
+  private _getAptitudees(classe: Classe): void {
     if (classe.aptitudes && classe.aptitudes.length > 0) {
-      classe.aptitudes.forEach(aptitudeItem => {
-        observableBatch.push(this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef).pipe(
-          map((aptitude: Aptitude) => {
-            aptitudeItem.aptitude = aptitude;
-          }),
-          first()
-        ))
+      classe.aptitudes.forEach(async (aptitudeItem: AptitudeItem) => {
+        aptitudeItem.aptitude = await this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef);
       });
     }
   }
 
-  private getDons(classe: Classe, observableBatch: any[]) {
+  private _getDons(classe: Classe): void {
     if (classe.dons && classe.dons.length > 0) {
-      classe.dons.forEach(donItem => {
-        observableBatch.push(this.db.doc$('dons/' + donItem.donRef).pipe(
-          map((don: Don) => {
-            donItem.don = don;
-          }),
-          first()
-        ))
+      classe.dons.forEach(async (donItem: DonItem) => {
+        donItem.don = await this.donService.getDon(donItem.donRef);
       });
     }
   }
 
-  private getSorts(classe: Classe) {
+  private _getSorts(classe: Classe): void {
     if (classe.sorts && classe.sorts.length > 0) {
-      classe.sorts.forEach(async (sortItem) => {
+      classe.sorts.forEach(async (sortItem: SortItem) => {
         sortItem.sort = await this.sortService.getSort(sortItem.sortRef);
       });
     }
@@ -167,7 +167,7 @@ export class ClasseService {
     }
   }
 
-  private _getStatistiques(classe: Classe) {
+  private _getStatistiques(classe: Classe): void {
     if (classe.statistiques && classe.statistiques.length > 0) {
       classe.statistiques.forEach(async (statistiqueItem: StatistiqueItem) => {
         statistiqueItem.statistique = await this.statistiqueService.getStatistique(statistiqueItem.statistiqueRef);
@@ -175,7 +175,7 @@ export class ClasseService {
     }
   }
 
-  private _getImmunites(classe: Classe) {
+  private _getImmunites(classe: Classe): void {
     if (classe.immunitesRef) {
       classe.immunitesRef.forEach(async (immuniteRef) => {
         if (!classe.immunites) classe.immunites = [];
@@ -183,7 +183,5 @@ export class ClasseService {
       });
     }
   }
-
-  //#endregion
 
 }

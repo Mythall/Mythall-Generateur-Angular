@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, forkJoin } from 'rxjs';
 import { FirestoreService } from '../firestore/firestore.service';
-import { AptitudeService } from '../aptitudes/aptitude.service';
-import { DonService } from '../dons/don.service';
+import { AptitudeService, AptitudeItem } from '../aptitude.service';
+import { DonService, DonItem } from '../don.service';
 import { SortService } from '../sort.service';
-import { Aptitude } from '../aptitudes/models/aptitude';
-import { Don } from '../dons/models/don';
 import { Domaine } from './models/domaine';
 import { Classe } from '../classes/models/classe';
 import { ClasseService } from '../classes/classe.service';
@@ -41,9 +39,9 @@ export class DomaineService {
 
         this.getClasses(domaine, observableBatch);
         this.getDomaineContraire(domaine, observableBatch);
-        this.getAptitudees(domaine, observableBatch);
-        this.getSorts(domaine);
-        this.getDons(domaine, observableBatch);
+        this._getAptitudees(domaine);
+        this._getSorts(domaine);
+        this._getDons(domaine);
 
         return forkJoin(observableBatch).pipe(
           map((data: any[]) => {
@@ -64,8 +62,8 @@ export class DomaineService {
     return this.db.add('domaines', domaine, domaine.nom);
   }
 
-  updateDomaine(id: string, domaine: Domaine) {
-    return this.db.update('domaines/' + id, domaine, domaine.nom);
+  updateDomaine(domaine: Domaine) {
+    return this.db.update('domaines/' + domaine.id, domaine, domaine.nom);
   }
 
   deleteDomaine(domaine: Domaine) {
@@ -108,32 +106,23 @@ export class DomaineService {
     );
   }
 
-  private getAptitudees(domaine: Domaine, observableBatch: any[]) {
+  private _getAptitudees(domaine: Domaine): void {
     if (domaine.aptitudes && domaine.aptitudes.length > 0) {
-      domaine.aptitudes.forEach(aptitudeItem => {
-        observableBatch.push(this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef).pipe(
-          map((aptitude: Aptitude) => {
-            aptitudeItem.aptitude = aptitude;
-          }),
-          first()
-        ))
+      domaine.aptitudes.forEach(async (aptitudeItem: AptitudeItem) => {
+        aptitudeItem.aptitude = await this.aptitudeService.getAptitude(aptitudeItem.aptitudeRef);
       });
     }
   }
 
-  private getDons(domaine: Domaine, observableBatch: any[]) {
+  private _getDons(domaine: Domaine): void {
     if (domaine.dons && domaine.dons.length > 0) {
-      domaine.dons.forEach(donItem => {
-        observableBatch.push(this.donService.getDon(donItem.donRef).pipe(
-          map((don: Don) => {
-            donItem.don = don;
-          }), first()
-        ))
+      domaine.dons.forEach(async (donItem: DonItem) => {
+        donItem.don = await this.donService.getDon(donItem.donRef);
       });
     }
   }
 
-  private getSorts(domaine: Domaine) {
+  private _getSorts(domaine: Domaine): void {
     if (domaine.sorts && domaine.sorts.length > 0) {
       domaine.sorts.forEach(async (sortItem) => {
         sortItem.sort = await this.sortService.getSort(sortItem.sortRef);

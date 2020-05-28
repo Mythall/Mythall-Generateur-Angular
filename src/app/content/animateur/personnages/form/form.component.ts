@@ -2,16 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingDialogComponent } from '../../../../layout/dialogs/loading/loading.dialog.component';
-import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
-import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
+import { AptitudeService, IAptitude, AptitudeItem } from '../../../../services/aptitude.service';
 import { PersonnageService } from '../../../../services/personnages/personnage.service';
 import { Personnage } from '../../../../services/personnages/models/personnage';
 import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 import { ClasseService } from '../../../../services/classes/classe.service';
 import { Classe, ClasseItem } from '../../../../services/classes/models/classe';
 import { IDieu, DieuService } from '../../../../services/dieu.service';
-import { DonService } from '../../../../services/dons/don.service';
-import { Don, DonItem } from '../../../../services/dons/models/don';
+import { DonService, IDon, DonItem } from '../../../../services/don.service';
 import { EspritService } from '../../../../services/esprits/esprit-service';
 import { Esprit } from '../../../../services/esprits/models/esprit';
 import { RaceService } from '../../../../services/races/race.service';
@@ -19,13 +17,10 @@ import { Race } from '../../../../services/races/models/race';
 import { SortService, ISort, SortItem } from '../../../../services/sort.service';
 import { UserService } from '../../../../services/@core/user.service';
 import { User } from '../../../../services/@core/models/user';
-import { Ordre } from '../../../../services/ordres/models/ordre';
-import { OrdreService } from '../../../../services/ordres/ordre.service';
-import { Fourberie, FourberieItem } from '../../../../services/fourberies/models/fourberie';
-import { FourberieService } from '../../../../services/fourberies/fourberie.service';
+import { OrdreService, IOrdre } from '../../../../services/ordre.service';
+import { FourberieService, IFourberie, FourberieItem } from '../../../../services/fourberie.service';
 import { DomaineService } from '../../../../services/domaines/domaine-service';
 import { Domaine } from '../../../../services/domaines/models/domaine';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-animateur-personnages-form',
@@ -53,18 +48,16 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     private router: Router,
   ) { }
 
-  private subscriptions: Subscription[] = [];
-
   id: string;
   personnage: Personnage = new Personnage();
   classes: Classe[];
   alignements: IAlignement[];
-  aptitudes: Aptitude[];
+  aptitudes: IAptitude[];
   dieux: IDieu[];
   domaines: Domaine[];
-  dons: Don[];
-  fourberies: Fourberie[];
-  ordres: Ordre[];
+  dons: IDon[];
+  fourberies: IFourberie[];
+  ordres: IOrdre[];
   races: Race[];
   sorts: ISort[];
   users: User[];
@@ -74,13 +67,13 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     this.getPersonnage();
     this.getClasses();
     this._getAlignements();
-    this.getAptitudes();
+    this._getAptitudes();
     this.getDomaines();
-    this.getDons();
+    this._getDons();
     this._getDieux();
     this.getEsprits();
-    this.getFourberies();
-    this.getOrdres();
+    this._getFourberies();
+    this._getOrdres();
     this.getRaces();
     this._getSorts();
     this.getUsers();
@@ -107,10 +100,8 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     this.alignements = await this.alignementService.getAlignements();
   }
 
-  getAptitudes() {
-    this.aptitudeService.getAptitudes().subscribe(response => {
-      this.aptitudes = response;
-    });
+  private async _getAptitudes(): Promise<void> {
+    this.aptitudes =  await this.aptitudeService.getAptitudes();
   }
 
   private async _getDieux(): Promise<void> {
@@ -123,10 +114,8 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     });
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    });
+  private async _getDons(): Promise<void> {
+    this.dons = await this.donService.getDons();
   }
 
   getEsprits() {
@@ -135,16 +124,12 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     })
   }
 
-  getFourberies() {
-    this.fourberieService.getFourberies().subscribe(response => {
-      this.fourberies = response;
-    })
+  private async _getFourberies(): Promise<void> {
+    this.fourberies = await this.fourberieService.getFourberies();
   }
 
-  getOrdres() {
-    this.ordreService.getOrdres().subscribe(response => {
-      this.ordres = response;
-    })
+  private async _getOrdres(): Promise<void> {
+    this.ordres = await this.ordreService.getOrdres();
   }
 
   getRaces() {
@@ -191,19 +176,19 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     this.personnage.classes.splice(index, 1);
   }
 
-  addDon() {
+  public addDon(): void {
     this.personnage.dons.push(new DonItem());
   }
 
-  deleteDon(index: number) {
+  public deleteDon(index: number): void {
     this.personnage.dons.splice(index, 1);
   }
 
-  addAptitude() {
+  public addAptitude(): void {
     this.personnage.aptitudes.push(new AptitudeItem());
   }
 
-  deleteAptitude(index: number) {
+  public deleteAptitude(index: number): void {
     this.personnage.aptitudes.splice(index, 1);
   }
 
@@ -215,11 +200,11 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     this.personnage.sorts.splice(index, 1);
   }
 
-  addFourberie() {
+  public addFourberie(): void {
     this.personnage.fourberies.push(new FourberieItem());
   }
 
-  deleteFourberie(index: number) {
+  public deleteFourberie(index: number): void {
     this.personnage.fourberies.splice(index, 1);
   }
 

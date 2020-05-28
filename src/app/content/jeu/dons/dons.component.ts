@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
-import { DonService } from '../../../services/dons/don.service';
-import { Don } from '../../../services/dons/models/don';
+import { DonService, IDon } from '../../../services/don.service';
 
 @Component({
   selector: 'app-jeu-dons',
@@ -12,22 +10,16 @@ export class JeuDonsComponent implements OnInit {
 
   constructor(
     private donService: DonService
-  ){}
+  ) { }
 
-  dons: Don[];
+  dons: IDon[];
 
-  ngOnInit(){
-
-    // Get Dons
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    });
-
+  ngOnInit() {
+    this._getDons();
   }
 
-  scroll(el) {
-    console.log(el);
-    el.scrollIntoView();
-}
+  private async _getDons(): Promise<void> {
+    this.dons = await this.donService.getDons();
+  }
 
 }

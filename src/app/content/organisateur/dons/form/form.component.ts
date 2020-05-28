@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { ClasseService } from '../../../../services/classes/classe.service';
-import { DonService } from '../../../../services/dons/don.service';
+import { DonService, IDon, DonCategories } from '../../../../services/don.service';
 import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
 import { RaceService } from '../../../../services/races/race.service';
 import { ResistanceService, IResistance, ResistanceItem } from '../../../../services/resistance.service';
 import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
 import { Classe, ClasseAuthorise } from '../../../../services/classes/models/classe';
-import { Don, DonCategories } from '../../../../services/dons/models/don';
 import { Race } from '../../../../services/races/models/race';
 
 @Component({
@@ -29,8 +28,8 @@ export class OrganisateurDonsFormComponent implements OnInit {
   ) { }
 
   id: string;
-  don: Don = new Don();
-  dons: Don[];
+  don = {} as IDon;
+  dons: IDon[];
   categories: string[] = DonCategories;
   classes: Classe[];
   races: Race[];
@@ -39,8 +38,8 @@ export class OrganisateurDonsFormComponent implements OnInit {
   immunites: IImmunite[];
 
   ngOnInit() {
-    this.getDon();
-    this.getDons();
+    this._getDon();
+    this._getDons();
     this.getClasses();
     this._getImmunites();
     this.getRaces();
@@ -48,21 +47,17 @@ export class OrganisateurDonsFormComponent implements OnInit {
     this._getStatistiques();
   }
 
-  getDon() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getDon(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.donService.getDon(this.id).subscribe(response => {
-          this.don = response;
-        });
+        this.don = await this.donService.getDon(this.id);
       }
     });
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons = await this.donService.getDons();
   }
 
   getClasses() {
@@ -82,26 +77,24 @@ export class OrganisateurDonsFormComponent implements OnInit {
   }
 
   private async _getResistances(): Promise<void> {
-    this.resistances =  await this.resistanceService.getResistances();
+    this.resistances = await this.resistanceService.getResistances();
   }
 
   private async _getStatistiques(): Promise<void> {
-    this.statistiques =  await this.statistiqueService.getStatistiques();
+    this.statistiques = await this.statistiqueService.getStatistiques();
   }
-  
-  submit() {
+
+  public async submit(): Promise<void> {
     if (this.id) {
-      this.donService.updateDon(this.id, this.don.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/dons/list"]);
-        }
-      });
+      const result = await this.donService.updateDon(this.don);
+      if (result) {
+        this.router.navigate(["/organisateur/dons/list"]);
+      }
     } else {
-      this.donService.addDon(this.don.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/dons/list"]);
-        }
-      });
+      const result = await this.donService.addDon(this.don);
+      if (result) {
+        this.router.navigate(["/organisateur/dons/list"]);
+      }
     }
   }
 
@@ -114,21 +107,21 @@ export class OrganisateurDonsFormComponent implements OnInit {
     this.don.classesAutorise.splice(index, 1);
   }
 
-  addResistance() {
+  public addResistance(): void {
     if (!this.don.resistances) this.don.resistances = [];
     this.don.resistances.push(new ResistanceItem());
   }
 
-  deleteResistance(index: number) {
+  public deleteResistance(index: number): void {
     this.don.resistances.splice(index, 1);
   }
 
-  addStatistique() {
+  public addStatistique(): void {
     if (!this.don.statistiques) this.don.statistiques = [];
     this.don.statistiques.push(new StatistiqueItem());
   }
 
-  deleteStatistique(index: number) {
+  public deleteStatistique(index: number): void {
     this.don.statistiques.splice(index, 1);
   }
 

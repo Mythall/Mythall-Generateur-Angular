@@ -3,14 +3,11 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ClasseService } from '../../../../services/classes/classe.service';
 import { Classe, ClasseTypes, ClasseSort } from '../../../../services/classes/models/classe';
-import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
-import { Don, DonItem, DonCategories } from '../../../../services/dons/models/don';
 import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 import { ChoixTypes, Choix } from '../../../../services/personnages/models/choix';
-import { Fourberie } from '../../../../services/fourberies/models/fourberie';
-import { FourberieService } from '../../../../services/fourberies/fourberie.service';
-import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
-import { DonService } from '../../../../services/dons/don.service';
+import { FourberieService, IFourberie } from '../../../../services/fourberie.service';
+import { AptitudeService, IAptitude, AptitudeItem } from '../../../../services/aptitude.service';
+import { DonService, IDon, DonCategories, DonItem } from '../../../../services/don.service';
 import { SortService, ISort, SortItem } from '../../../../services/sort.service';
 import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
 import { ResistanceService, IResistance, ResistanceItem } from '../../../../services/resistance.service';
@@ -41,10 +38,10 @@ export class OrganisateurClassesFormComponent implements OnInit {
   classe: Classe = new Classe();
   classes: Observable<Classe[]>;
   alignements: IAlignement[];
-  aptitudes: Aptitude[];
-  dons: Don[];
+  aptitudes: IAptitude[];
+  dons: IDon[];
   sorts: ISort[];
-  fourberies: Fourberie[];
+  fourberies: IFourberie[];
   choix: string[] = ChoixTypes;
   categories: string[] = DonCategories;
   resistances: IResistance[];
@@ -56,11 +53,11 @@ export class OrganisateurClassesFormComponent implements OnInit {
   ngOnInit() {
     this.getClasse();
     this.getClasses()
-    this.getaptitudes();
+    this._getAptitudes();
     this._getAlignements();
-    this.getDons();
+    this._getDons();
     this._getSorts();
-    this.getFourberies();
+    this._getFourberies();
     this._getResistances();
     this._getStatistiques();
     this._getImmunites();
@@ -85,22 +82,16 @@ export class OrganisateurClassesFormComponent implements OnInit {
     this.alignements = await this.alignementService.getAlignements();
   }
 
-  getaptitudes() {
-    this.aptitudeService.getAptitudes().subscribe(response => {
-      this.aptitudes = response;
-    })
+  private async _getAptitudes(): Promise<void> {
+    this.aptitudes =  await this.aptitudeService.getAptitudes();
   }
 
-  getFourberies() {
-    this.fourberieService.getFourberies().subscribe(response => {
-      this.fourberies = response;
-    })
+  private async _getFourberies(): Promise<void> {
+    this.fourberies = await this.fourberieService.getFourberies();
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons =  await this.donService.getDons();
   }
 
   private async _getSorts(): Promise<void> {
@@ -135,21 +126,21 @@ export class OrganisateurClassesFormComponent implements OnInit {
     }
   }
 
-  addAptitude() {
+  public addAptitude(): void {
     if (!this.classe.aptitudes) this.classe.aptitudes = [];
     this.classe.aptitudes.push(new AptitudeItem());
   }
 
-  deleteAptitude(index: number) {
+  public deleteAptitude(index: number): void {
     this.classe.aptitudes.splice(index, 1);
   }
 
-  addDon() {
+  public addDon(): void {
     if (!this.classe.dons) this.classe.dons = [];
     this.classe.dons.push(new DonItem());
   }
 
-  deleteDon(index: number) {
+  public deleteDon(index: number): void {
     this.classe.dons.splice(index, 1);
   }
 
@@ -187,21 +178,21 @@ export class OrganisateurClassesFormComponent implements OnInit {
     delete this.classe.choix[index].categorie;
   }
 
-  addResistance() {
+  public addResistance(): void {
     if (!this.classe.resistances) this.classe.resistances = [];
     this.classe.resistances.push(new ResistanceItem());
   }
 
-  deleteResistance(index: number) {
+  public deleteResistance(index: number): void {
     this.classe.resistances.splice(index, 1);
   }
 
-  addStatistique() {
+  public addStatistique(): void {
     if (!this.classe.statistiques) this.classe.statistiques = [];
     this.classe.statistiques.push(new StatistiqueItem());
   }
 
-  deleteStatistique(index: number) {
+  public deleteStatistique(index: number): void {
     this.classe.statistiques.splice(index, 1);
   }
 

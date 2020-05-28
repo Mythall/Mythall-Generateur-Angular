@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { OrdreService } from '../../../../services/ordres/ordre.service';
-import { Ordre } from '../../../../services/ordres/models/ordre';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
+import { OrdreService, IOrdre } from '../../../../services/ordre.service';
 
 @Component({
   selector: 'app-organisateur-ordres-list',
@@ -13,31 +11,31 @@ import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.
 export class OrganisateurOrdresListComponent implements OnInit {
 
   constructor(
-    private ordreService: OrdreService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private ordreService: OrdreService    
   ) { }
 
-  ordres: Observable<Ordre[]>;
+  ordres: IOrdre[];
 
   ngOnInit() {
-    this.ordres = this.ordreService.getOrdres();
+    this._getOrdres();
   }
 
-  confirmDelete(item: Ordre) {
+  private async _getOrdres(): Promise<void> {
+    this.ordres = await this.ordreService.getOrdres();
+  }
+
+  public confirmDelete(item: IOrdre): void {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async (result) => {
       if (result) {
-        this.delete(result);
+        await this.ordreService.deleteOrdre(result);
       }
     });
-  }
-
-  delete(ordre: Ordre) {
-    this.ordreService.deleteOrdre(ordre);
   }
 
 }

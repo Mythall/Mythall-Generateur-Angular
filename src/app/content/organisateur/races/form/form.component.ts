@@ -4,15 +4,13 @@ import { Observable } from 'rxjs';
 import { RaceService } from '../../../../services/races/race.service';
 import { Race } from '../../../../services/races/models/race';
 import { ClasseService } from '../../../../services/classes/classe.service';
-import { DonService } from '../../../../services/dons/don.service';
+import { DonService, IDon } from '../../../../services/don.service';
 import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
 import { ResistanceService, IResistance, ResistanceItem }  from '../../../../services/resistance.service';
 import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
 import { SortService, ISort } from '../../../../services/sort.service';
 import { Classe } from '../../../../services/classes/models/classe';
-import { Don } from '../../../../services/dons/models/don';
-import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
-import { Aptitude } from '../../../../services/aptitudes/models/aptitude';
+import { AptitudeService, IAptitude } from '../../../../services/aptitude.service';
 import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 
 @Component({
@@ -40,8 +38,8 @@ export class OrganisateurRacesFormComponent implements OnInit {
   race: Race = new Race();
   classes: Observable<Classe[]>;
   alignements: IAlignement[];
-  aptitudes: Aptitude[];
-  dons: Don[];
+  aptitudes: IAptitude[];
+  dons: IDon[];
   resistances: IResistance[];
   statistiques: IStatistique[];
   immunites: IImmunite[];
@@ -51,8 +49,8 @@ export class OrganisateurRacesFormComponent implements OnInit {
     this.getRace();
     this._getAlignements();
     this.getClasses();
-    this.getAptitudes();
-    this.getDons();
+    this._getAptitudes();
+    this._getDons();
     this._getResistances();
     this._getStatistiques();
     this._getImmunites();
@@ -78,16 +76,12 @@ export class OrganisateurRacesFormComponent implements OnInit {
     this.classes = this.classeService.getClasses();
   }
 
-  getAptitudes() {
-    this.aptitudeService.getAptitudes().subscribe(response => {
-      this.aptitudes = response;
-    })
+  private async _getAptitudes(): Promise<void> {
+    this.aptitudes =  await this.aptitudeService.getAptitudes();
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons =  await this.donService.getDons();
   }
 
   private async _getResistances(): Promise<void> {
@@ -122,21 +116,21 @@ export class OrganisateurRacesFormComponent implements OnInit {
     }    
   }
 
-  addResistance(){
+  public addResistance(): void {
     if(!this.race.resistances) this.race.resistances = [];
     this.race.resistances.push(new ResistanceItem());
   }
 
-  deleteResistance(index: number){
+  public deleteResistance(index: number): void {
     this.race.resistances.splice(index, 1);
   }
 
-  addStatistique(){
+  public addStatistique(): void {
     if(!this.race.statistiques) this.race.statistiques = [];
     this.race.statistiques.push(new StatistiqueItem());
   }
 
-  deleteStatistique(index: number){
+  public deleteStatistique(index: number): void {
     this.race.statistiques.splice(index, 1);
   }
 
