@@ -1,35 +1,98 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { FirestoreService } from '../firestore/firestore.service';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
-import { LoadingDialogComponent } from '../../layout/dialogs/loading/loading.dialog.component';
-import { Personnage } from './models/personnage';
-import { AptitudeService, AptitudeItem } from '../aptitude.service';
-import { ClasseService } from '../classes/classe.service';
-import { Classe, ClasseItem } from '../classes/models/classe';
-import { DonService, IDon, DonItem } from '../don.service';
-import { RaceService } from '../races/race.service';
-import { UserService } from '../@core/user.service';
-import { StatistiqueService, StatistiqueValue, StatistiqueIds } from '../statistique.service';
-import { DomaineService } from '../domaines/domaine-service';
-import { IDieu, DieuService } from '../dieu.service';
-import { IAlignement, AlignementService } from '../alignement.service';
-import { EspritService } from '../esprits/esprit-service';
-import { SortService, SortItem, ISort } from '../sort.service';
-import { OrdreService, IOrdre } from '../ordre.service';
-import { FourberieService, IFourberie } from '../fourberie.service';
-import { Esprit } from '../esprits/models/esprit';
-import { Choix } from './models/choix';
-import { Domaine } from '../domaines/models/domaine';
-import { EcoleService, IEcole } from '../ecole.service';
-import { ResistanceValue } from '../resistance.service';
+import { LoadingDialogComponent } from '../layout/dialogs/loading/loading.dialog.component';
+import { AptitudeService, AptitudeItem } from './aptitude.service';
+import { ClasseService, ClasseItem, IClasse } from './classe.service';
+import { DonService, IDon, DonItem } from './don.service';
+import { RaceService, IRace } from './race.service';
+import { UserService, IUser } from './@core/user.service';
+import { StatistiqueService, StatistiqueValue, StatistiqueIds } from './statistique.service';
+import { DomaineService, IDomaine } from './domaine.service';
+import { IDieu, DieuService } from './dieu.service';
+import { IAlignement, AlignementService } from './alignement.service';
+import { EspritService, IEsprit } from './esprit.service';
+import { SortService, SortItem, ISort } from './sort.service';
+import { OrdreService, IOrdre } from './ordre.service';
+import { FourberieService, IFourberie, FourberieItem } from './fourberie.service';
+import { EcoleService, IEcole } from './ecole.service';
+import { ResistanceValue } from './resistance.service';
+import { IImmunite } from './immunite.service';
+
+export interface IPersonnage extends IPersonnageDB {
+  id: string;
+  user: IUser;
+  alignement: IAlignement;
+  race: IRace;
+  statistiques: StatistiqueValue[];
+  capaciteSpeciales: StatistiqueValue[]; //Display Only, not saved
+  resistances: ResistanceValue[];
+  immunites: IImmunite[];
+  esprit: IEsprit;
+  ecole: IEcole;
+  dieu: IDieu;
+  ordres: IOrdre[];
+  domaines: IDomaine[];
+  niveauEffectif: number;
+  niveauReel: number;
+  niveauProfane: number;
+  niveauDivin: number;
+  niveauDisponible: number;
+}
+
+export interface IPersonnageDB {
+  nom: string;
+  userRef: string;
+  classes: ClasseItem[];
+  alignementRef: string;
+  dons: DonItem[];
+  aptitudes: AptitudeItem[];
+  sorts: SortItem[];
+  fourberies: FourberieItem[];
+  raceRef: string;
+  gnEffectif: number;
+  espritRef: string;
+  ecoleRef: string;
+  dieuRef: string;
+  ordresRef: string[];
+  domainesRef: string[];
+  vie: number;
+}
+
+export class Choix {
+
+  constructor() {
+    this.type = '';
+    this.quantite = 1;
+    this.niveauObtention = 0;
+    this.ref = [];
+  }
+
+  type: string;
+  quantite: number;
+  niveauObtention: number;
+  categorie?: string;
+  domaine: boolean;
+  ref: string[]; // Référence pour choix de don, sort, aptitude, fourberie
+}
+
+export const ChoixTypes: string[] = [
+  'aptitude',
+  'connaissance',
+  'don',
+  'domaine',
+  'ecole',
+  'esprit',
+  'fourberie',
+  'ordre',
+  'sort'
+]
 
 @Injectable()
 export class PersonnageService {
 
   constructor(
-    private db: FirestoreService,
+    private afs: AngularFirestore,
     private dialog: MatDialog,
     private alignementService: AlignementService,
     private aptitudeService: AptitudeService,
@@ -47,200 +110,277 @@ export class PersonnageService {
     private userService: UserService
   ) { }
 
-  getPersonnages(): Observable<Personnage[]> {
-    return this.db.colWithIds$('personnages', ref => ref.orderBy('createdAt'));
-  }
-
-  getPersonnage(id: string): Observable<Personnage> {
-    return this.db.doc$('personnages/' + id);
-  }
-
-  addPersonnage(personnage: Personnage) {
-    return this.db.add('personnages', personnage, personnage.nom);
-  }
-
-  updatePersonnage(id: string, personnage: Personnage) {
-    return this.db.update('personnages/' + id, personnage, personnage.nom);
-  }
-
-  deletePersonnage(personnage: Personnage) {
-    return this.db.delete('personnages/' + personnage.id, personnage.nom);
-  }
-
-  getPersonnagesByUser(userUid: string): Observable<Personnage[]> {
-    return this.db.colWithIds$('personnages', ref => ref.where('userRef', '==', userUid).orderBy('createdAt'));
-  }
-
-  mapDefault(data: Personnage): Personnage {
-    var personnage: Personnage = new Personnage();
-    for (var key in data) {
-      personnage[key] = data[key]
+  public async getPersonnages(userId?: string): Promise<IPersonnage[]> {
+    let query = this.afs.collection<IPersonnage>('personnages').ref.orderBy('createdAt');
+    if (userId) {
+      query = query.where('userRef', '==', userId);
     }
+    return (await query.get()).docs.map(doc => {
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as IPersonnage;
+    });
+  }
+
+  public async getPersonnage(id: string): Promise<IPersonnage> {
+    const data = await this.afs.doc<IPersonnage>(`personnages/${id}`).ref.get();
+    return {
+      id: data.id,
+      ...data.data()
+    } as IPersonnage;
+  }
+
+  public async addPersonnage(personnage: IPersonnage): Promise<IPersonnage> {
+    const data = await this.afs.collection(`personnages`).add(this._saveState(personnage));
+    return { id: data.id, ...personnage } as IPersonnage;
+  }
+
+  public async updatePersonnage(personnage: IPersonnage): Promise<IPersonnage> {
+    await this.afs.doc<IPersonnage>(`personnages/${personnage.id}`).update(this._saveState(personnage));
     return personnage;
   }
 
-  buildPromise(data: Personnage): Promise<Personnage> {
+  public async deletePersonnage(id: string): Promise<boolean> {
+    await this.afs.doc<IPersonnage>(`personnages/${id}`).delete();
+    return true;
+  }
 
-    return new Promise((resolve, reject) => {
+  private _saveState(item: IPersonnage): IPersonnageDB {
+    if (!item.dieuRef) item.dieuRef = '';
+    if (!item.ecoleRef) item.ecoleRef = '';
+    if (!item.espritRef) item.espritRef = '';
+    if (!item.ordresRef) item.ordresRef = [];
+    if (!item.domainesRef) item.domainesRef = [];
 
-      // Map Personnage
-      var personnage: Personnage = new Personnage();
-      for (var key in data) {
-        personnage[key] = data[key]
+    // Filter Out Race Dons / Sorts / Fourberies / Aptitudes
+    if (item.race) {
+
+      // Race
+      if (item.dons && item.dons.length > 0) {
+        let donsTemporaire: DonItem[] = [];
+        item.dons.forEach(don => {
+          let found: boolean = false;
+          item.race.donsRacialRef.forEach(id => {
+            if (id == don.donRef) {
+              found = true;
+            }
+          });
+
+          if (!found) {
+            donsTemporaire.push(don);
+          }
+
+        });
+        item.dons = donsTemporaire;
       }
 
-      this.buildPersonnage(personnage).then(completedPersonnage => {
-        resolve(completedPersonnage);
-      }).catch(error => {
-        console.log(error);
-        reject(error);
+      // Sorts
+      if (item.sorts && item.sorts.length > 0) {
+        let sortsTemporaire: SortItem[] = [];
+        item.sorts.forEach(sort => {
+          let found: boolean = false;
+          item.race.sortsRacialRef.forEach(id => {
+            if (id == sort.sortRef) {
+              found = true;
+            }
+          });
+
+          if (!found) {
+            sortsTemporaire.push(sort);
+          }
+
+        });
+        item.sorts = sortsTemporaire;
+      }
+
+      // Aptitudes
+      if (item.aptitudes && item.aptitudes.length > 0) {
+        let aptitudesTemporaire: AptitudeItem[] = [];
+        item.aptitudes.forEach(aptitude => {
+          let found: boolean = false;
+          item.race.aptitudesRacialRef.forEach(id => {
+            if (id == aptitude.aptitudeRef) {
+              found = true;
+            }
+          });
+
+          if (!found) {
+            aptitudesTemporaire.push(aptitude);
+          }
+
+        });
+        item.aptitudes = aptitudesTemporaire;
+      }
+
+    }
+
+    //Filter Out Populated Objects
+    item.classes.forEach(classeItem => {
+      classeItem.classe = null;
+    });
+    item.dons.forEach(donItem => {
+      donItem.don = null;
+    });
+    item.aptitudes.forEach(aptitudeItem => {
+      aptitudeItem.aptitude = null;
+    });
+    item.sorts.forEach(sortItem => {
+      sortItem.sort = null;
+    });
+    item.fourberies.forEach(fourberieItem => {
+      fourberieItem.fourberie = null;
+    });
+
+    return {
+      nom: item.nom,
+      classes: item.classes.map((obj) => { return { ...obj } }),
+      alignementRef: item.alignementRef,
+      dons: item.dons.map((obj) => { return { ...obj } }),
+      aptitudes: item.aptitudes.map((obj) => { return { ...obj } }),
+      sorts: item.sorts.map((obj) => { return { ...obj } }),
+      fourberies: item.fourberies.map((obj) => { return { ...obj } }),
+      raceRef: item.raceRef,
+      userRef: item.userRef,
+      ecoleRef: item.ecoleRef,
+      espritRef: item.espritRef,
+      dieuRef: item.dieuRef,
+      ordresRef: item.ordresRef,
+      domainesRef: item.domainesRef,
+      vie: item.vie,
+      gnEffectif: item.gnEffectif,
+    }
+  }
+
+
+  public async getChoixPersonnage(personnage: IPersonnage, progressingClasse: ClasseItem): Promise<Choix[]> {
+
+    let listChoix: Choix[] = [];
+
+    // Dons aux 3 niveaux & don niveau 1
+    if (personnage.niveauReel % 3 == 0 || personnage.niveauReel == 1) {
+
+      const don: Choix = new Choix();
+      don.type = 'don';
+      don.categorie = 'Normal';
+      don.niveauObtention = personnage.niveauReel;
+      don.quantite = 1;
+
+      listChoix.push(Object.assign({}, don));
+
+    }
+
+    // Don Racial Humain
+    if (personnage.raceRef == 'RkYWeQrxFkmFaepDM09n' && personnage.niveauReel == 1) {
+
+      const don: Choix = new Choix();
+      don.type = 'don';
+      don.categorie = 'Normal';
+      don.niveauObtention = 1;
+      don.quantite = 1;
+
+      listChoix.push({ ...don });
+
+    }
+
+    // Don Racial Elf
+    if (personnage.raceRef == '5hteaYQ4K8J1MaAvU9Zh' && personnage.niveauReel == 1) {
+
+      const don: Choix = new Choix();
+      don.type = 'don';
+      don.categorie = 'Connaissance';
+      don.niveauObtention = 1;
+      don.quantite = 1;
+
+      listChoix.push({ ...don });
+
+    }
+
+    // Get Choix de Classe
+    if (personnage.classes) {
+      personnage.classes.forEach(classeItem => {
+
+        // Choix de classe
+        if (classeItem.classeRef == progressingClasse.classeRef && classeItem.niveau == progressingClasse.niveau) {
+          classeItem.classe.choix.forEach(choix => {
+            if (choix.niveauObtention == progressingClasse.niveau) {
+              listChoix.push(choix);
+            }
+          });
+        }
+
       });
+    }
 
-    });
+    // Domaines
+    if (personnage.domaines && personnage.domaines.length > 0) {
+      personnage.domaines.forEach(domaine => {
 
-  }
+        // Prêtre
+        if (progressingClasse.classeRef == 'fNqknNgq0QmHzUaYEvEd') {
+          domaine.choix.forEach(choixDomaine => {
+            if (choixDomaine.niveauObtention == progressingClasse.niveau) {
+              listChoix.push(choixDomaine);
+            }
+          });
+        }
 
-  getChoixPersonnage(personnage: Personnage, progressingClasse: ClasseItem): Promise<Choix[]> {
+      });
+    }
 
-    return new Promise((resolve) => {
+    // ...
 
-      let listChoix: Choix[] = [];
-
-      // Dons aux 3 niveaux & don niveau 1
-      if (personnage.niveauReel % 3 == 0 || personnage.niveauReel == 1) {
-
-        const don: Choix = new Choix();
-        don.type = 'don';
-        don.categorie = 'Normal';
-        don.niveauObtention = personnage.niveauReel;
-        don.quantite = 1;
-
-        listChoix.push(Object.assign({}, don));
-
-      }
-
-      // Don Racial Humain
-      if (personnage.raceRef == 'RkYWeQrxFkmFaepDM09n' && personnage.niveauReel == 1) {
-
-        const don: Choix = new Choix();
-        don.type = 'don';
-        don.categorie = 'Normal';
-        don.niveauObtention = 1;
-        don.quantite = 1;
-
-        listChoix.push(Object.assign({}, don));
-
-      }
-
-      // Don Racial Elf
-      if (personnage.raceRef == '5hteaYQ4K8J1MaAvU9Zh' && personnage.niveauReel == 1) {
-
-        const don: Choix = new Choix();
-        don.type = 'don';
-        don.categorie = 'Connaissance';
-        don.niveauObtention = 1;
-        don.quantite = 1;
-
-        listChoix.push(Object.assign({}, don));
-
-      }
-
-      // Get Choix de Classe
-      if (personnage.classes) {
-        personnage.classes.forEach(classeItem => {
-
-          // Choix de classe
-          if (classeItem.classeRef == progressingClasse.classeRef && classeItem.niveau == progressingClasse.niveau) {
-            classeItem.classe.choix.forEach(choix => {
-              if (choix.niveauObtention == progressingClasse.niveau) {
-                listChoix.push(choix);
-              }
-            });
-          }
-
-        });
-      }
-
-      // Domaines
-      if (personnage.domaines && personnage.domaines.length > 0) {
-        personnage.domaines.forEach(domaine => {
-
-          // Prêtre
-          if (progressingClasse.classeRef == 'fNqknNgq0QmHzUaYEvEd') {
-            domaine.choix.forEach(choixDomaine => {
-              if (choixDomaine.niveauObtention == progressingClasse.niveau) {
-                listChoix.push(choixDomaine);
-              }
-            });
-          }
-
-        });
-      }
-
-      // ...
-
-      // console.log(listChoix);
-      resolve(listChoix);
-
-    });
+    return listChoix;
 
   }
 
-  getChoixClasse(personnage: Personnage, progressingClasse: ClasseItem): Promise<Choix[]> {
+  public getChoixClasse(personnage: IPersonnage, progressingClasse: ClasseItem): Choix[] {
 
-    return new Promise((resolve) => {
+    let listChoix: Choix[] = [];
 
-      let listChoix: Choix[] = [];
+    // Get All Classes Choices
+    if (personnage.classes) {
+      personnage.classes.forEach(classeItem => {
 
-      // Get All Classes Choices
-      if (personnage.classes) {
-        personnage.classes.forEach(classeItem => {
+        // Choix de classe
+        if (classeItem.classeRef == progressingClasse.classeRef && classeItem.niveau == progressingClasse.niveau) {
+          classeItem.classe.choix.forEach(choix => {
+            listChoix.push(choix);
+          });
+        }
 
-          // Choix de classe
-          if (classeItem.classeRef == progressingClasse.classeRef && classeItem.niveau == progressingClasse.niveau) {
-            classeItem.classe.choix.forEach(choix => {
+      });
+    }
+
+    return listChoix;
+
+  }
+
+  public getChoixDomaine(personnage: IPersonnage, progressingClasse: ClasseItem): Choix[] {
+
+    let listChoix: Choix[] = [];
+
+    // Get All Classes Choices
+    if (progressingClasse.classeRef == 'fNqknNgq0QmHzUaYEvEd') {
+      personnage.classes.forEach(classeItem => {
+
+        // Choix de domaine
+        if (classeItem.classeRef == 'fNqknNgq0QmHzUaYEvEd' && progressingClasse.niveau == classeItem.niveau) { // ID de prêtre
+          personnage.domaines.forEach(domaine => {
+            domaine.choix.forEach(choix => {
               listChoix.push(choix);
             });
-          }
+          });
+        }
 
-        });
-      }
+      });
+    }
 
-      resolve(listChoix);
-
-    });
-
-  }
-
-  getChoixDomaine(personnage: Personnage, progressingClasse: ClasseItem): Promise<Choix[]> {
-
-    return new Promise((resolve) => {
-
-      let listChoix: Choix[] = [];
-
-      // Get All Classes Choices
-      if (progressingClasse.classeRef == 'fNqknNgq0QmHzUaYEvEd') {
-        personnage.classes.forEach(classeItem => {
-
-          // Choix de domaine
-          if (classeItem.classeRef == 'fNqknNgq0QmHzUaYEvEd' && progressingClasse.niveau == classeItem.niveau) { // ID de prêtre
-            personnage.domaines.forEach(domaine => {
-              domaine.choix.forEach(choix => {
-                listChoix.push(choix);
-              });
-            });
-          }
-
-        });
-      }
-
-      resolve(listChoix);
-
-    });
+    return listChoix;
 
   }
 
-  public async getAvailableAlignements(personnage: Personnage): Promise<IAlignement[]> {
+  public async getAvailableAlignements(personnage: IPersonnage): Promise<IAlignement[]> {
 
     let alignements = await this.alignementService.getAlignements();
 
@@ -264,101 +404,93 @@ export class PersonnageService {
 
   }
 
-  getAvailableClasses(personnage: Personnage): Promise<Classe[]> {
+  public async getAvailableClasses(personnage: IPersonnage): Promise<IClasse[]> {
 
-    return new Promise((resolve) => {
+    let list = await this.classeService.getClasses();
 
-      this.db.getCollection('classes').then(classes => {
+    // Filtre selon la race
+    if (personnage.race) {
+      list = list.filter((classe) => {
+        return personnage.race.classesDisponibleRef.includes(classe.id);
+      });
+    }
 
-        let list: Classe[] = classes;
+    // Filtre selon les classes
+    if (personnage.classes) {
+      personnage.classes.forEach(classePerso => {
 
-        // Filtre selon la race
-        if (personnage.race) {
-          list = list.filter(function (classe) {
-            return personnage.race.classesDisponibleRef.includes(classe.id);
-          });
-        }
-
-        // Filtre selon les classes
-        if (personnage.classes) {
-          personnage.classes.forEach(classePerso => {
-
-            // Multiclassement
-            list = list.filter(function (classe) {
-              return classePerso.classe.multiclassementRef.includes(classe.id);
-            });
-
-            // Ajoute la classe actuelle (Filtré au multiclassement);
-            list.push(classePerso.classe);
-
-            // Alignement Permis
-            if (personnage.alignementRef) {
-              list = list.filter(function (classe) {
-                return classePerso.classe.alignementPermisRef.includes(personnage.alignementRef);
-              });
-            }
-
-          });
-        }
-
-        // Ordres
-        if (personnage.ordres && personnage.ordres.length > 0) {
-          personnage.ordres.forEach(ordre => {
-            list = list.filter(function (classe) {
-              return ordre.classeRef.includes(classe.id);
-            });
-          })
-        }
-
-        // Domaines
-        if (personnage.domaines && personnage.domaines.length > 0) {
-          personnage.domaines.forEach(domaine => {
-            list = list.filter(function (classe) {
-              return domaine.multiclassementRef.includes(classe.id);
-            });
-          })
-        }
-
-        // Ajoute les classes existante
-        if (personnage.classes) {
-
-          // Retire les autres classes si déjà 3 existantes
-          if (personnage.classes.length >= 3) {
-            list = [];
-          }
-
-          // Ajoute Chaques classe existante
-          personnage.classes.forEach(classePerso => {
-            list.push(classePerso.classe);
-          });
-
-          // Filtre les doubles
-          list = list.filter((obj, pos, arr) => {
-            return arr.map(mapObj => mapObj['id']).indexOf(obj['id']) === pos;
-          });
-
-        }
-
-        // Trie en Ordre Alphabetic
-        list = list.sort((a, b) => {
-          if (a.nom > b.nom) {
-            return 1;
-          }
-          if (a.nom < b.nom) {
-            return -1;
-          }
-          return 0;
+        // Multiclassement
+        list = list.filter((classe) => {
+          return classePerso.classe.multiclassementRef.includes(classe.id);
         });
 
-        resolve(list);
+        // Ajoute la classe actuelle (Filtré au multiclassement);
+        list.push(classePerso.classe);
+
+        // Alignement Permis
+        if (personnage.alignementRef) {
+          list = list.filter((classe) => {
+            return classePerso.classe.alignementPermisRef.includes(personnage.alignementRef);
+          });
+        }
 
       });
+    }
 
+    // Ordres
+    if (personnage.ordres && personnage.ordres.length > 0) {
+      personnage.ordres.forEach(ordre => {
+        list = list.filter((classe) => {
+          return ordre.classeRef.includes(classe.id);
+        });
+      })
+    }
+
+    // Domaines
+    if (personnage.domaines && personnage.domaines.length > 0) {
+      personnage.domaines.forEach(domaine => {
+        list = list.filter((classe) => {
+          return domaine.multiclassementRef.includes(classe.id);
+        });
+      })
+    }
+
+    // Ajoute les classes existante
+    if (personnage.classes) {
+
+      // Retire les autres classes si déjà 3 existantes
+      if (personnage.classes.length >= 3) {
+        list = [];
+      }
+
+      // Ajoute Chaques classe existante
+      personnage.classes.forEach(classePerso => {
+        list.push(classePerso.classe);
+      });
+
+      // Filtre les doubles
+      list = list.filter((obj, pos, arr) => {
+        return arr.map(mapObj => mapObj['id']).indexOf(obj['id']) === pos;
+      });
+
+    }
+
+    // Trie en Ordre Alphabetic
+    list = list.sort((a, b) => {
+      if (a.nom > b.nom) {
+        return 1;
+      }
+      if (a.nom < b.nom) {
+        return -1;
+      }
+      return 0;
     });
+
+    return list;
 
   }
 
-  public async getAvailableConnaissances(personnage: Personnage): Promise<IDon[]> {
+  public async getAvailableConnaissances(personnage: IPersonnage): Promise<IDon[]> {
 
     const dons = await this.donService.getDons('Connaissance');
 
@@ -447,9 +579,9 @@ export class PersonnageService {
 
   }
 
-  public async getAvailableDons(personnage: Personnage): Promise<IDon[]> {
+  public async getAvailableDons(personnage: IPersonnage): Promise<IDon[]> {
 
-    const dons = await this.db.getCollection('dons');
+    const dons = await this.donService.getDons();
 
     let list: IDon[] = dons;
 
@@ -574,61 +706,47 @@ export class PersonnageService {
 
   }
 
-  getAvailableDomaines(personnage: Personnage): Promise<Domaine[]> {
+  public async getAvailableDomaines(personnage: IPersonnage): Promise<IDomaine[]> {
 
-    return new Promise((resolve) => {
+    let list = await this.domaineService.getDomaines();
 
-      this.domaineService.getDomaines().subscribe(domaines => {
+    // Filtre selon l'alignement du personnage
+    if (personnage.alignementRef) {
+      list = list.filter((domaine) => {
+        return domaine.alignementPermisRef.includes(personnage.alignementRef);
+      });
+    }
 
-        let list: Domaine[] = domaines;
+    // Filtre selon les domaines du personnage
+    if (personnage.domaines && personnage.domaines.length > 0) {
+      personnage.domaines.forEach(domainePersonnage => {
 
-        // Filtre selon l'alignement du personnage
-        if (personnage.alignementRef) {
-          list = list.filter(function (domaine) {
-            return domaine.alignementPermisRef.includes(personnage.alignementRef);
-          });
-        }
+        // Filtre domaine existant
+        list = list.filter((domaine) => {
+          return domaine.id != domainePersonnage.id;
+        });
 
-        // Filtre selon les domaines du personnage
-        if (personnage.domaines && personnage.domaines.length > 0) {
-          personnage.domaines.forEach(domainePersonnage => {
-
-            // Filtre domaine existant
-            list = list.filter(function (domaine) {
-              return domaine.id != domainePersonnage.id;
-            });
-
-            // Filtre domaine oposé
-            list = list.filter(function (domaine) {
-              return domaine.id != domainePersonnage.domaineContraireRef;
-            });
-
-          });
-        }
-
-        resolve(list);
+        // Filtre domaine oposé
+        list = list.filter((domaine) => {
+          return domaine.id != domainePersonnage.domaineContraireRef;
+        });
 
       });
+    }
 
-    });
+    return list;
 
   }
 
-  public async getAvailableEcoles(personnage: Personnage): Promise<IEcole[]> {
+  public async getAvailableEcoles(): Promise<IEcole[]> {
     return await this.ecoleService.getEcoles();
   }
 
-  getAvailableEsprits(personnage: Personnage): Promise<Esprit[]> {
-
-    return new Promise((resolve) => {
-
-      this.espritService.getEsprits().subscribe(esprits => resolve(esprits));
-
-    });
-
+  public async getAvailableEsprits(): Promise<IEsprit[]> {
+    return await this.espritService.getEsprits();
   }
 
-  public async getAvailableOrdres(personnage: Personnage): Promise<IOrdre[]> {
+  public async getAvailableOrdres(personnage: IPersonnage): Promise<IOrdre[]> {
 
     const ordres = await this.ordreService.getOrdres();
 
@@ -654,9 +772,9 @@ export class PersonnageService {
 
   }
 
-  public async getAvailableFourberies(personnage: Personnage): Promise<IFourberie[]> {
+  public async getAvailableFourberies(personnage: IPersonnage): Promise<IFourberie[]> {
 
-    const fourberies = await this.db.getCollection('fourberies');
+    const fourberies = await this.fourberieService.getFourberies();
 
     let list: IFourberie[] = fourberies;
 
@@ -728,7 +846,7 @@ export class PersonnageService {
 
   }
 
-  public async getAvailableSorts(personnage: Personnage): Promise<ISort[]> {
+  public async getAvailableSorts(personnage: IPersonnage): Promise<ISort[]> {
 
     let list: ISort[] = [];
 
@@ -771,7 +889,7 @@ export class PersonnageService {
 
   }
 
-  public async getAvailableDieux(personnage: Personnage): Promise<IDieu[]> {
+  public async getAvailableDieux(personnage: IPersonnage): Promise<IDieu[]> {
 
     let list = await this.dieuService.getDieux();
 
@@ -798,16 +916,16 @@ export class PersonnageService {
 
 
 
-  private async buildPersonnage(personnage: Personnage): Promise<Personnage> {
+  public async buildPersonnage(personnage: IPersonnage): Promise<IPersonnage> {
 
     try {
       this.dialog.open(LoadingDialogComponent);
 
       console.log("Building Personnage...");
       await Promise.all([
-        this.getUser(personnage),
-        this.getRace(personnage),
-        this.getClasses(personnage),
+        this._getUser(personnage),
+        this._getRace(personnage),
+        this._getClasses(personnage),
         this._getAlignement(personnage),
         this._getDieu(personnage),
         this._getOrdres(personnage),
@@ -819,8 +937,8 @@ export class PersonnageService {
 
       console.log("Building Domaines & Esprits...");
       await Promise.all([
-        this.getDomaines(personnage),
-        this.getEsprit(personnage)
+        this._getDomaines(personnage),
+        this._getEsprit(personnage)
       ]);
 
       console.log("Building Aptitudes...");
@@ -858,74 +976,35 @@ export class PersonnageService {
       return personnage;
     } catch (error) {
       console.log(error);
+      // ...
       // Mettre une dialog d'erreur ici pour indiquer au joueur que sa fiche n'as pas loadé
     }
 
   }
 
-  private getUser(personnage: Personnage): Promise<Personnage> {
-
-    return new Promise((resolve, reject) => {
-
-      this.userService.getUser(personnage.userRef).subscribe(response => {
-        personnage.user = response;
-        resolve(personnage)
-      }, error => {
-        reject(error);
-      });
-
-    })
-
+  private async _getUser(personnage: IPersonnage): Promise<IPersonnage> {
+    personnage.user = await this.userService.getUser(personnage.userRef)
+    return personnage;
   }
 
-  private getRace(personnage: Personnage): Promise<Personnage> {
+  private async _getRace(personnage: IPersonnage): Promise<IPersonnage> {
+    personnage.race = await this.raceService.getRace(personnage.raceRef);
+    return personnage;
+  }
 
-    return new Promise((resolve, reject) => {
+  private async _getClasses(personnage: IPersonnage): Promise<IPersonnage> {
 
-      this.raceService.getRace(personnage.raceRef).pipe(
-        map(race => {
-          personnage.race = race;
-        })
-      ).subscribe(() => {
-        resolve(personnage);
-      }, error => {
-        reject(error);
-      });
-
+    // ...
+    // Pretty sure we can optimize load time with a promise.all here
+    personnage.classes.forEach(async (classeItem) => {
+      classeItem.classe = await this.classeService.getClasse(classeItem.classeRef);
     });
 
-  }
-
-  private getClasses(personnage: Personnage): Promise<Personnage> {
-
-    return new Promise((resolve, reject) => {
-
-      let count: number = 0;
-
-      personnage.classes.forEach(classeItem => {
-
-        this.classeService.getClasse(classeItem.classeRef).pipe(
-          map(classe => {
-            classeItem.classe = classe;
-          })
-        ).subscribe(() => {
-
-          count++;
-          if (count == personnage.classes.length) {
-            resolve(personnage);
-          }
-
-        }, error => {
-          reject(error);
-        });
-
-      });
-
-    });
+    return personnage;
 
   }
 
-  private async _getAlignement(personnage: Personnage): Promise<Personnage> {
+  private async _getAlignement(personnage: IPersonnage): Promise<IPersonnage> {
     if (personnage.alignementRef) {
       try {
         personnage.alignement = await this.alignementService.getAlignement(personnage.alignementRef);
@@ -936,7 +1015,7 @@ export class PersonnageService {
     return personnage;
   }
 
-  private async _getDieu(personnage: Personnage): Promise<Personnage> {
+  private async _getDieu(personnage: IPersonnage): Promise<IPersonnage> {
     if (personnage.dieuRef) {
       try {
         personnage.dieu = await this.dieuService.getDieu(personnage.dieuRef);
@@ -947,7 +1026,7 @@ export class PersonnageService {
     return personnage;
   }
 
-  private async _getOrdres(personnage: Personnage): Promise<Personnage> {
+  private async _getOrdres(personnage: IPersonnage): Promise<IPersonnage> {
 
     // Retourne seulement la liste des ordres du personnage
     let count: number = 0;
@@ -968,7 +1047,7 @@ export class PersonnageService {
     }
   }
 
-  private async _getNiveauEffectif(personnage: Personnage): Promise<Personnage> {
+  private async _getNiveauEffectif(personnage: IPersonnage): Promise<IPersonnage> {
 
     personnage.niveauEffectif = 0;
     personnage.niveauReel = 0;
@@ -1005,69 +1084,41 @@ export class PersonnageService {
 
   }
 
-  private getDomaines(personnage: Personnage): Promise<Personnage> {
+  private async _getDomaines(personnage: IPersonnage): Promise<IPersonnage> {
 
-    return new Promise((resolve, reject) => {
+    if (personnage.domainesRef && personnage.domainesRef.length > 0) {
 
-      if (personnage.domainesRef && personnage.domainesRef.length > 0) {
+      let count: number = 0;
 
-        let count: number = 0;
+      personnage.domainesRef.forEach(async (domaineRef) => {
+        const domaine = await this.domaineService.getDomaine(domaineRef)
+        if (!personnage.domaines) personnage.domaines = [];
+        personnage.domaines.push(domaine);
+        count++;
+        if (count == personnage.domainesRef.length) {
+          return personnage;
+        }
+      });
 
-        personnage.domainesRef.forEach(domaineRef => {
-          this.domaineService.getDomaine(domaineRef).pipe(
-            map(domaine => {
-
-              if (!personnage.domaines) personnage.domaines = [];
-              personnage.domaines.push(domaine);
-
-            })
-          ).subscribe(response => {
-
-            count++;
-            if (count == personnage.domainesRef.length) {
-
-              resolve(personnage);
-
-            }
-
-          }, error => {
-            reject(error);
-          });
-
-        });
-
-      } else {
-        resolve(personnage);
-      }
-
-    });
+    } else {
+      return personnage;
+    }
 
   }
 
-  private getEsprit(personnage: Personnage): Promise<Personnage> {
+  private async _getEsprit(personnage: IPersonnage): Promise<IPersonnage> {
 
-    return new Promise((resolve, reject) => {
+    if (personnage.espritRef) {
+      const response = await this.espritService.getEsprit(personnage.espritRef);
+      personnage.esprit = response;
+      return personnage;
+    }
 
-      if (personnage.espritRef) {
-
-        this.espritService.getEsprit(personnage.espritRef).subscribe(response => {
-
-          personnage.esprit = response;
-          resolve(personnage);
-
-        }, error => {
-          reject(error);
-        });
-
-      } else {
-        resolve(personnage);
-      }
-
-    });
+    return personnage;
 
   }
 
-  private async getAllFourberies(personnage: Personnage): Promise<Personnage> {
+  private async getAllFourberies(personnage: IPersonnage): Promise<IPersonnage> {
 
     let count: number = 0;
     if (!personnage.fourberies) personnage.fourberies = [];
@@ -1121,7 +1172,7 @@ export class PersonnageService {
 
   }
 
-  private async _getAllAptitudes(personnage: Personnage): Promise<Personnage> {
+  private async _getAllAptitudes(personnage: IPersonnage): Promise<IPersonnage> {
 
     // Aptitudes Racial
     if (personnage.race && personnage.race.aptitudesRacialRef && personnage.race.aptitudesRacialRef.length > 0) {
@@ -1221,7 +1272,7 @@ export class PersonnageService {
 
   }
 
-  private async _getAllSorts(personnage: Personnage): Promise<Personnage> {
+  private async _getAllSorts(personnage: IPersonnage): Promise<IPersonnage> {
 
     // Sorts Classes
     if (personnage.classes && personnage.classes.length > 0) {
@@ -1316,7 +1367,7 @@ export class PersonnageService {
     }
   }
 
-  private async getAllDons(personnage: Personnage): Promise<Personnage> {
+  private async getAllDons(personnage: IPersonnage): Promise<IPersonnage> {
 
     // Dons Racial
     if (personnage.race && personnage.race.donsRacialRef && personnage.race.donsRacialRef.length > 0) {
@@ -1441,7 +1492,7 @@ export class PersonnageService {
 
   }
 
-  private async _getStatistiquesParDefault(personnage: Personnage): Promise<Personnage> {
+  private async _getStatistiquesParDefault(personnage: IPersonnage): Promise<IPersonnage> {
 
     const statistiques = await Promise.all([
       this.statistiqueService.getStatistique(StatistiqueIds.Constitution),
@@ -1520,7 +1571,7 @@ export class PersonnageService {
 
   }
 
-  private async _getStatistiques(personnage: Personnage): Promise<Personnage> {
+  private async _getStatistiques(personnage: IPersonnage): Promise<IPersonnage> {
 
     //Race Statistiques
     if (personnage.race.statistiques) {
@@ -1830,7 +1881,7 @@ export class PersonnageService {
 
   }
 
-  private async _getResistances(personnage: Personnage): Promise<Personnage> {
+  private async _getResistances(personnage: IPersonnage): Promise<IPersonnage> {
 
     //Race Resistances
     if (personnage.race.resistances) {
@@ -2018,7 +2069,7 @@ export class PersonnageService {
 
   }
 
-  private async _getImmunites(personnage: Personnage): Promise<Personnage> {
+  private async _getImmunites(personnage: IPersonnage): Promise<IPersonnage> {
 
     if (!personnage.immunites) personnage.immunites = [];
 
@@ -2058,7 +2109,7 @@ export class PersonnageService {
 
   }
 
-  private async _getDonsNiveauEffectif(personnage: Personnage): Promise<Personnage> {
+  private async _getDonsNiveauEffectif(personnage: IPersonnage): Promise<IPersonnage> {
 
     if (personnage.dons && personnage.statistiques) {
       personnage.dons.forEach(donItem => {
@@ -2089,7 +2140,7 @@ export class PersonnageService {
 
   }
 
-  private async _getCapaciteSpeciales(personnage: Personnage): Promise<Personnage> {
+  private async _getCapaciteSpeciales(personnage: IPersonnage): Promise<IPersonnage> {
 
     if (!personnage.capaciteSpeciales) personnage.capaciteSpeciales = [];
     personnage.statistiques.forEach(statistiqueValue => {

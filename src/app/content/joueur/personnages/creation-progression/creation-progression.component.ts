@@ -1,591 +1,562 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-
-//Services
-import { AuthenticationService } from '../../../../services/@core/authentication.service';
-import { PersonnageService } from '../../../../services/personnages/personnage.service';
-
-//Models
-import { Personnage } from '../../../../services/personnages/models/personnage';
-import { ClasseItem } from '../../../../services/classes/models/classe';
 import { MatStepper } from '@angular/material/stepper';
-import { Choix } from '../../../../services/personnages/models/choix';
+import { AuthenticationService } from '../../../../services/@core/authentication.service';
+import { PersonnageService, IPersonnage, Choix } from '../../../../services/personnage.service';
+import { ClasseItem } from '../../../../services/classe.service';
 
 @Component({
-    selector: 'app-joueur-personnages-creation-progression',
-    templateUrl: './creation-progression.component.html',
-    styleUrls: ['./creation-progression.component.scss']
+  selector: 'app-joueur-personnages-creation-progression',
+  templateUrl: './creation-progression.component.html',
+  styleUrls: ['./creation-progression.component.scss']
 })
 export class JoueurPersonnageCreationProgressionComponent implements OnInit {
 
-    constructor(
-        private auth: AuthenticationService,
-        private personnageService: PersonnageService,
-        private route: ActivatedRoute,
-        private router: Router
-    ) { }
+  constructor(
+    private auth: AuthenticationService,
+    private personnageService: PersonnageService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) { }
 
-    @ViewChild('stepper') stepper: MatStepper;
+  @ViewChild('stepper') stepper: MatStepper;
 
-    progression: boolean = false;
-    personnage: Personnage = new Personnage();
-    personnageLoaded: boolean = false;
-    selectedClasse: ClasseItem;
-    choixPersonnage: Choix[] = [];
+  progression: boolean = false;
+  personnage = {} as IPersonnage;
+  personnageLoaded: boolean = false;
+  selectedClasse: ClasseItem;
+  choixPersonnage: Choix[] = [];
 
-    // Steps Existing
-    ajustementNiveau: boolean = false;
-    stepAlignementExist: boolean = false;
-    stepConnaissancesExist: boolean = false;
-    stepDieuExist: boolean = false;
-    stepDonsExist: boolean = false;
-    stepDomainesExist: boolean = false;
-    stepEcoleExist: boolean = false;
-    stepEspritExist: boolean = false;
-    stepFourberiesExist: boolean = false;
-    stepOrdreExist: boolean = false;
-    stepSortsExist: boolean = false;
-    stepSortsDomaineExist: boolean = false;
+  // Steps Existing
+  ajustementNiveau: boolean = false;
+  stepAlignementExist: boolean = false;
+  stepConnaissancesExist: boolean = false;
+  stepDieuExist: boolean = false;
+  stepDonsExist: boolean = false;
+  stepDomainesExist: boolean = false;
+  stepEcoleExist: boolean = false;
+  stepEspritExist: boolean = false;
+  stepFourberiesExist: boolean = false;
+  stepOrdreExist: boolean = false;
+  stepSortsExist: boolean = false;
+  stepSortsDomaineExist: boolean = false;
 
-    // Steps Completed
-    stepAlignementCompleted: boolean = false;
-    stepRaceCompleted: boolean = false;
-    stepClassesCompleted: boolean = false;
-    stepConnaissancesCompleted: boolean = false;
-    stepDieuCompleted: boolean = false;
-    stepDonsCompleted: boolean = false;
-    stepDomainesCompleted: boolean = false;
-    stepEcoleCompleted: boolean = false;
-    stepEspritCompleted: boolean = false;
-    stepFourberiesCompleted: boolean = false;
-    stepOrdreCompleted: boolean = false;
-    stepSortsCompleted: boolean = false;
-    stepSortsDomaineCompleted: boolean = false;
+  // Steps Completed
+  stepAlignementCompleted: boolean = false;
+  stepRaceCompleted: boolean = false;
+  stepClassesCompleted: boolean = false;
+  stepConnaissancesCompleted: boolean = false;
+  stepDieuCompleted: boolean = false;
+  stepDonsCompleted: boolean = false;
+  stepDomainesCompleted: boolean = false;
+  stepEcoleCompleted: boolean = false;
+  stepEspritCompleted: boolean = false;
+  stepFourberiesCompleted: boolean = false;
+  stepOrdreCompleted: boolean = false;
+  stepSortsCompleted: boolean = false;
+  stepSortsDomaineCompleted: boolean = false;
 
-    ngOnInit() {
-        this.getPersonnage();
-    }
+  ngOnInit() {
+    this._getPersonnage();
+  }
 
-    getPersonnage() {
-        this.route.params.subscribe(param => {
-            if (param && param.id) {
-                this.personnageService.getPersonnage(param.id).subscribe(personnage => {
-                    this.personnageService.buildPromise(personnage).then(personnage => {
+  private _getPersonnage(): void {
+    this.route.params.subscribe(async (param) => {
+      if (param && param.id) {
+        const personnage = await this.personnageService.getPersonnage(param.id);
+        await this.personnageService.buildPersonnage(personnage);
 
-                        // Set Personnage
-                        this.personnage = personnage;
+        // Set Personnage
+        this.personnage = personnage;
 
-                        // Niveau d'ajustement
-                        if (this.personnage.gnEffectif < (+this.personnage.race.ajustement + 1)) {
+        // Niveau d'ajustement
+        if (this.personnage.gnEffectif < (+this.personnage.race.ajustement + 1)) {
 
-                            // Skip la progression
-                            this.ajustementNiveau = true;
+          // Skip la progression
+          this.ajustementNiveau = true;
 
-                            // Donne le niveau d'ajustement
-                            this.personnage.gnEffectif += 1;
-
-                        }
-
-                        this.personnageLoaded = true;
-                        this.progression = true;
-
-                    });
-                })
-            } else {
-
-                //Set Personnage User
-                this.auth.user.subscribe(response => {
-                    this.personnage.userRef = response.uid;
-                })
-
-                // Alignement exist if creation
-                if (!this.progression) {
-                    this.stepAlignementExist = true;
-                    this.stepDieuExist = true;
-                }
-
-                this.personnageLoaded = true;
-
-            }
-        })
-    }
-
-    getChoixPersonnage() {
-
-        // Get Choix
-        this.personnageService.getChoixPersonnage(this.personnage, this.selectedClasse).then(listChoix => {
-
-            // Set Choix
-            this.choixPersonnage = listChoix;
-            console.log(this.choixPersonnage);
-
-            // Determine which steps exists
-            listChoix.forEach(choix => {
-
-                if (choix.type == 'domaine' && choix.quantite > 0) {
-                    this.stepDomainesExist = true;
-                }
-
-                if (choix.type == 'ecole' && choix.quantite > 0) {
-                    this.stepEcoleExist = true;
-                }
-
-                if (choix.type == 'esprit' && choix.quantite > 0) {
-                    this.stepEspritExist = true;
-                }
-
-                if (choix.type == 'ordre' && choix.quantite > 0) {
-                    this.stepOrdreExist = true;
-                }
-
-                if (choix.type == 'don' && choix.categorie == 'Connaissance' && choix.quantite > 0) {
-                    this.stepConnaissancesExist = true;
-                }
-
-                if (choix.type == 'don' && choix.categorie == 'Normal' && choix.quantite > 0) {
-                    this.stepDonsExist = true;
-                }
-
-                if (choix.type == 'fourberie' && choix.quantite > 0) {
-                    this.stepFourberiesExist = true;
-                }
-
-                if (choix.type == 'sort' && choix.quantite > 0 && !choix.domaine) {
-                    this.stepSortsExist = true;
-                }
-
-                if (choix.type == 'sort' && choix.quantite > 0 && choix.domaine) {
-                    this.stepSortsDomaineExist = true;
-                }
-
-            });
-
-            setTimeout(() => this.stepper.next());
-
-        });
-
-    }
-
-    save() {
-        if (this.progression) {
-            this.personnageService.updatePersonnage(this.personnage.id, this.personnage.saveState()).then(result => {
-                this.router.navigate(['/joueur/personnage/' + this.personnage.id]);
-            });
-        } else {
-            this.personnageService.addPersonnage(this.personnage.saveState()).then(result => {
-                this.router.navigate(['/joueur/personnages']);
-            });
-        }
-    }
-
-    // Step Events
-    stepClasseCompletedEvent(event) {
-
-        this.stepClassesCompleted = event;
-
-        this.getChoixPersonnage();
-
-    }
-
-    stepDomainesCompletedEvent(event) {
-
-        this.stepDomainesCompleted = event;
-
-        this.getChoixPersonnage();
-
-    }
-
-    stepEcoleCompletedEvent(event) {
-
-        this.stepEcoleCompleted = event;
-
-        this.getChoixPersonnage();
-
-    }
-
-    stepEspritCompletedEvent(event) {
-
-        this.stepEspritCompleted = event;
-
-        this.getChoixPersonnage();
-
-    }
-
-    stepOrdreCompletedEvent(event) {
-
-        this.stepOrdreCompleted = event;
-
-        this.getChoixPersonnage();
-
-    }
-
-
-    // Step Verifications
-    isCurrentStepAlignement() {
-
-        if (this.stepClassesCompleted) {
-
-            let steps: boolean = true;
-
-            return steps;
+          // Donne le niveau d'ajustement
+          this.personnage.gnEffectif += 1;
 
         }
 
-        return false;
-    }
+        this.personnageLoaded = true;
+        this.progression = true;
 
-    isCurrentStepDomaines() {
+      } else {
 
-        if (this.stepClassesCompleted) {
+        //Set Personnage User
+        this.personnage.userRef = this.auth.user.uid;
 
-            let steps: boolean = true;
-
-            if (this.stepAlignementExist && !this.stepAlignementCompleted) {
-                steps = false;
-            }
-
-            return steps;
-
+        // Alignement exist if creation
+        if (!this.progression) {
+          this.stepAlignementExist = true;
+          this.stepDieuExist = true;
         }
 
-        return false;
+        this.personnageLoaded = true;
+
+      }
+    })
+  }
+
+  private async getChoixPersonnage(): Promise<void> {
+
+    // Get Choix
+    const listChoix = await this.personnageService.getChoixPersonnage(this.personnage, this.selectedClasse);
+
+    // Set Choix
+    this.choixPersonnage = listChoix;
+
+    // Determine which steps exists
+    listChoix.forEach(choix => {
+
+      if (choix.type == 'domaine' && choix.quantite > 0) {
+        this.stepDomainesExist = true;
+      }
+
+      if (choix.type == 'ecole' && choix.quantite > 0) {
+        this.stepEcoleExist = true;
+      }
+
+      if (choix.type == 'esprit' && choix.quantite > 0) {
+        this.stepEspritExist = true;
+      }
+
+      if (choix.type == 'ordre' && choix.quantite > 0) {
+        this.stepOrdreExist = true;
+      }
+
+      if (choix.type == 'don' && choix.categorie == 'Connaissance' && choix.quantite > 0) {
+        this.stepConnaissancesExist = true;
+      }
+
+      if (choix.type == 'don' && choix.categorie == 'Normal' && choix.quantite > 0) {
+        this.stepDonsExist = true;
+      }
+
+      if (choix.type == 'fourberie' && choix.quantite > 0) {
+        this.stepFourberiesExist = true;
+      }
+
+      if (choix.type == 'sort' && choix.quantite > 0 && !choix.domaine) {
+        this.stepSortsExist = true;
+      }
+
+      if (choix.type == 'sort' && choix.quantite > 0 && choix.domaine) {
+        this.stepSortsDomaineExist = true;
+      }
+
+    });
+
+    setTimeout(() => this.stepper.next());
+
+  }
+
+  // ...
+  public async save(): Promise<void> {
+    if (this.progression) {
+      const result = await this.personnageService.updatePersonnage(this.personnage);
+      this.router.navigate(['/joueur/personnage/' + this.personnage.id]);
+    } else {
+      const result = await this.personnageService.addPersonnage(this.personnage);
+      this.router.navigate(['/joueur/personnages']);
+    }
+  }
+
+  // Step Events
+  stepClasseCompletedEvent(event) {
+    this.stepClassesCompleted = event;
+    this.getChoixPersonnage();
+  }
+
+  stepDomainesCompletedEvent(event) {
+    this.stepDomainesCompleted = event;
+    this.getChoixPersonnage();
+  }
+
+  stepEcoleCompletedEvent(event) {
+    this.stepEcoleCompleted = event;
+    this.getChoixPersonnage();
+  }
+
+  stepEspritCompletedEvent(event) {
+    this.stepEspritCompleted = event;
+    this.getChoixPersonnage();
+  }
+
+  stepOrdreCompletedEvent(event) {
+    this.stepOrdreCompleted = event;
+    this.getChoixPersonnage();
+  }
+
+
+  // Step Verifications
+  isCurrentStepAlignement() {
+
+    if (this.stepClassesCompleted) {
+
+      let steps: boolean = true;
+
+      return steps;
 
     }
 
-    isCurrentStepEcole() {
+    return false;
+  }
 
-        if (this.stepClassesCompleted) {
+  isCurrentStepDomaines() {
 
-            let steps: boolean = true;
+    if (this.stepClassesCompleted) {
 
-            if (this.stepAlignementExist && !this.stepAlignementCompleted) {
-                steps = false;
-            }
+      let steps: boolean = true;
 
-            if (this.stepDomainesExist && !this.stepDomainesCompleted) {
-                steps = false;
-            }
+      if (this.stepAlignementExist && !this.stepAlignementCompleted) {
+        steps = false;
+      }
 
-            return steps;
-
-        }
-
-        return false;
+      return steps;
 
     }
 
-    isCurrentStepEsprit() {
+    return false;
 
-        if (this.stepClassesCompleted) {
+  }
 
-            let steps: boolean = true;
+  isCurrentStepEcole() {
 
-            if (this.stepAlignementExist && !this.stepAlignementCompleted) {
-                steps = false;
-            }
+    if (this.stepClassesCompleted) {
 
-            if (this.stepEcoleExist && !this.stepEcoleCompleted) {
-                steps = false;
-            }
+      let steps: boolean = true;
 
-            if (this.stepDomainesExist && !this.stepDomainesCompleted) {
-                steps = false;
-            }
+      if (this.stepAlignementExist && !this.stepAlignementCompleted) {
+        steps = false;
+      }
 
-            return steps;
+      if (this.stepDomainesExist && !this.stepDomainesCompleted) {
+        steps = false;
+      }
 
-        }
-
-        return false;
+      return steps;
 
     }
 
-    isCurrentStepOrdre() {
+    return false;
 
-        if (this.stepClassesCompleted) {
+  }
 
-            let steps: boolean = true;
+  isCurrentStepEsprit() {
 
-            if (this.stepAlignementExist && !this.stepAlignementCompleted) {
-                steps = false;
-            }
+    if (this.stepClassesCompleted) {
 
-            if (this.stepEcoleExist && !this.stepEcoleCompleted) {
-                steps = false;
-            }
+      let steps: boolean = true;
 
-            if (this.stepDomainesExist && !this.stepDomainesCompleted) {
-                steps = false;
-            }
+      if (this.stepAlignementExist && !this.stepAlignementCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEspritExist && !this.stepEspritCompleted) {
-                steps = false;
-            }
+      if (this.stepEcoleExist && !this.stepEcoleCompleted) {
+        steps = false;
+      }
 
-            return steps;
+      if (this.stepDomainesExist && !this.stepDomainesCompleted) {
+        steps = false;
+      }
 
-        }
-
-        return false;
+      return steps;
 
     }
 
-    isCurrentStepConnaissances() {
+    return false;
 
-        if (this.stepClassesCompleted) {
+  }
 
-            let steps: boolean = true;
+  isCurrentStepOrdre() {
 
-            if (this.stepAlignementExist && !this.stepAlignementCompleted) {
-                steps = false;
-            }
+    if (this.stepClassesCompleted) {
 
-            if (this.stepDomainesExist && !this.stepDomainesCompleted) {
-                steps = false;
-            }
+      let steps: boolean = true;
 
-            if (this.stepEcoleExist && !this.stepEcoleCompleted) {
-                steps = false;
-            }
+      if (this.stepAlignementExist && !this.stepAlignementCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEspritExist && !this.stepEspritCompleted) {
-                steps = false;
-            }
+      if (this.stepEcoleExist && !this.stepEcoleCompleted) {
+        steps = false;
+      }
 
-            if (this.stepOrdreExist && !this.stepOrdreCompleted) {
-                steps = false;
-            }
+      if (this.stepDomainesExist && !this.stepDomainesCompleted) {
+        steps = false;
+      }
 
-            return steps;
+      if (this.stepEspritExist && !this.stepEspritCompleted) {
+        steps = false;
+      }
 
-        }
+      return steps;
 
-        return false;
     }
 
-    isCurrentStepDons() {
+    return false;
 
-        if (this.stepClassesCompleted) {
+  }
 
-            let steps: boolean = true;
+  isCurrentStepConnaissances() {
 
-            if (this.stepAlignementExist && !this.stepAlignementCompleted) {
-                steps = false;
-            }
+    if (this.stepClassesCompleted) {
 
-            if (this.stepDomainesExist && !this.stepDomainesCompleted) {
-                steps = false;
-            }
+      let steps: boolean = true;
 
-            if (this.stepEcoleExist && !this.stepEcoleCompleted) {
-                steps = false;
-            }
+      if (this.stepAlignementExist && !this.stepAlignementCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEspritExist && !this.stepEspritCompleted) {
-                steps = false;
-            }
+      if (this.stepDomainesExist && !this.stepDomainesCompleted) {
+        steps = false;
+      }
 
-            if (this.stepOrdreExist && !this.stepOrdreCompleted) {
-                steps = false;
-            }
+      if (this.stepEcoleExist && !this.stepEcoleCompleted) {
+        steps = false;
+      }
 
-            if (this.stepConnaissancesExist && !this.stepConnaissancesCompleted) {
-                steps = false;
-            }
+      if (this.stepEspritExist && !this.stepEspritCompleted) {
+        steps = false;
+      }
 
-            return steps;
+      if (this.stepOrdreExist && !this.stepOrdreCompleted) {
+        steps = false;
+      }
 
-        }
+      return steps;
 
-        return false;
     }
 
-    isCurrentStepFourberies() {
+    return false;
+  }
 
-        if (this.stepClassesCompleted) {
+  isCurrentStepDons() {
 
-            let steps: boolean = true;
+    if (this.stepClassesCompleted) {
 
-            if (this.stepAlignementExist && !this.stepAlignementCompleted) {
-                steps = false;
-            }
+      let steps: boolean = true;
 
-            if (this.stepDomainesExist && !this.stepDomainesCompleted) {
-                steps = false;
-            }
+      if (this.stepAlignementExist && !this.stepAlignementCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEcoleExist && !this.stepEcoleCompleted) {
-                steps = false;
-            }
+      if (this.stepDomainesExist && !this.stepDomainesCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEspritExist && !this.stepEspritCompleted) {
-                steps = false;
-            }
+      if (this.stepEcoleExist && !this.stepEcoleCompleted) {
+        steps = false;
+      }
 
-            if (this.stepOrdreExist && !this.stepOrdreCompleted) {
-                steps = false;
-            }
+      if (this.stepEspritExist && !this.stepEspritCompleted) {
+        steps = false;
+      }
 
-            if (this.stepConnaissancesExist && !this.stepConnaissancesCompleted) {
-                steps = false;
-            }
+      if (this.stepOrdreExist && !this.stepOrdreCompleted) {
+        steps = false;
+      }
 
-            if (this.stepDonsExist && !this.stepDonsCompleted) {
-                steps = false;
-            }
+      if (this.stepConnaissancesExist && !this.stepConnaissancesCompleted) {
+        steps = false;
+      }
 
-            return steps;
+      return steps;
 
-        }
-
-        return false;
     }
 
-    isCurrentStepSorts() {
+    return false;
+  }
 
-        if (this.stepClassesCompleted) {
+  isCurrentStepFourberies() {
 
-            let steps: boolean = true;
+    if (this.stepClassesCompleted) {
 
-            if (this.stepAlignementExist && !this.stepAlignementCompleted) {
-                steps = false;
-            }
+      let steps: boolean = true;
 
-            if (this.stepDomainesExist && !this.stepDomainesCompleted) {
-                steps = false;
-            }
+      if (this.stepAlignementExist && !this.stepAlignementCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEcoleExist && !this.stepEcoleCompleted) {
-                steps = false;
-            }
+      if (this.stepDomainesExist && !this.stepDomainesCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEspritExist && !this.stepEspritCompleted) {
-                steps = false;
-            }
+      if (this.stepEcoleExist && !this.stepEcoleCompleted) {
+        steps = false;
+      }
 
-            if (this.stepOrdreExist && !this.stepOrdreCompleted) {
-                steps = false;
-            }
+      if (this.stepEspritExist && !this.stepEspritCompleted) {
+        steps = false;
+      }
 
-            if (this.stepConnaissancesExist && !this.stepConnaissancesCompleted) {
-                steps = false;
-            }
+      if (this.stepOrdreExist && !this.stepOrdreCompleted) {
+        steps = false;
+      }
 
-            if (this.stepDonsExist && !this.stepDonsCompleted) {
-                steps = false;
-            }
+      if (this.stepConnaissancesExist && !this.stepConnaissancesCompleted) {
+        steps = false;
+      }
 
-            if (this.stepFourberiesExist && !this.stepFourberiesCompleted) {
-                steps = false;
-            }
+      if (this.stepDonsExist && !this.stepDonsCompleted) {
+        steps = false;
+      }
 
-            return steps;
+      return steps;
 
-        }
-
-        return false;
     }
 
-    isCurrentStepSortsDomaine() {
+    return false;
+  }
 
-        if (this.stepClassesCompleted) {
+  isCurrentStepSorts() {
 
-            let steps: boolean = true;
+    if (this.stepClassesCompleted) {
 
-            if (this.stepAlignementExist && !this.stepAlignementCompleted) {
-                steps = false;
-            }
+      let steps: boolean = true;
 
-            if (this.stepDomainesExist && !this.stepDomainesCompleted) {
-                steps = false;
-            }
+      if (this.stepAlignementExist && !this.stepAlignementCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEcoleExist && !this.stepEcoleCompleted) {
-                steps = false;
-            }
+      if (this.stepDomainesExist && !this.stepDomainesCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEspritExist && !this.stepEspritCompleted) {
-                steps = false;
-            }
+      if (this.stepEcoleExist && !this.stepEcoleCompleted) {
+        steps = false;
+      }
 
-            if (this.stepOrdreExist && !this.stepOrdreCompleted) {
-                steps = false;
-            }
+      if (this.stepEspritExist && !this.stepEspritCompleted) {
+        steps = false;
+      }
 
-            if (this.stepConnaissancesExist && !this.stepConnaissancesCompleted) {
-                steps = false;
-            }
+      if (this.stepOrdreExist && !this.stepOrdreCompleted) {
+        steps = false;
+      }
 
-            if (this.stepDonsExist && !this.stepDonsCompleted) {
-                steps = false;
-            }
+      if (this.stepConnaissancesExist && !this.stepConnaissancesCompleted) {
+        steps = false;
+      }
 
-            if (this.stepFourberiesExist && !this.stepFourberiesCompleted) {
-                steps = false;
-            }
+      if (this.stepDonsExist && !this.stepDonsCompleted) {
+        steps = false;
+      }
 
-            if(this.stepSortsExist && !this.stepSortsCompleted){
-                steps = false;
-            }
+      if (this.stepFourberiesExist && !this.stepFourberiesCompleted) {
+        steps = false;
+      }
 
-            return steps;
+      return steps;
 
-        }
-
-        return false;
     }
 
-    isCurrentStepDieu() {
+    return false;
+  }
 
-        if (this.stepClassesCompleted) {
+  isCurrentStepSortsDomaine() {
 
-            let steps: boolean = true;
+    if (this.stepClassesCompleted) {
 
-            if (this.stepAlignementExist && !this.stepAlignementCompleted) {
-                steps = false;
-            }
+      let steps: boolean = true;
 
-            if (this.stepDomainesExist && !this.stepDomainesCompleted) {
-                steps = false;
-            }
+      if (this.stepAlignementExist && !this.stepAlignementCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEcoleExist && !this.stepEcoleCompleted) {
-                steps = false;
-            }
+      if (this.stepDomainesExist && !this.stepDomainesCompleted) {
+        steps = false;
+      }
 
-            if (this.stepEspritExist && !this.stepEspritCompleted) {
-                steps = false;
-            }
+      if (this.stepEcoleExist && !this.stepEcoleCompleted) {
+        steps = false;
+      }
 
-            if (this.stepOrdreExist && !this.stepOrdreCompleted) {
-                steps = false;
-            }
+      if (this.stepEspritExist && !this.stepEspritCompleted) {
+        steps = false;
+      }
 
-            if (this.stepConnaissancesExist && !this.stepConnaissancesCompleted) {
-                steps = false;
-            }
+      if (this.stepOrdreExist && !this.stepOrdreCompleted) {
+        steps = false;
+      }
 
-            if (this.stepDonsExist && !this.stepDonsCompleted) {
-                steps = false;
-            }
+      if (this.stepConnaissancesExist && !this.stepConnaissancesCompleted) {
+        steps = false;
+      }
 
-            if (this.stepFourberiesExist && !this.stepFourberiesCompleted) {
-                steps = false;
-            }
+      if (this.stepDonsExist && !this.stepDonsCompleted) {
+        steps = false;
+      }
 
-            if (this.stepSortsExist && !this.stepSortsCompleted) {
-                steps = false;
-            }
+      if (this.stepFourberiesExist && !this.stepFourberiesCompleted) {
+        steps = false;
+      }
 
-            if (this.stepSortsDomaineExist && !this.stepSortsDomaineCompleted){
-                steps = false;
-            }
+      if (this.stepSortsExist && !this.stepSortsCompleted) {
+        steps = false;
+      }
 
-            return steps;
+      return steps;
 
-        }
-
-        return false;
     }
+
+    return false;
+  }
+
+  isCurrentStepDieu() {
+
+    if (this.stepClassesCompleted) {
+
+      let steps: boolean = true;
+
+      if (this.stepAlignementExist && !this.stepAlignementCompleted) {
+        steps = false;
+      }
+
+      if (this.stepDomainesExist && !this.stepDomainesCompleted) {
+        steps = false;
+      }
+
+      if (this.stepEcoleExist && !this.stepEcoleCompleted) {
+        steps = false;
+      }
+
+      if (this.stepEspritExist && !this.stepEspritCompleted) {
+        steps = false;
+      }
+
+      if (this.stepOrdreExist && !this.stepOrdreCompleted) {
+        steps = false;
+      }
+
+      if (this.stepConnaissancesExist && !this.stepConnaissancesCompleted) {
+        steps = false;
+      }
+
+      if (this.stepDonsExist && !this.stepDonsCompleted) {
+        steps = false;
+      }
+
+      if (this.stepFourberiesExist && !this.stepFourberiesCompleted) {
+        steps = false;
+      }
+
+      if (this.stepSortsExist && !this.stepSortsCompleted) {
+        steps = false;
+      }
+
+      if (this.stepSortsDomaineExist && !this.stepSortsDomaineCompleted) {
+        steps = false;
+      }
+
+      return steps;
+
+    }
+
+    return false;
+  }
 
 }

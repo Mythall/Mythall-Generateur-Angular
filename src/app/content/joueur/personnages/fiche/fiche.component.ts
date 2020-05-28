@@ -1,16 +1,14 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { AuthenticationService } from '../../../../services/@core/authentication.service';
-import { PersonnageService } from '../../../../services/personnages/personnage.service';
-import { Personnage } from '../../../../services/personnages/models/personnage';
-import { Subscription } from 'rxjs';
-import { User } from '../../../../services/@core/models/user';
+import { PersonnageService, IPersonnage } from '../../../../services/personnage.service';
+import { IUser } from '../../../../services/@core/user.service';
 
 @Component({
   selector: 'app-joueur-fiche-personnage',
   templateUrl: './fiche.component.html'
 })
-export class JoueurPersonnageFicheComponent implements OnInit, OnDestroy {
+export class JoueurPersonnageFicheComponent implements OnInit {
 
   constructor(
     public auth: AuthenticationService,
@@ -19,32 +17,22 @@ export class JoueurPersonnageFicheComponent implements OnInit, OnDestroy {
   ) { }
 
   id: string;
-  personnage: Personnage = new Personnage();
-  user: User;
-  private _subscription: Subscription;
+  personnage = {} as IPersonnage;
 
   ngOnInit() {
     this._getPersonnage();
-    this.getUser();
   }
 
-  ngOnDestroy() {
-    this._subscription.unsubscribe();
+  public get user(): IUser {
+    return this.auth.user;
   }
 
   private _getPersonnage(): void {
     this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
-        this._subscription = this.personnageService.getPersonnage(params['id']).subscribe(async (response) => {
-          this.personnage = await this.personnageService.buildPromise(response);
-        })
+        this.personnage = await this.personnageService.getPersonnage(params['id']);
+        await this.personnageService.buildPersonnage(this.personnage);
       }
-    });
-  }
-
-  getUser() {
-    this.auth.user.subscribe(response => {
-      this.user = response
     });
   }
 

@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { DomaineService } from '../../../../services/domaines/domaine-service';
-import { Domaine } from '../../../../services/domaines/models/domaine';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
+import { DomaineService, IDomaine } from '../../../../services/domaine.service';
 
 @Component({
   selector: 'app-organisateur-domaines-list',
@@ -13,31 +11,31 @@ import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.
 export class OrganisateurDomainesListComponent implements OnInit {
 
   constructor(
+    public dialog: MatDialog,
     private domaineService: DomaineService,
-    public dialog: MatDialog
-  ){}
+  ) { }
 
-  domaines: Observable<Domaine[]>;
+  domaines: IDomaine[];
 
-  ngOnInit(){
-    this.domaines = this.domaineService.getDomaines();    
+  ngOnInit() {
+    this._getDomaines();
   }
 
-  confirmDelete(item: Domaine) {
+  private async _getDomaines(): Promise<void> {
+    this.domaines = await this.domaineService.getDomaines();
+  }
+
+  public confirmDelete(item: IDomaine): void {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if(result){
-        this.delete(result);
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        await this.domaineService.deleteDomaine(result);
       }
     });
-  }
-
-  delete(domaine: Domaine){
-    this.domaineService.deleteDomaine(domaine);
   }
 
 }

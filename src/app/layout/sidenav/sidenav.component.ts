@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthenticationService } from '../../services/@core/authentication.service';
-import { User } from '../../services/@core/models/user';
+import { IUser } from '../../services/@core/user.service';
 
 @Component({
   selector: 'app-sidenav',
@@ -14,10 +14,12 @@ export class SidenavComponent implements OnInit {
     public auth: AuthenticationService
   ){}
 
-  public user: User;
-
   ngOnInit(){
-    this.auth.user.subscribe(response => this.user = response);
+    
+  }
+
+  public get user(): IUser {
+    return this.auth.user;
   }
 
 }

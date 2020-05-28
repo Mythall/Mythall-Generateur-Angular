@@ -5,10 +5,10 @@ import { DonService, IDon, DonCategories } from '../../../../services/don.servic
 import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
 import { ResistanceService, IResistance, ResistanceItem } from '../../../../services/resistance.service';
 import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
-import { Classe } from '../../../../services/classes/models/classe';
-import { Race } from '../../../../services/races/models/race';
 import { SortService, ISort } from '../../../../services/sort.service';
-import { Choix, ChoixTypes } from '../../../../services/personnages/models/choix';
+import { IClasse } from '../../../../services/classe.service';
+import { IRace } from '../../../../services/race.service';
+import { ChoixTypes, Choix } from '../../../../services/personnage.service';
 
 @Component({
   selector: 'app-organisateur-aptitudes-form',
@@ -31,10 +31,10 @@ export class OrganisateurAptitudesFormComponent implements OnInit {
   id: string;
   aptitude = {} as IAptitude;
   aptitudes: IAptitude[];
-  classes: Classe[];
+  classes: IClasse[];
   dons: IDon[];
   sorts: ISort[];
-  races: Race[];
+  races: IRace[];
   resistances: IResistance[];
   statistiques: IStatistique[];
   immunites: IImmunite[];
@@ -45,7 +45,7 @@ export class OrganisateurAptitudesFormComponent implements OnInit {
     this._getAptitude();
     this._getAptitudes();
     this._getDons();
-    this.getSorts();
+    this._getSorts();
     this._getImmunites();
     this._getResistances();
     this._getStatistiques();
@@ -68,7 +68,7 @@ export class OrganisateurAptitudesFormComponent implements OnInit {
     this.dons =  await this.donService.getDons();
   }
 
-  private async getSorts(): Promise<void> {
+  private async _getSorts(): Promise<void> {
     this.sorts = await this.sortService.getSorts();
   }
 

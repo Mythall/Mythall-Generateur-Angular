@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs';
-import { ClasseService } from '../../../../services/classes/classe.service';
-import { Classe, ClasseTypes, ClasseSort } from '../../../../services/classes/models/classe';
+import { ClasseService, IClasse, ClasseTypes, ClasseSort } from '../../../../services/classe.service';
 import { IAlignement, AlignementService } from '../../../../services/alignement.service';
-import { ChoixTypes, Choix } from '../../../../services/personnages/models/choix';
 import { FourberieService, IFourberie } from '../../../../services/fourberie.service';
 import { AptitudeService, IAptitude, AptitudeItem } from '../../../../services/aptitude.service';
 import { DonService, IDon, DonCategories, DonItem } from '../../../../services/don.service';
@@ -12,6 +9,7 @@ import { SortService, ISort, SortItem } from '../../../../services/sort.service'
 import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
 import { ResistanceService, IResistance, ResistanceItem } from '../../../../services/resistance.service';
 import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
+import { ChoixTypes, Choix } from '../../../../services/personnage.service';
 
 @Component({
   selector: 'app-organisateur-classes-form',
@@ -35,8 +33,8 @@ export class OrganisateurClassesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  classe: Classe = new Classe();
-  classes: Observable<Classe[]>;
+  classe = {} as IClasse;
+  classes: IClasse[];
   alignements: IAlignement[];
   aptitudes: IAptitude[];
   dons: IDon[];
@@ -51,8 +49,8 @@ export class OrganisateurClassesFormComponent implements OnInit {
   classeSorts: string[] = ClasseSort;
 
   ngOnInit() {
-    this.getClasse();
-    this.getClasses()
+    this._getClasse();
+    this._getClasses()
     this._getAptitudes();
     this._getAlignements();
     this._getDons();
@@ -63,19 +61,17 @@ export class OrganisateurClassesFormComponent implements OnInit {
     this._getImmunites();
   }
 
-  getClasse() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getClasse(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.classeService.getClasse(this.id).subscribe(response => {
-          this.classe = this.classeService.map(response);
-        });
+        this.classe = await this.classeService.getClasse(this.id);
       }
     });
   }
 
-  getClasses() {
-    this.classes = this.classeService.getClasses();
+  private async _getClasses(): Promise<void> {
+    this.classes = await this.classeService.getClasses();
   }
 
   private async _getAlignements(): Promise<void> {
@@ -83,7 +79,7 @@ export class OrganisateurClassesFormComponent implements OnInit {
   }
 
   private async _getAptitudes(): Promise<void> {
-    this.aptitudes =  await this.aptitudeService.getAptitudes();
+    this.aptitudes = await this.aptitudeService.getAptitudes();
   }
 
   private async _getFourberies(): Promise<void> {
@@ -91,7 +87,7 @@ export class OrganisateurClassesFormComponent implements OnInit {
   }
 
   private async _getDons(): Promise<void> {
-    this.dons =  await this.donService.getDons();
+    this.dons = await this.donService.getDons();
   }
 
   private async _getSorts(): Promise<void> {
@@ -99,30 +95,28 @@ export class OrganisateurClassesFormComponent implements OnInit {
   }
 
   private async _getResistances(): Promise<void> {
-    this.resistances =  await this.resistanceService.getResistances();
+    this.resistances = await this.resistanceService.getResistances();
   }
 
   private async _getStatistiques(): Promise<void> {
-    this.statistiques =  await this.statistiqueService.getStatistiques();
+    this.statistiques = await this.statistiqueService.getStatistiques();
   }
 
   private async _getImmunites(): Promise<void> {
     this.immunites = await this.immuniteService.getImmunites();
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
-      this.classeService.updateClasse(this.id, this.classe.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/classes/list"]);
-        }
-      });
+      const result = await this.classeService.updateClasse(this.classe);
+      if (result) {
+        this.router.navigate(["/organisateur/classes/list"]);
+      }
     } else {
-      this.classeService.addClasse(this.classe.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/classes/list"]);
-        }
-      });
+      const result = await this.classeService.addClasse(this.classe);
+      if (result) {
+        this.router.navigate(["/organisateur/classes/list"]);
+      }
     }
   }
 

@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
-import { ClasseService } from '../../../services/classes/classe.service';
-import { Classe } from '../../../services/classes/models/classe';
+import { ClasseService, IClasse } from '../../../services/classe.service';
 
 @Component({
   selector: 'app-jeu-classes-prestige',
@@ -12,28 +10,16 @@ export class JeuClassesPrestigeComponent implements OnInit {
 
   constructor(
     private classeService: ClasseService
-  ){}
+  ) { }
 
-  classes: Classe[];
-  // multiClasses: Classe[];
+  classes: IClasse[];
 
-  ngOnInit(){
-
-    // // Get Full Classes List for Multiclassement
-    // this.classeService.getClasses().subscribe(response => {
-    //   this.multiClasses = response;
-    // })
-
-    // Get Classes
-    this.classeService.getClassesPrestige().subscribe(response => {
-      this.classes = response;
-    });
-
+  ngOnInit() {
+    this._getClassesPrestige();
   }
 
-  scroll(el) {
-    console.log(el);
-    el.scrollIntoView();
-}
+  private async _getClassesPrestige(): Promise<void> {
+    this.classes = await this.classeService.getClasses(false, true);
+  }
 
 }

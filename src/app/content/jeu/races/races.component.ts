@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
-import { RaceService } from '../../../services/races/race.service';
-import { Race } from '../../../services/races/models/race';
+import { RaceService, IRace } from '../../../services/race.service';
 
 @Component({
   selector: 'app-jeu-races',
@@ -14,16 +12,14 @@ export class JeuRacesComponent implements OnInit {
     private raceService: RaceService
   ){}
 
-  races: Race[];
+  races: IRace[];
 
   ngOnInit(){
-    this.getRaces();
+    this._getRaces();
   }
 
-  getRaces(){
-    this.raceService.getRaces().subscribe(response => {
-      this.races = response;
-    });
+  private async _getRaces(): Promise<void> {
+    this.races = await this.raceService.getRaces();
   }
 
 }

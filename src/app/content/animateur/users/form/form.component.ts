@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { UserService } from '../../../../services/@core/user.service';
-import { User } from '../../../../services/@core/models/user';
+import { UserService, IUser } from '../../../../services/@core/user.service';
 import { AuthenticationService } from '../../../../services/@core/authentication.service';
 
 @Component({
@@ -16,34 +15,31 @@ export class AnimateurUsersFormComponent implements OnInit {
     public auth: AuthenticationService,
     private userService: UserService,
     private router: Router
-  ){}
+  ) { }
 
   id: string;
-  user: User = new User();
+  user = {} as IUser;
 
   ngOnInit() {
-    this.getUser();
+    this._getUser();
   }
 
-  getUser() {
-    this.activatedRoute.params.subscribe((params: Params) => {
-      if(params['id']){
+  private _getUser(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
+      if (params['id']) {
         this.id = params['id'];
-        this.userService.getUser(this.id).subscribe(response => {
-          this.user = this.userService.map(response);
-        });
+        this.user = await this.userService.getUser(this.id);
       }
     });
   }
 
-  submit() {
-    if(this.id){
-      this.userService.updateUser(this.id, this.user.saveState()).then(result => {
-        if(result){
-          this.router.navigate(["/animateur/users/list"]);
-        }
-      });
-    }    
+  public async submit(): Promise<void> {
+    if (this.id) {
+      const result = await this.userService.updateUser(this.user);
+      if (result) {
+        this.router.navigate(["/animateur/users/list"]);
+      };
+    }
   }
 
 }

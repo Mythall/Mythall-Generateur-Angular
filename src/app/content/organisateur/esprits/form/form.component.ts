@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-
 import { AptitudeService, IAptitude, AptitudeItem } from '../../../../services/aptitude.service';
 import { DonService, IDon, DonItem } from '../../../../services/don.service';
-import { EspritService } from '../../../../services/esprits/esprit-service';
+import { EspritService, IEsprit } from '../../../../services/esprit.service';
 import { SortService, ISort, SortItem } from '../../../../services/sort.service';
-import { Esprit } from '../../../../services/esprits/models/esprit';
 
 @Component({
   selector: 'app-organisateur-esprits-form',
@@ -24,54 +22,50 @@ export class OrganisateurEspritsFormComponent implements OnInit {
   ) { }
 
   id: string;
-  esprit: Esprit = new Esprit();
+  esprit = {} as IEsprit;
   aptitudes: IAptitude[];
   dons: IDon[];
   sorts: ISort[];
 
   ngOnInit() {
-    this.getEsprit();
+    this._getEsprit();
     this._getAptitudes();
     this._getDons();
     this._getSorts();
   }
 
-  getEsprit() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getEsprit(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.espritService.getEsprit(this.id).subscribe(response => {
-          this.esprit = response;
-        });
+        this.esprit = await this.espritService.getEsprit(this.id);
       }
     });
   }
 
   private async _getAptitudes(): Promise<void> {
-    this.aptitudes =  await this.aptitudeService.getAptitudes();
+    this.aptitudes = await this.aptitudeService.getAptitudes();
   }
 
   private async _getDons(): Promise<void> {
-    this.dons =  await this.donService.getDons();
+    this.dons = await this.donService.getDons();
   }
 
   private async _getSorts(): Promise<void> {
     this.sorts = await this.sortService.getSorts();
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
-      this.espritService.updateEsprit(this.id, this.esprit.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/esprits/list"]);
-        }
-      });
+      const result = await this.espritService.updateEsprit(this.esprit);
+      if (result) {
+        this.router.navigate(["/organisateur/esprits/list"]);
+      }
     } else {
-      this.espritService.addEsprit(this.esprit.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/esprits/list"]);
-        }
-      });
+      const result = await this.espritService.addEsprit(this.esprit);
+      if (result) {
+        this.router.navigate(["/organisateur/esprits/list"]);
+      }
     }
   }
 

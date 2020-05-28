@@ -22,7 +22,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let domaine of domaines | async">
+          <tr *ngFor="let domaine of domaines">
             <td [innerHtml]="domaine.nom"></td>
             <td [innerHtml]="domaine.bonus"></td>
             <td>

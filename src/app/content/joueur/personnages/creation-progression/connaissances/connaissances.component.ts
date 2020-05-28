@@ -1,8 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Choix } from '../../../../../services/personnages/models/choix';
+import { PersonnageService, IPersonnage, Choix } from '../../../../../services/personnage.service';
 import { IDon, DonItem } from '../../../../../services/don.service';
 
 @Component({
@@ -17,10 +15,10 @@ export class JoueurPersonnageCreationProgressionConnaissancesComponent implement
 
   @Input() stepper: MatStepper;
   @Input() progression: boolean;
-  @Input() personnage: Personnage;
+  @Input() personnage: IPersonnage;
   @Input() choixPersonnage: Choix[];
 
-  @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
   @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   selectedConnaissances: IDon[] = [];
@@ -29,7 +27,7 @@ export class JoueurPersonnageCreationProgressionConnaissancesComponent implement
   currentIndex: number = 0;
 
   ngOnInit() {
-    this.getAvailableConnaissances();
+    this._getAvailableConnaissances();
 
     // Get the amount of connaissances to choose
     this.choixPersonnage.forEach((choix) => {
@@ -44,13 +42,11 @@ export class JoueurPersonnageCreationProgressionConnaissancesComponent implement
     return this.selectedConnaissances && this.selectedConnaissances.length == this.quantity.length ? true : false;
   }
 
-  getAvailableConnaissances() {
-    this.personnageService.getAvailableConnaissances(this.personnage).then(response => {
-      this.availableConnaissances[this.currentIndex] = response;
-    });
+  private async _getAvailableConnaissances(): Promise<void> {
+    this.availableConnaissances[this.currentIndex] = await this.personnageService.getAvailableConnaissances(this.personnage);
   }
 
-  setConnaissance(index) {
+  public setConnaissance(index): void {
 
     // Set Current Index
     this.currentIndex = index + 1;
@@ -66,7 +62,7 @@ export class JoueurPersonnageCreationProgressionConnaissancesComponent implement
     this.personnage.dons.push(selectedConnaissanceItem);
 
     // Refresh List of Available connaissances
-    this.getAvailableConnaissances();
+    this._getAvailableConnaissances();
 
   }
 
@@ -74,7 +70,7 @@ export class JoueurPersonnageCreationProgressionConnaissancesComponent implement
     if (this.isCompleted) {
 
       // Rebuild Personnage
-      const personnage = await this.personnageService.buildPromise(this.personnage);
+      const personnage = await this.personnageService.buildPersonnage(this.personnage);
 
       // Emit & Allow next step
       this.personnageChange.emit(personnage);

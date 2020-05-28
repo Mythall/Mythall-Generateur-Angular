@@ -1,13 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { ClasseService } from '../../../../services/classes/classe.service';
+import { ClasseService, IClasse, ClasseAuthorise } from '../../../../services/classe.service';
 import { DonService, IDon, DonCategories } from '../../../../services/don.service';
 import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
-import { RaceService } from '../../../../services/races/race.service';
+import { RaceService, IRace } from '../../../../services/race.service';
 import { ResistanceService, IResistance, ResistanceItem } from '../../../../services/resistance.service';
 import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
-import { Classe, ClasseAuthorise } from '../../../../services/classes/models/classe';
-import { Race } from '../../../../services/races/models/race';
 
 @Component({
   selector: 'app-organisateur-dons-form',
@@ -31,8 +29,8 @@ export class OrganisateurDonsFormComponent implements OnInit {
   don = {} as IDon;
   dons: IDon[];
   categories: string[] = DonCategories;
-  classes: Classe[];
-  races: Race[];
+  classes: IClasse[];
+  races: IRace[];
   resistances: IResistance[];
   statistiques: IStatistique[];
   immunites: IImmunite[];
@@ -40,9 +38,9 @@ export class OrganisateurDonsFormComponent implements OnInit {
   ngOnInit() {
     this._getDon();
     this._getDons();
-    this.getClasses();
+    this._getClasses();
     this._getImmunites();
-    this.getRaces();
+    this._getRaces();
     this._getResistances();
     this._getStatistiques();
   }
@@ -60,20 +58,16 @@ export class OrganisateurDonsFormComponent implements OnInit {
     this.dons = await this.donService.getDons();
   }
 
-  getClasses() {
-    this.classeService.getClasses().subscribe(response => {
-      this.classes = response;
-    });
+  private async _getClasses(): Promise<void> {
+    this.classes = await this.classeService.getClasses();
   }
 
   private async _getImmunites(): Promise<void> {
     this.immunites = await this.immuniteService.getImmunites();
   }
 
-  getRaces() {
-    this.raceService.getRaces().subscribe(response => {
-      this.races = response;
-    });
+  private async _getRaces(): Promise<void> {
+    this.races = await this.raceService.getRaces();
   }
 
   private async _getResistances(): Promise<void> {
@@ -98,12 +92,12 @@ export class OrganisateurDonsFormComponent implements OnInit {
     }
   }
 
-  addClasseAuthorise() {
+  public addClasseAuthorise(): void {
     if (!this.don.classesAutorise) this.don.classesAutorise = [];
     this.don.classesAutorise.push(new ClasseAuthorise());
   }
 
-  deleteClasseAuthorise(index: number) {
+  public deleteClasseAuthorise(index: number): void {
     this.don.classesAutorise.splice(index, 1);
   }
 
@@ -125,14 +119,14 @@ export class OrganisateurDonsFormComponent implements OnInit {
     this.don.statistiques.splice(index, 1);
   }
 
-  selectAllRaces() {
+  public selectAllRaces(): void {
     this.don.racesAutoriseRef = [];
     this.races.forEach(race => {
       this.don.racesAutoriseRef.push(race.id);
     })
   }
 
-  selectAllClasses() {
+  public selectAllClasses(): void {
     this.don.classesAutorise = [];
     this.classes.forEach(classe => {
       const ca: ClasseAuthorise = new ClasseAuthorise();

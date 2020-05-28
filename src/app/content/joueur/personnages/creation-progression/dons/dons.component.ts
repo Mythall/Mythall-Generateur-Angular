@@ -1,8 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Choix } from '../../../../../services/personnages/models/choix';
+import { PersonnageService, IPersonnage, Choix } from '../../../../../services/personnage.service';
 import { IDon, DonItem } from '../../../../../services/don.service';
 
 @Component({
@@ -17,10 +15,10 @@ export class JoueurPersonnageCreationProgressionDonsComponent implements OnInit 
 
   @Input() stepper: MatStepper;
   @Input() progression: boolean;
-  @Input() personnage: Personnage;
+  @Input() personnage: IPersonnage;
   @Input() choixPersonnage: Choix[];
 
-  @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
   @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   selectedDons: IDon[] = [];
@@ -74,7 +72,7 @@ export class JoueurPersonnageCreationProgressionDonsComponent implements OnInit 
     if (this.isCompleted) {
 
       // Rebuild Personnage
-      const personnage = await this.personnageService.buildPromise(this.personnage);
+      const personnage = await this.personnageService.buildPersonnage(this.personnage);
 
       // Emit & Allow next step
       this.personnageChange.emit(personnage);

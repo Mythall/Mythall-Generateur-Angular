@@ -1,8 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { PersonnageService } from '../../../../../services/personnages/personnage.service';
+import { PersonnageService, IPersonnage } from '../../../../../services/personnage.service';
 import { IDieu } from '../../../../../services/dieu.service';
 
 @Component({
@@ -17,9 +15,9 @@ export class JoueurPersonnageCreationProgressionDieuComponent implements OnInit 
 
   @Input() stepper: MatStepper;
   @Input() progression: boolean;
-  @Input() personnage: Personnage;
+  @Input() personnage: IPersonnage;
 
-  @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
   @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   selectedDieu: IDieu;
@@ -37,24 +35,22 @@ export class JoueurPersonnageCreationProgressionDieuComponent implements OnInit 
     this.availableDieus = await this.personnageService.getAvailableDieux(this.personnage);
   }
 
-  setDieu() {
+  public setDieu(): void {
     this.personnage.dieuRef = this.selectedDieu.id;
     this.personnage.dieu = this.selectedDieu;
   }
 
-  next() {
+  public async next(): Promise<void> {
     if (this.isCompleted) {
 
       // Rebuild Personnage
-      this.personnageService.buildPromise(this.personnage).then(personnage => {
+      const personnage = await this.personnageService.buildPersonnage(this.personnage);
 
-        // Emit & Allow next step
-        this.personnageChange.emit(personnage);
-        this.completedChange.emit(true);
-        setTimeout(() => {
-          this.stepper.next();
-        });
-
+      // Emit & Allow next step
+      this.personnageChange.emit(personnage);
+      this.completedChange.emit(true);
+      setTimeout(() => {
+        this.stepper.next();
       });
 
     }

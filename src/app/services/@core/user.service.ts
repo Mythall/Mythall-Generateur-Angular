@@ -1,42 +1,76 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { FirestoreService } from '../firestore/firestore.service';
-import { User } from './models/user';
+import { AngularFirestore } from '@angular/fire/firestore';
+
+export interface IRoles {
+  joueur?: boolean;
+  animateur?: boolean;
+  organisateur?: boolean;
+}
+
+export interface IUser extends IUserDB {
+
+}
+
+export interface IUserDB {
+  uid: string;
+  displayname: string;
+  photoURL: string;
+  email: string;
+  roles: IRoles;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 @Injectable()
 export class UserService {
 
   constructor(
-    private db: FirestoreService
+    private afs: AngularFirestore,
   ) { }
 
   //#region Service
-  getUsers(): Observable<User[]> {
-    return this.db.colWithIds$('users', ref => ref.orderBy('displayname'));
+  public async getUsers(): Promise<IUser[]> {
+    return (await this.afs.collection<IUser>('users').ref.orderBy('displayname').get()).docs.map(doc => {
+      return {
+        uid: doc.id,
+        ...doc.data()
+      } as IUser;
+    });
   }
 
-  getUser(uid: string): Observable<User> {
-    return this.db.doc$('users/' + uid);
+  public async getUser(id: string): Promise<IUser> {
+    const data = await this.afs.doc<IUser>(`users/${id}`).ref.get();
+    return {
+      uid: data.id,
+      ...data.data()
+    } as IUser;
   }
 
-  updateUser(uid: string, user: User) {
-    return this.db.update('users/' + uid, user, user.displayname);
+  public async addUser(user: IUser): Promise<IUser> {
+    const data = await this.afs.collection(`users`).add(this._saveState(user));
+    return { id: data.id, ...user } as IUser;
   }
 
-  deleteUser(user: User) {
-    return this.db.delete('users/' + user.uid, user.displayname);
-  }
-  //#endregion
-
-
-  //#region Maps
-  map(data: any): User {
-    const user: User = new User();
-    for (var key in data) {
-      user[key] = data[key]
-    }
+  public async updateUser(user: IUser): Promise<IUser> {
+    await this.afs.doc<IUser>(`users/${user.uid}`).update(this._saveState(user));
     return user;
   }
-  //#endregion
+
+  public async deleteUser(id: string): Promise<boolean> {
+    await this.afs.doc<IUser>(`users/${id}`).delete();
+    return true;
+  }
+
+  private _saveState(item: IUser): IUserDB {
+    return {
+      uid: item.uid,
+      displayname: item.displayname,
+      photoURL: item.photoURL,
+      email: item.email,
+      roles: item.roles,
+      createdAt: item.createdAt,
+      updatedAt: new Date(),
+    };
+  }
 
 }

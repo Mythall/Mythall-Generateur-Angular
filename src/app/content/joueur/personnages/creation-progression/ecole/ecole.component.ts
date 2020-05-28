@@ -1,8 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { PersonnageService } from '../../../../../services/personnages/personnage.service';
+import { PersonnageService, IPersonnage } from '../../../../../services/personnage.service';
 import { IEcole } from '../../../../../services/ecole.service';
 
 @Component({
@@ -17,9 +15,9 @@ export class JoueurPersonnageCreationProgressionEcoleComponent implements OnInit
 
   @Input() stepper: MatStepper;
   @Input() progression: boolean;
-  @Input() personnage: Personnage;
+  @Input() personnage: IPersonnage;
 
-  @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
   @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   selectedEcole: IEcole;
@@ -30,30 +28,28 @@ export class JoueurPersonnageCreationProgressionEcoleComponent implements OnInit
   }
 
   public get isCompleted(): boolean {
-    return this.selectedEcole ? true: false;
+    return this.selectedEcole ? true : false;
   }
 
   private async _getAvailableEcoles() {
-    this.availableEcoles = await this.personnageService.getAvailableEcoles(this.personnage);
+    this.availableEcoles = await this.personnageService.getAvailableEcoles();
   }
 
 
-  setEcole() {
+  public setEcole(): void {
     this.personnage.ecoleRef = this.selectedEcole.id;
     this.personnage.ecole = this.selectedEcole;
   }
 
-  next() {
+  public async next(): Promise<void> {
     if (this.isCompleted) {
 
       // Rebuild Personnage
-      this.personnageService.buildPromise(this.personnage).then(personnage => {
+      const personnage = await this.personnageService.buildPersonnage(this.personnage);
 
-        // Emit & Allow next step
-        this.personnageChange.emit(personnage);
-        this.completedChange.emit(true);
-
-      });
+      // Emit & Allow next step
+      this.personnageChange.emit(personnage);
+      this.completedChange.emit(true);
 
     }
   }

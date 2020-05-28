@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { IDieu, DieuService } from '../../../../services/dieu.service';
 import { IAlignement, AlignementService } from '../../../../services/alignement.service';
-import { Domaine } from '../../../../services/domaines/models/domaine';
-import { DomaineService } from '../../../../services/domaines/domaine-service';
+import { DomaineService, IDomaine } from '../../../../services/domaine.service';
 import { ToastService } from '../../../../services/@core/toast.service';
 
 @Component({
@@ -25,11 +24,11 @@ export class OrganisateurDieuxFormComponent implements OnInit {
   id: string;
   dieu: IDieu = {} as IDieu;
   alignements: IAlignement[];
-  domaines: Domaine[];
+  domaines: IDomaine[];
 
   ngOnInit() {
     this._getDieu();
-    this.getDomains();
+    this._getDomaines();
     this._getAlignements();
   }
 
@@ -42,10 +41,8 @@ export class OrganisateurDieuxFormComponent implements OnInit {
     });
   }
 
-  getDomains() {
-    this.domaineService.getDomaines().subscribe(response => {
-      this.domaines = response;
-    })
+  private async _getDomaines(): Promise<void> {
+    this.domaines = await this.domaineService.getDomaines();
   }
 
   private async _getAlignements(): Promise<void> {

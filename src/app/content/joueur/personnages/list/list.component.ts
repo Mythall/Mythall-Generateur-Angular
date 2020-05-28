@@ -1,10 +1,7 @@
 import { Component } from '@angular/core';
-
 import { AuthenticationService } from '../../../../services/@core/authentication.service';
-import { User } from '../../../../services/@core/models/user';
-
-import { PersonnageService } from '../../../../services/personnages/personnage.service';
-import { Personnage } from '../../../../services/personnages/models/personnage';
+import { PersonnageService, IPersonnage } from '../../../../services/personnage.service';
+import { IUser } from '../../../../services/@core/user.service';
 
 @Component({
   selector: 'app-joueur-personnages-list',
@@ -15,23 +12,20 @@ export class JoueurPersonnagesListComponent {
   constructor(
     private auth: AuthenticationService,
     private personnageService: PersonnageService
-  ){  }
+  ) { }
 
-  public user: User;
-  public personnages: Personnage[] = [];
+  public personnages: IPersonnage[] = [];
 
-  ngOnInit(){
-    this.auth.user.subscribe(response => {
-      this.user = response;
-      this.personnageService.getPersonnagesByUser(this.user.uid).subscribe(response => {
-        this.personnages = new Array();
-        for(var i = 0; i < response.length; i++){
-          var personnage: Personnage = new Personnage();
-          personnage = this.personnageService.mapDefault(response[i]);
-          this.personnages.push(personnage);
-        }
-      });
-    });
+  ngOnInit() {
+    this._getPersonnages();
+  }
+
+  public get user(): IUser {
+    return this.auth.user;
+  }
+
+  private async _getPersonnages(): Promise<void> {
+    this.personnages = await this.personnageService.getPersonnages(this.user.uid);
   }
 
 }

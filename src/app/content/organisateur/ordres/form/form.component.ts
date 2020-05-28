@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { OrdreService, IOrdre } from '../../../../services/ordre.service';
-import { ClasseService } from '../../../../services/classes/classe.service';
-import { Classe } from '../../../../services/classes/models/classe';
+import { ClasseService, IClasse } from '../../../../services/classe.service';
 import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 
 @Component({
@@ -22,12 +21,12 @@ export class OrganisateurOrdresFormComponent implements OnInit {
 
   id: string;
   ordre = {} as IOrdre;
-  classes: Classe[];
+  classes: IClasse[];
   alignements: IAlignement[];
 
   ngOnInit() {
     this._getOrdre();
-    this.getClasses();
+    this._getClasses();
     this._getAlignements();
   }
 
@@ -40,10 +39,8 @@ export class OrganisateurOrdresFormComponent implements OnInit {
     });
   }
 
-  getClasses() {
-    this.classeService.getClasses().subscribe(response => {
-      this.classes = response;
-    })
+  private async _getClasses(): Promise<void> {
+    this.classes = await this.classeService.getClasses();
   }
 
   private async _getAlignements(): Promise<void> {

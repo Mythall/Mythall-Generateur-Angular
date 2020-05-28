@@ -1,9 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Choix } from '../../../../../services/personnages/models/choix';
+import { PersonnageService, IPersonnage, Choix } from '../../../../../services/personnage.service';
 import { ISort, SortItem } from '../../../../../services/sort.service';
 
 @Component({
@@ -18,10 +15,10 @@ export class JoueurPersonnageCreationProgressionSortsComponent implements OnInit
 
   @Input() stepper: MatStepper;
   @Input() progression: boolean;
-  @Input() personnage: Personnage;
+  @Input() personnage: IPersonnage;
   @Input() choixPersonnage: Choix[];
 
-  @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
   @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   selectedSorts: ISort[] = [];
@@ -71,19 +68,17 @@ export class JoueurPersonnageCreationProgressionSortsComponent implements OnInit
 
   }
 
-  next() {
+  public async next(): Promise<void> {
     if (this.isCompleted) {
 
       // Rebuild Personnage
-      this.personnageService.buildPromise(this.personnage).then(personnage => {
+      const personnage = await this.personnageService.buildPersonnage(this.personnage);
 
-        // Emit & Allow next step
-        this.personnageChange.emit(personnage);
-        this.completedChange.emit(true);
-        setTimeout(() => {
-          this.stepper.next();
-        });
-
+      // Emit & Allow next step
+      this.personnageChange.emit(personnage);
+      this.completedChange.emit(true);
+      setTimeout(() => {
+        this.stepper.next();
       });
 
     }

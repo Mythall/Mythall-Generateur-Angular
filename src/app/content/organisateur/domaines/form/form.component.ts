@@ -2,14 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AptitudeService, IAptitude, AptitudeItem } from '../../../../services/aptitude.service';
 import { DonService, IDon, DonCategories, DonItem } from '../../../../services/don.service';
-import { DomaineService } from '../../../../services/domaines/domaine-service';
+import { DomaineService, IDomaine } from '../../../../services/domaine.service';
 import { SortService, ISort, SortItem } from '../../../../services/sort.service';
-import { Domaine } from '../../../../services/domaines/models/domaine';
-import { ClasseService } from '../../../../services/classes/classe.service';
-import { Classe } from '../../../../services/classes/models/classe';
+import { ClasseService, IClasse } from '../../../../services/classe.service';
 import { IAlignement, AlignementService } from '../../../../services/alignement.service';
-import { ChoixTypes, Choix } from '../../../../services/personnages/models/choix';
 import { FourberieService, IFourberie } from '../../../../services/fourberie.service';
+import { ChoixTypes, Choix } from '../../../../services/personnage.service';
 
 @Component({
   selector: 'app-organisateur-domaines-form',
@@ -31,9 +29,9 @@ export class OrganisateurDomainesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  domaine: Domaine = new Domaine();
-  domaines: Domaine[];
-  classes: Classe[];
+  domaine = {} as IDomaine;
+  domaines: IDomaine[];
+  classes: IClasse[];
   alignements: IAlignement[];
   aptitudes: IAptitude[];
   dons: IDon[];
@@ -43,37 +41,31 @@ export class OrganisateurDomainesFormComponent implements OnInit {
   categories: string[] = DonCategories;
 
   ngOnInit() {
-    this.getDomaine();
-    this.getDomaines();
+    this._getDomaine();
+    this._getDomaines();
     this._getAptitudes();
-    this.getClasses();
+    this._getClasses();
     this._getAlignements();
     this._getDons();
     this._getSorts();
     this._getFourberies();
   }
 
-  getDomaine() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getDomaine(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.domaineService.getDomaine(this.id).subscribe(response => {
-          this.domaine = response;
-        });
+        this.domaine = await this.domaineService.getDomaine(this.id);
       }
     });
   }
 
-  getDomaines() {
-    this.domaineService.getDomaines().subscribe(response => {
-      this.domaines = response;
-    })
+  private async _getDomaines(): Promise<void> {
+    this.domaines = await this.domaineService.getDomaines();
   }
 
-  getClasses() {
-    this.classeService.getClasses().subscribe(response => {
-      this.classes = response;
-    })
+  private async _getClasses(): Promise<void> {
+    this.classes = await this.classeService.getClasses();
   }
 
   private async _getAlignements(): Promise<void> {

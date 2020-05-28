@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { ClasseService } from './classes/classe.service';
-import { Classe } from './classes/models/classe';
+import { ClasseService, IClasse } from './classe.service';
 import { IAlignement } from './alignement.service';
 
 export interface IOrdre extends IOrdreDB {
   id: string;
-  multiclassement: Classe[];
+  multiclassement: IClasse[];
   alignementPermis: IAlignement[];
 }
 
@@ -74,7 +73,7 @@ export class OrdreService {
     if (ordre.multiclassementRef) {
       ordre.multiclassementRef.forEach(async (classeRef) => {
         if (!ordre.multiclassement) ordre.multiclassement = [];
-        ordre.multiclassement.push(await this.classeService.getClasseSummaryTemp(classeRef));
+        ordre.multiclassement.push(await this.classeService.getClasse(classeRef));
       });
     }
   }

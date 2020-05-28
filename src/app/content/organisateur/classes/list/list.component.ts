@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ClasseService } from '../../../../services/classes/classe.service';
-import { Classe } from '../../../../services/classes/models/classe';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
+import { ClasseService, IClasse } from '../../../../services/classe.service';
 
 @Component({
   selector: 'app-organisateur-classes-list',
@@ -15,29 +13,29 @@ export class OrganisateurClassesListComponent implements OnInit {
   constructor(
     private classeService: ClasseService,
     public dialog: MatDialog
-  ){}
+  ) { }
 
-  classes: Observable<Classe[]>;
+  classes: IClasse[];
 
-  ngOnInit(){
-    this.classes = this.classeService.getClasses();    
+  ngOnInit() {
+    this._getClasses();
   }
 
-  confirmDelete(item: Classe) {
+  private async _getClasses(): Promise<void> {
+    this.classes = await this.classeService.getClasses();
+  }
+
+  public confirmDelete(item: IClasse): void {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if(result){
-        this.delete(result);
-      }      
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        await this.classeService.deleteClasse(result);
+      }
     });
-  }
-
-  delete(classe: Classe){
-    this.classeService.deleteClasse(classe);
   }
 
 }

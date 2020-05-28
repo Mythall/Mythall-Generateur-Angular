@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { IAlignement } from "../services/alignement.service";
-import { Domaine } from "../services/domaines/models/domaine";
+import { IDomaine } from './domaine.service';
 
 export interface IDieu extends IDieuDB {
   id: string;
   alignement: IAlignement;
   alignementPermis: IAlignement[];
-  domaines: Domaine[];
+  domaines: IDomaine[];
 }
 
 export interface IDieuDB {

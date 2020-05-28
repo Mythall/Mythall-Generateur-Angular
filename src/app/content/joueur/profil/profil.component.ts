@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-
 import { AuthenticationService } from '../../../services/@core/authentication.service';
-import { UserService } from '../../../services/@core/user.service';
-import { User } from '../../../services/@core/models/user';
+import { UserService, IUser } from '../../../services/@core/user.service';
 
 @Component({
   selector: 'app-profil',
@@ -16,12 +14,12 @@ export class ProfilComponent implements OnInit {
     private userService: UserService
   ) { }
 
-  user: User;
-
   ngOnInit() {
-    this.auth.user.subscribe(response => {
-      this.user = response
-    });
+    
+  }
+
+  public get user(): IUser {
+    return this.auth.user;
   }
 
 }

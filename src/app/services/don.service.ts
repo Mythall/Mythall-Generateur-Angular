@@ -3,15 +3,15 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { ImmuniteService, IImmunite } from './immunite.service';
 import { ResistanceService, ResistanceItem } from './resistance.service';
 import { StatistiqueService, StatistiqueItem, IStatistique } from './statistique.service';
-import { Classe, ClasseAuthorise } from './classes/models/classe';
-import { Race } from './races/models/race';
+import { ClasseAuthorise } from './classe.service';
+import { IRace } from './race.service';
 
 export interface IDon extends IDonDB {
   id: string;
   modificateurs: IStatistique[];
   donsRequis: IDon[];
   immunites: IImmunite[];
-  racesAutorise: Race[];
+  racesAutorise: IRace[];
 }
 
 export interface IDonDB {

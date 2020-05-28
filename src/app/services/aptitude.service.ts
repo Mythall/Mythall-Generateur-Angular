@@ -3,8 +3,8 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { ImmuniteService, IImmunite } from './immunite.service';
 import { ResistanceService, ResistanceItem } from './resistance.service';
 import { StatistiqueService, StatistiqueItem } from './statistique.service';
-import { Choix } from './personnages/models/choix';
 import { IDon } from './don.service';
+import { Choix } from './personnage.service';
 
 export interface IAptitude extends IAptitudeDB {
   id: string;

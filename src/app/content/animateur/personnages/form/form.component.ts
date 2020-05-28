@@ -3,24 +3,18 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { LoadingDialogComponent } from '../../../../layout/dialogs/loading/loading.dialog.component';
 import { AptitudeService, IAptitude, AptitudeItem } from '../../../../services/aptitude.service';
-import { PersonnageService } from '../../../../services/personnages/personnage.service';
-import { Personnage } from '../../../../services/personnages/models/personnage';
+import { PersonnageService, IPersonnage } from '../../../../services/personnage.service';
 import { IAlignement, AlignementService } from '../../../../services/alignement.service';
-import { ClasseService } from '../../../../services/classes/classe.service';
-import { Classe, ClasseItem } from '../../../../services/classes/models/classe';
+import { ClasseService, IClasse, ClasseItem } from '../../../../services/classe.service';
 import { IDieu, DieuService } from '../../../../services/dieu.service';
 import { DonService, IDon, DonItem } from '../../../../services/don.service';
-import { EspritService } from '../../../../services/esprits/esprit-service';
-import { Esprit } from '../../../../services/esprits/models/esprit';
-import { RaceService } from '../../../../services/races/race.service';
-import { Race } from '../../../../services/races/models/race';
+import { EspritService, IEsprit } from '../../../../services/esprit.service';
+import { RaceService, IRace } from '../../../../services/race.service';
 import { SortService, ISort, SortItem } from '../../../../services/sort.service';
-import { UserService } from '../../../../services/@core/user.service';
-import { User } from '../../../../services/@core/models/user';
+import { UserService, IUser } from '../../../../services/@core/user.service';
 import { OrdreService, IOrdre } from '../../../../services/ordre.service';
 import { FourberieService, IFourberie, FourberieItem } from '../../../../services/fourberie.service';
-import { DomaineService } from '../../../../services/domaines/domaine-service';
-import { Domaine } from '../../../../services/domaines/models/domaine';
+import { DomaineService, IDomaine } from '../../../../services/domaine.service';
 
 @Component({
   selector: 'app-animateur-personnages-form',
@@ -49,51 +43,47 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  personnage: Personnage = new Personnage();
-  classes: Classe[];
+  personnage = {} as IPersonnage;
+  classes: IClasse[];
   alignements: IAlignement[];
   aptitudes: IAptitude[];
   dieux: IDieu[];
-  domaines: Domaine[];
+  domaines: IDomaine[];
   dons: IDon[];
   fourberies: IFourberie[];
   ordres: IOrdre[];
-  races: Race[];
+  races: IRace[];
   sorts: ISort[];
-  users: User[];
-  esprits: Esprit[];
+  users: IUser[];
+  esprits: IEsprit[];
 
   ngOnInit() {
-    this.getPersonnage();
-    this.getClasses();
+    this._getPersonnage();
+    this._getClasses();
     this._getAlignements();
     this._getAptitudes();
-    this.getDomaines();
+    this._getDomaines();
     this._getDons();
     this._getDieux();
-    this.getEsprits();
+    this._getEsprits();
     this._getFourberies();
     this._getOrdres();
-    this.getRaces();
+    this._getRaces();
     this._getSorts();
-    this.getUsers();
+    this._getUsers();
   }
 
-  getPersonnage() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getPersonnage(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.personnageService.getPersonnage(this.id).subscribe(response => {
-          this.personnage = this.personnageService.mapDefault(response);
-        })
+        this.personnage = await this.personnageService.getPersonnage(this.id);
       }
     });
   }
 
-  getClasses() {
-    this.classeService.getClasses().subscribe(response => {
-      this.classes = response;
-    });
+  private async _getClasses(): Promise<void> {
+    this.classes = await this.classeService.getClasses();
   }
 
   private async _getAlignements(): Promise<void> {
@@ -101,27 +91,23 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
   }
 
   private async _getAptitudes(): Promise<void> {
-    this.aptitudes =  await this.aptitudeService.getAptitudes();
+    this.aptitudes = await this.aptitudeService.getAptitudes();
   }
 
   private async _getDieux(): Promise<void> {
     this.dieux = await this.dieuService.getDieux();
   }
 
-  getDomaines() {
-    this.domaineService.getDomaines().subscribe(response => {
-      this.domaines = response;
-    });
+  private async _getDomaines(): Promise<void> {
+    this.domaines = await this.domaineService.getDomaines();
   }
 
   private async _getDons(): Promise<void> {
     this.dons = await this.donService.getDons();
   }
 
-  getEsprits() {
-    this.espritService.getEsprits().subscribe(response => {
-      this.esprits = response;
-    })
+  private async _getEsprits(): Promise<void> {
+    this.esprits = await this.espritService.getEsprits();
   }
 
   private async _getFourberies(): Promise<void> {
@@ -132,47 +118,41 @@ export class AnimateurPersonnagesFormComponent implements OnInit {
     this.ordres = await this.ordreService.getOrdres();
   }
 
-  getRaces() {
-    this.raceService.getRacesSummary().subscribe(response => {
-      this.races = response;
-    });
+  private async _getRaces(): Promise<void> {
+    this.races = await this.raceService.getRaces();
   }
 
   private async _getSorts(): Promise<void> {
     this.sorts = await this.sortService.getSorts();
   }
 
-  getUsers() {
-    this.userService.getUsers().subscribe(response => {
-      this.users = response;
-    });
+  private async _getUsers(): Promise<void> {
+    this.users = await this.userService.getUsers();
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     this.dialog.open(LoadingDialogComponent);
     if (this.id) {
-      this.personnageService.updatePersonnage(this.id, this.personnage.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/animateur/personnages/list"]);
-          this.dialog.closeAll();
-        }
-      });
+      const result = await this.personnageService.updatePersonnage(this.personnage);
+      if (result) {
+        this.router.navigate(["/animateur/personnages/list"]);
+        this.dialog.closeAll();
+      }
     } else {
-      this.personnageService.addPersonnage(this.personnage.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/animateur/personnages/list"]);
-          this.dialog.closeAll();
-        }
-      });
+      const result = await this.personnageService.addPersonnage(this.personnage);
+      if (result) {
+        this.router.navigate(["/animateur/personnages/list"]);
+        this.dialog.closeAll();
+      }
     }
 
   }
 
-  addClasse() {
+  public addClasse(): void {
     this.personnage.classes.push(new ClasseItem());
   }
 
-  deleteClasse(index: number) {
+  public deleteClasse(index: number): void {
     this.personnage.classes.splice(index, 1);
   }
 
