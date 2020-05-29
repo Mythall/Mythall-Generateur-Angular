@@ -1,69 +1,56 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Ordre } from '../../../../../services/ordres/models/ordre';
+import { PersonnageService, IPersonnage } from '../../../../../services/personnage.service';
+import { IOrdre } from '../../../../../services/ordre.service';
 
 @Component({
-    selector: 'creation-progression-ordres',
-    templateUrl: './ordre.component.html'
+  selector: 'creation-progression-ordres',
+  templateUrl: './ordre.component.html'
 })
 export class JoueurPersonnageCreationProgressionOrdreComponent implements OnInit {
 
-    constructor(
-        private personnageService: PersonnageService
-    ) { }
+  constructor(
+    private personnageService: PersonnageService
+  ) { }
 
-    @Input() stepper: MatStepper;
-    @Input() progression: boolean;
-    @Input() personnage: Personnage;
+  @Input() stepper: MatStepper;
+  @Input() progression: boolean;
+  @Input() personnage: IPersonnage;
 
-    @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
-    @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
+  @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-    selectedOrdre: Ordre;
-    availableOrdres: Ordre[] = [];
+  selectedOrdre: IOrdre;
+  availableOrdres: IOrdre[] = [];
 
-    ngOnInit() {
-        this.getAvailableOrdres();
+  ngOnInit() {
+    this._getAvailableOrdres();
+  }
+
+  public get isCompleted(): boolean {
+    return this.selectedOrdre ? true : false;
+  }
+
+  private async _getAvailableOrdres(): Promise<void> {
+    this.availableOrdres = await this.personnageService.getAvailableOrdres(this.personnage);
+  }
+
+  public setOrdre(): void {
+    this.personnage.ordresRef.push(this.selectedOrdre.id);
+    this.personnage.ordres.push(this.selectedOrdre);
+  }
+
+  public async next(): Promise<void> {
+    if (this.isCompleted) {
+
+      // Rebuild Personnage
+      const personnage = await this.personnageService.buildPersonnage(this.personnage);
+
+      // Emit & Allow next step
+      this.personnageChange.emit(personnage);
+      this.completedChange.emit(true);
+
     }
-
-    isCompleted(): boolean {
-
-        if (this.selectedOrdre) {
-            return true;
-        }
-
-        return false;
-
-    }
-
-    getAvailableOrdres() {
-        this.personnageService.getAvailableOrdres(this.personnage).then(response => {
-            this.availableOrdres = response;
-        });
-    }
-
-
-    setOrdre() {
-        this.personnage.ordresRef.push(this.selectedOrdre.id);
-        this.personnage.ordres.push(this.selectedOrdre);
-    }
-
-    next() {
-        if (this.isCompleted()) {
-
-            // Rebuild Personnage
-            this.personnageService.buildPromise(this.personnage).then(personnage => {
-
-                // Emit & Allow next step
-                this.personnageChange.emit(personnage);
-                this.completedChange.emit(true);
-                
-            });
-
-        }
-    }
+  }
 
 }

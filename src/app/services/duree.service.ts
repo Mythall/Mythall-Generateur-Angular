@@ -1,51 +1,57 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { environment } from '../../environments/environment';
-import { Duree } from '../models/duree';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+
+export interface IDuree extends IDureeDB {
+  id: string;
+}
+
+export interface IDureeDB {
+  nom: string;
+}
 
 @Injectable()
 export class DureeService {
 
   constructor(
-    private http: HttpClient,
     private afs: AngularFirestore
   ) { }
 
-  private url = environment.api + 'durees/';
-
-  getDurees$(): Observable<Duree[]> {
-    return this.afs.collection<Duree>('durees', ref => ref.orderBy("nom")).snapshotChanges().pipe(
-      map(actions => {
-        return actions.map(a => {
-          const data = a.payload.doc.data() as Duree;
-          data.id = a.payload.doc.id;
-          return data;
-        });
-      })
-    );
+  public async getDurees(): Promise<IDuree[]> {
+    return (await this.afs.collection<IDuree>('durees').ref.get()).docs.map(doc => {
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as IDuree;
+    });
   }
 
-  getDurees(): Observable<Duree[]> {
-    return this.getDurees$();
+  public async getDuree(id: string): Promise<IDuree> {
+    const data = await this.afs.doc<IDuree>(`durees/${id}`).ref.get();
+    return {
+      id: data.id,
+      ...data.data()
+    } as IDuree;
   }
 
-  getDuree(id: string): Observable<Duree> {
-    return this.afs.doc<Duree>(`durees/${id}`).valueChanges();
+  public async addDuree(duree: IDuree): Promise<IDuree> {
+    const data = await this.afs.collection(`durees`).add(this._saveState(duree));
+    return { id: data.id, ...duree } as IDuree;
   }
 
-  addDuree(duree: Duree): Observable<Duree> {
-    return this.http.post(this.url, duree.saveState()).pipe(map((res: Duree) => res));
+  public async updateDuree(duree: IDuree): Promise<IDuree> {
+    await this.afs.doc<IDuree>(`durees/${duree.id}`).update(this._saveState(duree));
+    return duree;
   }
 
-  updateDuree(duree: Duree): Observable<Duree> {
-    return this.http.put(this.url, { id: duree.id, data: duree.saveState() }).pipe(map((res: Duree) => res));
+  public async deleteDuree(id: string): Promise<boolean> {
+    await this.afs.doc<IDuree>(`durees/${id}`).delete();
+    return true;
   }
 
-  deleteDuree(id: string): Observable<boolean> {
-    return this.http.delete(this.url, { params: new HttpParams().set('id', id) }).pipe(map((res: boolean) => res));
+  private _saveState(item: IDuree): IDureeDB {
+    return {
+      nom: item.nom,
+    };
   }
 
 }

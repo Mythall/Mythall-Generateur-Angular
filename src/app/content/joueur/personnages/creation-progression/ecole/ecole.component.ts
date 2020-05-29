@@ -1,69 +1,57 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Ecole } from '../../../../../models/ecole';
+import { PersonnageService, IPersonnage } from '../../../../../services/personnage.service';
+import { IEcole } from '../../../../../services/ecole.service';
 
 @Component({
-    selector: 'creation-progression-ecoles',
-    templateUrl: './ecole.component.html'
+  selector: 'creation-progression-ecoles',
+  templateUrl: './ecole.component.html'
 })
 export class JoueurPersonnageCreationProgressionEcoleComponent implements OnInit {
 
-    constructor(
-        private personnageService: PersonnageService
-    ) { }
+  constructor(
+    private personnageService: PersonnageService
+  ) { }
 
-    @Input() stepper: MatStepper;
-    @Input() progression: boolean;
-    @Input() personnage: Personnage;
+  @Input() stepper: MatStepper;
+  @Input() progression: boolean;
+  @Input() personnage: IPersonnage;
 
-    @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
-    @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
+  @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-    selectedEcole: Ecole;
-    availableEcoles: Ecole[] = [];
+  selectedEcole: IEcole;
+  availableEcoles: IEcole[] = [];
 
-    ngOnInit() {
-        this.getAvailableEcoles();
+  ngOnInit() {
+    this._getAvailableEcoles();
+  }
+
+  public get isCompleted(): boolean {
+    return this.selectedEcole ? true : false;
+  }
+
+  private async _getAvailableEcoles() {
+    this.availableEcoles = await this.personnageService.getAvailableEcoles();
+  }
+
+
+  public setEcole(): void {
+    this.personnage.ecoleRef = this.selectedEcole.id;
+    this.personnage.ecole = this.selectedEcole;
+  }
+
+  public async next(): Promise<void> {
+    if (this.isCompleted) {
+
+      // Rebuild Personnage
+      const personnage = await this.personnageService.buildPersonnage(this.personnage);
+
+      // Emit & Allow next step
+      this.personnageChange.emit(personnage);
+      this.completedChange.emit(true);
+
     }
-
-    isCompleted(): boolean {
-
-        if (this.selectedEcole) {
-            return true;
-        }
-
-        return false;
-
-    }
-
-    getAvailableEcoles() {
-        this.personnageService.getAvailableEcoles(this.personnage).then(response => {
-            this.availableEcoles = response;
-        });
-    }
-
-
-    setEcole() {
-        this.personnage.ecoleRef = this.selectedEcole.id;
-        this.personnage.ecole = this.selectedEcole;
-    }
-
-    next() {
-        if (this.isCompleted()) {
-
-            // Rebuild Personnage
-            this.personnageService.buildPromise(this.personnage).then(personnage => {
-
-                // Emit & Allow next step
-                this.personnageChange.emit(personnage);
-                this.completedChange.emit(true);
-                
-            });
-
-        }
-    }
+  }
 
 }

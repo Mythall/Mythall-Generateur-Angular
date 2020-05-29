@@ -1,17 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { ClasseService } from '../../../../services/classes/classe.service';
-import { DonService } from '../../../../services/dons/don.service';
-import { ImmuniteService } from '../../../../services/immunite.service';
-import { RaceService } from '../../../../services/races/race.service';
-import { ResistanceService } from '../../../../services/resistance.service';
-import { StatistiqueService } from '../../../../services/statistique.service';
-import { Classe, ClasseAuthorise } from '../../../../services/classes/models/classe';
-import { Don, DonCategories } from '../../../../services/dons/models/don';
-import { Immunite } from '../../../../models/immunite';
-import { Race } from '../../../../services/races/models/race';
-import { Resistance, ResistanceItem } from '../../../../models/resistance';
-import { Statistique, StatistiqueItem } from '../../../../models/statistique';
+import { ClasseService, IClasse, ClasseAuthorise } from '../../../../services/classe.service';
+import { DonService, IDon, DonCategories } from '../../../../services/don.service';
+import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
+import { RaceService, IRace } from '../../../../services/race.service';
+import { ResistanceService, IResistance, ResistanceItem } from '../../../../services/resistance.service';
+import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
 
 @Component({
   selector: 'app-organisateur-dons-form',
@@ -32,123 +26,107 @@ export class OrganisateurDonsFormComponent implements OnInit {
   ) { }
 
   id: string;
-  don: Don = new Don();
-  dons: Don[];
+  don = {} as IDon;
+  dons: IDon[];
   categories: string[] = DonCategories;
-  classes: Classe[];
-  races: Race[];
-  resistances: Resistance[];
-  statistiques: Statistique[];
-  immunites: Immunite[];
+  classes: IClasse[];
+  races: IRace[];
+  resistances: IResistance[];
+  statistiques: IStatistique[];
+  immunites: IImmunite[];
 
   ngOnInit() {
-    this.getDon();
-    this.getDons();
-    this.getClasses();
-    this.getImmunites();
-    this.getRaces();
-    this.getResistances();
-    this.getStatistiques();
+    this._getDon();
+    this._getDons();
+    this._getClasses();
+    this._getImmunites();
+    this._getRaces();
+    this._getResistances();
+    this._getStatistiques();
   }
 
-  getDon() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getDon(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.donService.getDon(this.id).subscribe(response => {
-          this.don = response;
-        });
+        this.don = await this.donService.getDon(this.id);
       }
     });
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons = await this.donService.getDons();
   }
 
-  getClasses() {
-    this.classeService.getClasses().subscribe(response => {
-      this.classes = response;
-    });
+  private async _getClasses(): Promise<void> {
+    this.classes = await this.classeService.getClasses();
   }
 
-  getImmunites() {
-    this.immuniteService.getImmunites().subscribe(response => {
-      this.immunites = response;
-    })
+  private async _getImmunites(): Promise<void> {
+    this.immunites = await this.immuniteService.getImmunites();
   }
 
-  getRaces() {
-    this.raceService.getRaces().subscribe(response => {
-      this.races = response;
-    });
+  private async _getRaces(): Promise<void> {
+    this.races = await this.raceService.getRaces();
   }
 
-  getResistances() {
-    this.resistanceService.getResistances().subscribe(response => {
-      this.resistances = response;
-    });
+  private async _getResistances(): Promise<void> {
+    this.resistances = await this.resistanceService.getResistances();
   }
 
-  getStatistiques() {
-    this.statistiqueService.getStatistiques().subscribe(response => {
-      this.statistiques = response;
-    })
+  private async _getStatistiques(): Promise<void> {
+    this.statistiques = await this.statistiqueService.getStatistiques();
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
-      this.donService.updateDon(this.id, this.don.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/dons/list"]);
-        }
-      });
+      const result = await this.donService.updateDon(this.don);
+      if (result) {
+        this.router.navigate(["/organisateur/dons/list"]);
+      }
     } else {
-      this.donService.addDon(this.don.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/dons/list"]);
-        }
-      });
+      const result = await this.donService.addDon(this.don);
+      if (result) {
+        this.router.navigate(["/organisateur/dons/list"]);
+      }
     }
   }
 
-  addClasseAuthorise() {
+  public addClasseAuthorise(): void {
     if (!this.don.classesAutorise) this.don.classesAutorise = [];
     this.don.classesAutorise.push(new ClasseAuthorise());
   }
 
-  deleteClasseAuthorise(index: number) {
+  public deleteClasseAuthorise(index: number): void {
     this.don.classesAutorise.splice(index, 1);
   }
 
-  addResistance() {
+  public addResistance(): void {
     if (!this.don.resistances) this.don.resistances = [];
     this.don.resistances.push(new ResistanceItem());
   }
 
-  deleteResistance(index: number) {
+  public deleteResistance(index: number): void {
     this.don.resistances.splice(index, 1);
   }
 
-  addStatistique() {
+  public addStatistique(): void {
     if (!this.don.statistiques) this.don.statistiques = [];
     this.don.statistiques.push(new StatistiqueItem());
   }
 
-  deleteStatistique(index: number) {
+  public deleteStatistique(index: number): void {
     this.don.statistiques.splice(index, 1);
   }
 
-  selectAllRaces() {
+  public selectAllRaces(): void {
     this.don.racesAutoriseRef = [];
     this.races.forEach(race => {
       this.don.racesAutoriseRef.push(race.id);
     })
   }
 
-  selectAllClasses() {
+  public selectAllClasses(): void {
     this.don.classesAutorise = [];
     this.classes.forEach(classe => {
       const ca: ClasseAuthorise = new ClasseAuthorise();

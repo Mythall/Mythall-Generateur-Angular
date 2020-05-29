@@ -8,33 +8,28 @@ import { FirebaseModule } from './modules/firebase.module';
 import { MediaMatcher } from '@angular/cdk/layout';
 
 //Services
-import { AdminService } from './services/@core/admin.service';
 import { ToastService } from './services/@core/toast.service';
 import { AuthenticationService } from './services/@core/authentication.service';
 import { AlignementService } from './services/alignement.service';
-import { AptitudeService } from './services/aptitudes/aptitude.service';
-import { ClasseService } from './services/classes/classe.service';
+import { AptitudeService } from './services/aptitude.service';
+import { ClasseService } from './services/classe.service';
 import { DieuService } from './services/dieu.service';
-import { DomaineService } from './services/domaines/domaine-service';
-import { DonService } from './services/dons/don.service';
+import { DomaineService } from './services/domaine.service';
+import { DonService } from './services/don.service';
 import { DureeService } from './services/duree.service';
 import { EcoleService } from './services/ecole.service';
-import { EspritService } from './services/esprits/esprit-service';
-import { FirestoreService } from './services/firestore/firestore.service';
-import { FourberieService } from './services/fourberies/fourberie.service';
+import { EspritService } from './services/esprit.service';
+import { FourberieService } from './services/fourberie.service';
 import { ImmuniteService } from './services/immunite.service';
-import { OrdreService } from './services/ordres/ordre.service';
-import { PersonnageService } from './services/personnages/personnage.service';
+import { OrdreService } from './services/ordre.service';
+import { PersonnageService } from './services/personnage.service';
 import { PorteService } from './services/porte.service';
-import { RaceService } from './services/races/race.service';
+import { RaceService } from './services/race.service';
 import { ResistanceService } from './services/resistance.service';
 import { StatistiqueService } from './services/statistique.service';
-import { SortService } from './services/sorts/sort.service';
+import { SortService } from './services/sort.service';
 import { UserService } from './services/@core/user.service';
 import { ZoneService } from './services/zone.service';
-
-//Pipes
-import { DocPipe } from './services/firestore/doc.pipe';
 
 //Guards
 import { JoueurGuard } from './services/@core/guards/joueur.guard';
@@ -91,7 +86,6 @@ import { JoueurPersonnageCreationProgressionOrdreComponent } from './content/jou
 import { JoueurPersonnageCreationProgressionSortsComponent } from './content/joueur/personnages/creation-progression/sorts/sorts.component';
 import { JoueurPersonnageCreationProgressionSortsDomaineComponent } from './content/joueur/personnages/creation-progression/sorts-domaine/sorts-domaine.component';
 
-import { OrganisateurAdminComponent } from './content/organisateur/admin/admin.component';
 import { OrganisateurAlignementsListComponent } from './content/organisateur/alignements/list/list.component';
 import { OrganisateurAptitudesFormComponent } from './content/organisateur/aptitudes/form/form.component';
 import { OrganisateurAptitudesListComponent } from './content/organisateur/aptitudes/list/list.component';
@@ -166,8 +160,6 @@ const appRoutes: Routes = [
 
   {
     path: 'organisateur', canActivate: [OrganisateurGuard], children: [
-
-      { path: 'admin', component: OrganisateurAdminComponent },
 
       { path: 'alignements/list', component: OrganisateurAlignementsListComponent },
 
@@ -254,7 +246,6 @@ const appRoutes: Routes = [
   ],
   declarations: [
     AppComponent,
-    DocPipe,
     NavbarComponent,
     NavbarAuthComponent,
     SidenavComponent,
@@ -290,7 +281,6 @@ const appRoutes: Routes = [
     JoueurPersonnageCreationProgressionOrdreComponent,
     JoueurPersonnageCreationProgressionSortsComponent,
     JoueurPersonnageCreationProgressionSortsDomaineComponent,
-    OrganisateurAdminComponent,
     OrganisateurAlignementsListComponent,
     OrganisateurAptitudesFormComponent,
     OrganisateurAptitudesListComponent,
@@ -342,11 +332,9 @@ const appRoutes: Routes = [
     JoueurGuard,
     AnimateurGuard,
     OrganisateurGuard,
-    AdminService,
     ToastService,
     AuthenticationService,
     AptitudeService,
-    FirestoreService,
     AlignementService,
     ClasseService,
     DieuService,

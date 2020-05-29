@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { EcoleService } from '../../../../services/ecole.service';
-import { Ecole } from '../../../../models/ecole';
+import { EcoleService, IEcole } from '../../../../services/ecole.service';
 import { ToastService } from '../../../../services/@core/toast.service';
 
 @Component({
@@ -19,44 +18,40 @@ export class OrganisateurEcolesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  ecole: Ecole = new Ecole();
+  ecole = {} as IEcole;
 
   ngOnInit() {
-    this.getEcole();
+    this._getEcole();
   }
 
-  getEcole() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getEcole(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.ecoleService.getEcole(this.id).subscribe(response => {
-          this.ecole = response;
-        });
+        this.ecole = await this.ecoleService.getEcole(this.id);
       }
     });
   }
 
-  submit() {
+  public async submit(): Promise<void> {
 
     if (this.id) {
 
       // Update
-      this.ecoleService.updateEcole(this.ecole).subscribe(result => {
-        if (result) {
-          this.toast.update(result.nom);
-          this.router.navigate(["/organisateur/ecoles/list"]);
-        }
-      });
+      const result = await this.ecoleService.updateEcole(this.ecole);
+      if (result) {
+        this.toast.update(result.nom);
+        this.router.navigate(["/organisateur/ecoles/list"]);
+      }
 
     } else {
 
       // Add
-      this.ecoleService.addEcole(this.ecole).subscribe(result => {
-        if (result) {
-          this.toast.add(result.nom);
-          this.router.navigate(["/organisateur/ecoles/list"]);
-        }
-      });
+      const result = await this.ecoleService.addEcole(this.ecole);
+      if (result) {
+        this.toast.add(result.nom);
+        this.router.navigate(["/organisateur/ecoles/list"]);
+      }
 
     }
   }

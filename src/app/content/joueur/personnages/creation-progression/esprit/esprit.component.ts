@@ -1,69 +1,56 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Esprit } from '../../../../../services/esprits/models/esprit';
+import { PersonnageService, IPersonnage } from '../../../../../services/personnage.service';
+import { IEsprit } from '../../../../../services/esprit.service';
 
 @Component({
-    selector: 'creation-progression-esprits',
-    templateUrl: './esprit.component.html'
+  selector: 'creation-progression-esprits',
+  templateUrl: './esprit.component.html'
 })
 export class JoueurPersonnageCreationProgressionEspritComponent implements OnInit {
 
-    constructor(
-        private personnageService: PersonnageService
-    ) { }
+  constructor(
+    private personnageService: PersonnageService
+  ) { }
 
-    @Input() stepper: MatStepper;
-    @Input() progression: boolean;
-    @Input() personnage: Personnage;
+  @Input() stepper: MatStepper;
+  @Input() progression: boolean;
+  @Input() personnage: IPersonnage;
 
-    @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
-    @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
+  @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-    selectedEsprit: Esprit;
-    availableEsprits: Esprit[] = [];
+  selectedEsprit: IEsprit;
+  availableEsprits: IEsprit[] = [];
 
-    ngOnInit() {
-        this.getAvailableEsprits();
+  ngOnInit() {
+    this._getAvailableEsprits();
+  }
+
+  public get isCompleted(): boolean {
+    return this.selectedEsprit ? true : false;
+  }
+
+  private async _getAvailableEsprits(): Promise<void> {
+    this.availableEsprits = await this.personnageService.getAvailableEsprits();
+  }
+
+  public setEsprit(): void {
+    this.personnage.espritRef = this.selectedEsprit.id;
+    this.personnage.esprit = this.selectedEsprit;
+  }
+
+  public async next(): Promise<void> {
+    if (this.isCompleted) {
+
+      // Rebuild Personnage
+      const personnage = await this.personnageService.buildPersonnage(this.personnage);
+
+      // Emit & Allow next step
+      this.personnageChange.emit(personnage);
+      this.completedChange.emit(true);
+
     }
-
-    isCompleted(): boolean {
-
-        if (this.selectedEsprit) {
-            return true;
-        }
-
-        return false;
-
-    }
-
-    getAvailableEsprits() {
-        this.personnageService.getAvailableEsprits(this.personnage).then(response => {
-            this.availableEsprits = response;
-        });
-    }
-
-
-    setEsprit() {
-        this.personnage.espritRef = this.selectedEsprit.id;
-        this.personnage.esprit = this.selectedEsprit;
-    }
-
-    next() {
-        if (this.isCompleted()) {
-
-            // Rebuild Personnage
-            this.personnageService.buildPromise(this.personnage).then(personnage => {
-
-                // Emit & Allow next step
-                this.personnageChange.emit(personnage);
-                this.completedChange.emit(true);
-
-            });
-
-        }
-    }
+  }
 
 }

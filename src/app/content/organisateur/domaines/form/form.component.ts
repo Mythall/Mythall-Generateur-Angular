@@ -1,22 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-
-import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
-import { DonService } from '../../../../services/dons/don.service';
-import { DomaineService } from '../../../../services/domaines/domaine-service';
-import { SortService } from '../../../../services/sorts/sort.service';
-
-import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
-import { Don, DonItem, DonCategories } from '../../../../services/dons/models/don';
-import { Domaine } from '../../../../services/domaines/models/domaine';
-import { Sort, SortItem } from '../../../../services/sorts/models/sort';
-import { ClasseService } from '../../../../services/classes/classe.service';
-import { Classe } from '../../../../services/classes/models/classe';
-import { Alignement } from '../../../../models/alignement';
-import { AlignementService } from '../../../../services/alignement.service';
-import { ChoixTypes, Choix } from '../../../../services/personnages/models/choix';
-import { Fourberie } from '../../../../services/fourberies/models/fourberie';
-import { FourberieService } from '../../../../services/fourberies/fourberie.service';
+import { AptitudeService, IAptitude, AptitudeItem } from '../../../../services/aptitude.service';
+import { DonService, IDon, DonCategories, DonItem } from '../../../../services/don.service';
+import { DomaineService, IDomaine } from '../../../../services/domaine.service';
+import { SortService, ISort, SortItem } from '../../../../services/sort.service';
+import { ClasseService, IClasse } from '../../../../services/classe.service';
+import { IAlignement, AlignementService } from '../../../../services/alignement.service';
+import { FourberieService, IFourberie } from '../../../../services/fourberie.service';
+import { ChoixTypes, Choix } from '../../../../services/personnage.service';
 
 @Component({
   selector: 'app-organisateur-domaines-form',
@@ -38,121 +29,103 @@ export class OrganisateurDomainesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  domaine: Domaine = new Domaine();
-  domaines: Domaine[];
-  classes: Classe[];
-  alignements: Alignement[];
-  aptitudes: Aptitude[];
-  dons: Don[];
-  sorts: Sort[];
-  fourberies: Fourberie[];
+  domaine = {} as IDomaine;
+  domaines: IDomaine[];
+  classes: IClasse[];
+  alignements: IAlignement[];
+  aptitudes: IAptitude[];
+  dons: IDon[];
+  sorts: ISort[];
+  fourberies: IFourberie[];
   choix: string[] = ChoixTypes;
   categories: string[] = DonCategories;
 
   ngOnInit() {
-    this.getDomaine();
-    this.getDomaines();
-    this.getaptitudes();
-    this.getClasses();
-    this.getAlignements();
-    this.getDons();
-    this.getSorts();
-    this.getFourberies();
+    this._getDomaine();
+    this._getDomaines();
+    this._getAptitudes();
+    this._getClasses();
+    this._getAlignements();
+    this._getDons();
+    this._getSorts();
+    this._getFourberies();
   }
 
-  getDomaine() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getDomaine(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.domaineService.getDomaine(this.id).subscribe(response => {
-          this.domaine = response;
-        });
+        this.domaine = await this.domaineService.getDomaine(this.id);
       }
     });
   }
 
-  getDomaines() {
-    this.domaineService.getDomaines().subscribe(response => {
-      this.domaines = response;
-    })
+  private async _getDomaines(): Promise<void> {
+    this.domaines = await this.domaineService.getDomaines();
   }
 
-  getClasses() {
-    this.classeService.getClasses().subscribe(response => {
-      this.classes = response;
-    })
+  private async _getClasses(): Promise<void> {
+    this.classes = await this.classeService.getClasses();
   }
 
-  getAlignements() {
-    this.alignementService.getAlignements().subscribe(response => {
-      this.alignements = response;
-    })
+  private async _getAlignements(): Promise<void> {
+    this.alignements = await this.alignementService.getAlignements();
   }
 
-  getaptitudes() {
-    this.aptitudeService.getAptitudes().subscribe(response => {
-      this.aptitudes = response;
-    })
+  private async _getAptitudes(): Promise<void> {
+    this.aptitudes = await this.aptitudeService.getAptitudes();
   }
 
-  getFourberies() {
-    this.fourberieService.getFourberies().subscribe(response => {
-      this.fourberies = response;
-    })
+  private async _getFourberies(): Promise<void> {
+    this.fourberies = await this.fourberieService.getFourberies();
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons = await this.donService.getDons();
   }
 
-  getSorts() {
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = response;
-    })
+  private async _getSorts(): Promise<void> {
+    this.sorts = await this.sortService.getSorts();
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
-      this.domaineService.updateDomaine(this.id, this.domaine.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/domaines/list"]);
-        }
-      });
+      const result = await this.domaineService.updateDomaine(this.domaine);
+      if (result) {
+        this.router.navigate(["/organisateur/domaines/list"]);
+      }
     } else {
-      this.domaineService.addDomaine(this.domaine.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/domaines/list"]);
-        }
-      });
+      const result = await this.domaineService.addDomaine(this.domaine);
+      if (result) {
+        this.router.navigate(["/organisateur/domaines/list"]);
+      }
     }
   }
 
-  addAptitude() {
+  public addAptitude(): void {
     if (!this.domaine.aptitudes) this.domaine.aptitudes = [];
     this.domaine.aptitudes.push(new AptitudeItem());
   }
 
-  deleteAptitude(index: number) {
+  public deleteAptitude(index: number): void {
     this.domaine.aptitudes.splice(index, 1);
   }
 
-  addDon() {
+  public addDon(): void {
     if (!this.domaine.dons) this.domaine.dons = [];
     this.domaine.dons.push(new DonItem());
   }
 
-  deleteDon(index: number) {
+  public deleteDon(index: number): void {
     this.domaine.dons.splice(index, 1);
   }
 
-  addSort() {
+  public addSort(): void {
     if (!this.domaine.sorts) this.domaine.sorts = [];
     this.domaine.sorts.push(new SortItem());
   }
 
-  deleteSort(index: number) {
+  public deleteSort(index: number): void {
     this.domaine.sorts.splice(index, 1);
   }
 

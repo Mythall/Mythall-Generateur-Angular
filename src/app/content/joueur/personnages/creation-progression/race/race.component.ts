@@ -1,95 +1,76 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-
 import { AuthenticationService } from '../../../../../services/@core/authentication.service';
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { RaceService } from '../../../../../services/races/race.service';
-import { Race } from '../../../../../services/races/models/race';
-import { UserService } from '../../../../../services/@core/user.service';
-import { User } from '../../../../../services/@core/models/user';
-
+import { RaceService, IRace } from '../../../../../services/race.service';
+import { UserService, IUser } from '../../../../../services/@core/user.service';
+import { IPersonnage } from '../../../../../services/personnage.service';
 
 @Component({
-    selector: 'creation-progression-race',
-    templateUrl: './race.component.html'
+  selector: 'creation-progression-race',
+  templateUrl: './race.component.html'
 })
 export class JoueurPersonnageCreationProgressionRaceComponent implements OnInit {
 
-    constructor(
-        public auth: AuthenticationService,
-        private raceService: RaceService,
-        private userService: UserService
-    ) { }
+  constructor(
+    public auth: AuthenticationService,
+    private raceService: RaceService,
+    private userService: UserService
+  ) { }
 
-    @Input() stepper: MatStepper;
-    @Input() progression: boolean;
-    @Input() personnage: Personnage;
+  @Input() stepper: MatStepper;
+  @Input() progression: boolean;
+  @Input() personnage: IPersonnage;
 
-    @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
-    @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
+  @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-    selectedRace: Race;
-    races: Race[];
-    user: User;
-    users: User[];
+  selectedRace: IRace;
+  races: IRace[];
+  users: IUser[];
 
-    ngOnInit() {
+  ngOnInit() {
 
-        this.auth.user.subscribe(response => {
-
-            this.user = response
-
-            if (this.auth.isAnimateur(this.user)) {
-                this.getUsers();
-            }
-
-        });
-
-        this.getRaces();
-
-        
-
-        if (this.personnage.race) {
-            this.selectedRace = this.personnage.race;
-        }
-
+    if (this.auth.isAnimateur(this.user)) {
+      this._getUsers();
     }
 
-    isCompleted(): boolean {
+    this._getRaces();
 
-        if (this.personnage.nom && this.personnage.raceRef) {
-            return true;
-        }
-
-        return false;
-
+    if (this.personnage.race) {
+      this.selectedRace = this.personnage.race;
     }
 
-    getUsers()  {
-        this.userService.getUsers().subscribe(response => {
-            this.users = response;
-        });
-    }
+  }
 
-    getRaces() {
-        this.raceService.getRaces().subscribe(response => {
-            this.races = response;
-        });
-    }
+  public get user(): IUser {
+    return this.auth.user;
+  }
 
-    setRace() {
-        if (!this.progression) {
-            this.personnage.raceRef = this.selectedRace.id;
-            this.personnage.race = this.selectedRace;
-        }
-    }
+  public get isCompleted(): boolean {
+    return !!(this.personnage.nom && this.personnage.raceRef);
+  }
 
-    next() {
-        if (this.isCompleted()) {
-            this.personnageChange.emit(this.personnage);
-            this.completedChange.emit(true);
-            setTimeout(() => { this.stepper.next() });
-        }
+  private async _getUsers(): Promise<void> {
+    this.users = await this.userService.getUsers();
+  }
+
+  private async _getRaces(): Promise<void> {
+    this.races = await this.raceService.getRaces();
+  }
+
+  public setRace(): void {
+    if (!this.progression) {
+      this.personnage.raceRef = this.selectedRace.id;
+      this.personnage.race = this.selectedRace;
     }
+  }
+
+  public next(): void {
+    if (this.isCompleted) {
+      this.personnageChange.emit(this.personnage);
+      this.completedChange.emit(true);
+      setTimeout(() => { this.stepper.next() });
+    }
+  }
 
 }

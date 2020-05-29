@@ -2,9 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 import { ToastService } from '../../../../services/@core/toast.service';
-import { DureeService } from '../../../../services/duree.service';
-import { Duree } from '../../../../models/duree';
-import { Observable } from 'rxjs';
+import { IDuree, DureeService } from '../../../../services/duree.service';
 
 @Component({
   selector: 'app-organisateur-durees-list',
@@ -19,21 +17,26 @@ export class OrganisateurDureesListComponent implements OnInit {
     private toast: ToastService
   ) { }
 
-  durees: Observable<Duree[]>;
+  durees: IDuree[];
 
   ngOnInit() {
-    this.durees = this.dureeService.getDurees$();
+    this._getDurees();
   }
 
-  confirmDelete(item: Duree) {
+  private async _getDurees(): Promise<void> {
+    this.durees = await this.dureeService.getDurees();
+  }
+
+  public async confirmDelete(item: IDuree) {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async (result) => {
       if (result) {
-        this.dureeService.deleteDuree(result).subscribe(res => this.toast.delete(result.nom));
+        await this.dureeService.deleteDuree(result);
+        this.toast.delete(result.nom);
       }
     });
   }

@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { RaceService } from '../../../../services/races/race.service';
-import { Race } from '../../../../services/races/models/race';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
+import { RaceService, IRace } from '../../../../services/race.service';
 
 @Component({
   selector: 'app-organisateur-races-list',
@@ -15,29 +13,29 @@ export class OrganisateurRacesListComponent implements OnInit {
   constructor(
     private raceService: RaceService,
     public dialog: MatDialog
-  ){}
+  ) { }
 
-  races: Observable<Race[]>;
+  races: IRace[];
 
-  ngOnInit(){
-    this.races = this.raceService.getRacesSummary();    
+  ngOnInit() {
+    this._getRaces();
   }
 
-  confirmDelete(item: Race) {
+  private async _getRaces(): Promise<void> {
+    this.races = await this.raceService.getRaces();
+  }
+
+  public confirmDelete(item: IRace) {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if(result){
-        this.delete(result);
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        await this.raceService.deleteRace(result);
       }
     });
-  }
-
-  delete(race: Race){
-    this.raceService.deleteRace(race);
   }
 
 }

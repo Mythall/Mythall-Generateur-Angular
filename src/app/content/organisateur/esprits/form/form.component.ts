@@ -1,15 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-
-import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
-import { DonService } from '../../../../services/dons/don.service';
-import { EspritService } from '../../../../services/esprits/esprit-service';
-import { SortService } from '../../../../services/sorts/sort.service';
-
-import { AptitudeItem, Aptitude } from '../../../../services/aptitudes/models/aptitude';
-import { Don, DonItem } from '../../../../services/dons/models/don';
-import { Esprit } from '../../../../services/esprits/models/esprit';
-import { Sort, SortItem } from '../../../../services/sorts/models/sort';
+import { AptitudeService, IAptitude, AptitudeItem } from '../../../../services/aptitude.service';
+import { DonService, IDon, DonItem } from '../../../../services/don.service';
+import { EspritService, IEsprit } from '../../../../services/esprit.service';
+import { SortService, ISort, SortItem } from '../../../../services/sort.service';
 
 @Component({
   selector: 'app-organisateur-esprits-form',
@@ -25,90 +19,80 @@ export class OrganisateurEspritsFormComponent implements OnInit {
     private espritService: EspritService,
     private sortService: SortService,
     private router: Router
-  ){}
+  ) { }
 
   id: string;
-  esprit: Esprit = new Esprit();
-  aptitudes: Aptitude[];
-  dons: Don[];
-  sorts: Sort[];
+  esprit = {} as IEsprit;
+  aptitudes: IAptitude[];
+  dons: IDon[];
+  sorts: ISort[];
 
   ngOnInit() {
-    this.getEsprit();
-    this.getaptitudes();
-    this.getDons();
-    this.getSorts();
+    this._getEsprit();
+    this._getAptitudes();
+    this._getDons();
+    this._getSorts();
   }
 
-  getEsprit() {
-    this.activatedRoute.params.subscribe((params: Params) => {
-      if(params['id']){
+  private _getEsprit(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
+      if (params['id']) {
         this.id = params['id'];
-        this.espritService.getEsprit(this.id).subscribe(response => {
-          this.esprit = response;
-        });
+        this.esprit = await this.espritService.getEsprit(this.id);
       }
     });
   }
 
-  getaptitudes() {
-    this.aptitudeService.getAptitudes().subscribe(response => {
-      this.aptitudes = response;
-    })
+  private async _getAptitudes(): Promise<void> {
+    this.aptitudes = await this.aptitudeService.getAptitudes();
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons = await this.donService.getDons();
   }
 
-  getSorts(){
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = response;
-    })
+  private async _getSorts(): Promise<void> {
+    this.sorts = await this.sortService.getSorts();
   }
 
-  submit() {
-    if(this.id){
-      this.espritService.updateEsprit(this.id, this.esprit.saveState()).then(result => {
-        if(result){
-          this.router.navigate(["/organisateur/esprits/list"]);
-        }
-      });
+  public async submit(): Promise<void> {
+    if (this.id) {
+      const result = await this.espritService.updateEsprit(this.esprit);
+      if (result) {
+        this.router.navigate(["/organisateur/esprits/list"]);
+      }
     } else {
-      this.espritService.addEsprit(this.esprit.saveState()).then(result => {
-        if(result){
-          this.router.navigate(["/organisateur/esprits/list"]);
-        }
-      });
-    }    
+      const result = await this.espritService.addEsprit(this.esprit);
+      if (result) {
+        this.router.navigate(["/organisateur/esprits/list"]);
+      }
+    }
   }
 
-  addAptitude(){
-    if(!this.esprit.aptitudes) this.esprit.aptitudes = [];
+  public addAptitude(): void {
+    if (!this.esprit.aptitudes) this.esprit.aptitudes = [];
     this.esprit.aptitudes.push(new AptitudeItem());
   }
 
-  deleteAptitude(index: number){
+  public deleteAptitude(index: number): void {
     this.esprit.aptitudes.splice(index, 1);
   }
 
-  addDon(){
-    if(!this.esprit.dons) this.esprit.dons = [];
+  public addDon(): void {
+    if (!this.esprit.dons) this.esprit.dons = [];
     this.esprit.dons.push(new DonItem());
   }
 
-  deleteDon(index: number){
+  public deleteDon(index: number): void {
     this.esprit.dons.splice(index, 1);
   }
 
-  addSort(){
-    if(!this.esprit.sorts) this.esprit.sorts = [];
+  public addSort(): void {
+    if (!this.esprit.sorts) this.esprit.sorts = [];
     this.esprit.sorts.push(new SortItem());
   }
 
-  deleteSort(index: number){
+  public deleteSort(index: number): void {
     this.esprit.sorts.splice(index, 1);
   }
 

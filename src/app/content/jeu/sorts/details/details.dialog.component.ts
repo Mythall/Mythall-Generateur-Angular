@@ -1,7 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { SortService } from '../../../../services/sorts/sort.service';
-import { Sort } from '../../../../services/sorts/models/sort';
+import { SortService, ISort } from '../../../../services/sort.service';
 
 @Component({
   selector: 'jeu-sort-details-dialog',
@@ -16,13 +15,14 @@ export class JeuSortDetailsDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public id: string
   ) { }
 
-  public sort: Sort;
+  public sort: ISort;
 
-  ngOnInit(){
-    this.sortService.getSort(this.id).subscribe(sort => {
-      this.sort = sort;
-      console.log(sort);
-    })
+  ngOnInit() {
+    this._getSorts();
+  }
+
+  private async _getSorts(): Promise<void> {
+    this.sort = await this.sortService.getSort(this.id);
   }
 
 }

@@ -1,22 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { ClasseService } from '../../../../services/classes/classe.service';
-import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
-import { DonService } from '../../../../services/dons/don.service';
-import { ImmuniteService } from '../../../../services/immunite.service';
-import { RaceService } from '../../../../services/races/race.service';
-import { ResistanceService } from '../../../../services/resistance.service';
-import { StatistiqueService } from '../../../../services/statistique.service';
-import { Aptitude } from '../../../../services/aptitudes/models/aptitude';
-import { Classe } from '../../../../services/classes/models/classe';
-import { Don, DonCategories } from '../../../../services/dons/models/don';
-import { Immunite } from '../../../../models/immunite';
-import { Race } from '../../../../services/races/models/race';
-import { Resistance, ResistanceItem } from '../../../../models/resistance';
-import { Statistique, StatistiqueItem } from '../../../../models/statistique';
-import { SortService } from '../../../../services/sorts/sort.service';
-import { Sort } from '../../../../services/sorts/models/sort';
-import { Choix, ChoixTypes } from '../../../../services/personnages/models/choix';
+import { AptitudeService, IAptitude } from '../../../../services/aptitude.service';
+import { DonService, IDon, DonCategories } from '../../../../services/don.service';
+import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
+import { ResistanceService, IResistance, ResistanceItem } from '../../../../services/resistance.service';
+import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
+import { SortService, ISort } from '../../../../services/sort.service';
+import { IClasse } from '../../../../services/classe.service';
+import { IRace } from '../../../../services/race.service';
+import { ChoixTypes, Choix } from '../../../../services/personnage.service';
 
 @Component({
   selector: 'app-organisateur-aptitudes-form',
@@ -37,106 +29,90 @@ export class OrganisateurAptitudesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  aptitude: Aptitude = new Aptitude();
-  aptitudes: Aptitude[];
-  classes: Classe[];
-  dons: Don[];
-  sorts: Sort[];
-  races: Race[];
-  resistances: Resistance[];
-  statistiques: Statistique[];
-  immunites: Immunite[];
-  choix: string[] = ChoixTypes;
-  categories: string[] = DonCategories;
+  aptitude = {} as IAptitude;
+  aptitudes: IAptitude[];
+  classes: IClasse[];
+  dons: IDon[];
+  sorts: ISort[];
+  races: IRace[];
+  resistances: IResistance[];
+  statistiques: IStatistique[];
+  immunites: IImmunite[];
+  choix = ChoixTypes;
+  categories = DonCategories;
 
   ngOnInit() {
-    this.getAptitude();
-    this.getAptitudes();
-    this.getDons();
-    this.getSorts();
-    this.getImmunites();
-    this.getResistances();
-    this.getStatistiques();
+    this._getAptitude();
+    this._getAptitudes();
+    this._getDons();
+    this._getSorts();
+    this._getImmunites();
+    this._getResistances();
+    this._getStatistiques();
   }
 
-  getAptitude() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getAptitude(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.aptitudeService.getAptitude(this.id).subscribe(response => {
-          this.aptitude = response;
-        });
+        this.aptitude = await this.aptitudeService.getAptitude(this.id);
       }
     });
   }
 
-  getAptitudes() {
-    this.aptitudeService.getAptitudes().subscribe(response => {
-      this.aptitudes = response;
-    })
+  private async _getAptitudes(): Promise<void> {
+    this.aptitudes = await this.aptitudeService.getAptitudes();
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons =  await this.donService.getDons();
   }
 
-  getSorts() {
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = response;
-    })
+  private async _getSorts(): Promise<void> {
+    this.sorts = await this.sortService.getSorts();
   }
 
-  getImmunites() {
-    this.immuniteService.getImmunites().subscribe(response => {
-      this.immunites = response;
-    })
+  private async _getImmunites(): Promise<void> {
+    this.immunites = await this.immuniteService.getImmunites();
   }
 
-  getResistances() {
-    this.resistanceService.getResistances().subscribe(response => {
-      this.resistances = response;
-    });
+  private async _getResistances(): Promise<void> {
+    this.resistances = await this.resistanceService.getResistances();
   }
 
-  getStatistiques() {
-    this.statistiqueService.getStatistiques().subscribe(response => {
-      this.statistiques = response;
-    })
+  private async _getStatistiques(): Promise<void> {
+    this.statistiques = await this.statistiqueService.getStatistiques();
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
-      this.aptitudeService.updateAptitude(this.id, this.aptitude.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/aptitudes/list"]);
-        }
-      });
+      const result = await this.aptitudeService.updateAptitude(this.aptitude);
+      if (result) {
+        this.router.navigate(["/organisateur/aptitudes/list"]);
+      }
     } else {
-      this.aptitudeService.addAptitude(this.aptitude.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/aptitudes/list"]);
-        }
-      });
+      const result = await this.aptitudeService.addAptitude(this.aptitude);
+      if (result) {
+        this.router.navigate(["/organisateur/aptitudes/list"]);
+      }
     }
   }
 
-  addResistance() {
+  public addResistance(): void {
     if (!this.aptitude.resistances) this.aptitude.resistances = [];
     this.aptitude.resistances.push(new ResistanceItem());
   }
 
-  deleteResistance(index: number) {
+  public deleteResistance(index: number): void {
     this.aptitude.resistances.splice(index, 1);
   }
 
-  addStatistique() {
+  public addStatistique(): void {
     if (!this.aptitude.statistiques) this.aptitude.statistiques = [];
     this.aptitude.statistiques.push(new StatistiqueItem());
   }
 
-  deleteStatistique(index: number) {
+  public deleteStatistique(index: number): void {
     this.aptitude.statistiques.splice(index, 1);
   }
 

@@ -1,51 +1,56 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { environment } from '../../environments/environment';
-import { Zone } from '../models/zone';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+
+export interface IZone extends IZoneDB {
+  id: string;
+}
+
+export interface IZoneDB {
+  nom: string;
+}
 
 @Injectable()
 export class ZoneService {
 
   constructor(
-    private http: HttpClient,
     private afs: AngularFirestore
   ) { }
 
-  private url = environment.api + 'zones/';
-
-  getZones$(): Observable<Zone[]> {
-    return this.afs.collection<Zone>('zones', ref => ref.orderBy("nom")).snapshotChanges().pipe(
-      map(actions => {
-        return actions.map(a => {
-          const data = a.payload.doc.data() as Zone;
-          data.id = a.payload.doc.id;
-          return data;
-        });
-      })
-    );
+  public async getZones(): Promise<IZone[]> {
+    return (await this.afs.collection<IZone>('zones').ref.orderBy('nom').get()).docs.map(doc => {
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as IZone;
+    });
   }
 
-  getZones(): Observable<Zone[]> {
-    return this.getZones$();
+  public async getZone(id: string): Promise<IZone> {
+    const data = await this.afs.doc<IZone>(`zones/${id}`).ref.get();
+    return {
+      id: data.id,
+      ...data.data()
+    } as IZone;
   }
 
-  getZone(id: string): Observable<Zone> {
-    return this.afs.doc<Zone>(`zones/${id}`).valueChanges();
+  public async addZone(zone: IZone): Promise<IZone> {
+    const data = await this.afs.collection(`zones`).add(this._saveState(zone));
+    return { id: data.id, ...zone } as IZone;
   }
 
-  addZone(zone: Zone): Observable<Zone> {
-    return this.http.post(this.url, zone.saveState()).pipe(map((res: Zone) => res));
+  public async updateZone(zone: IZone): Promise<IZone> {
+    await this.afs.doc<IZone>(`zones/${zone.id}`).update(this._saveState(zone));
+    return zone;
   }
 
-  updateZone(zone: Zone): Observable<Zone> {
-    return this.http.put(this.url, { id: zone.id, data: zone.saveState() }).pipe(map((res: Zone) => res));
+  public async deleteZone(id: string): Promise<boolean> {
+    await this.afs.doc<IZone>(`zones/${id}`).delete();
+    return true;
   }
 
-  deleteZone(id: string): Observable<boolean> {
-    return this.http.delete(this.url, { params: new HttpParams().set('id', id) }).pipe(map((res: boolean) => res));
+  private _saveState(item: IZone): IZoneDB {
+    return {
+      nom: item.nom,
+    };
   }
-
 }

@@ -1,11 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { DonService } from '../../../../services/dons/don.service';
-import { FourberieService } from '../../../../services/fourberies/fourberie.service';
-import { StatistiqueService } from '../../../../services/statistique.service';
-import { Fourberie } from '../../../../services/fourberies/models/fourberie';
-import { Statistique } from '../../../../models/statistique';
-import { Don } from '../../../../services/dons/models/don';
+import { DonService, IDon } from '../../../../services/don.service';
+import { FourberieService, IFourberie } from '../../../../services/fourberie.service';
+import { StatistiqueService, IStatistique } from '../../../../services/statistique.service';
 
 @Component({
   selector: 'app-organisateur-fourberies-form',
@@ -23,60 +20,48 @@ export class OrganisateurFourberiesFormComponent implements OnInit {
   ) { }
 
   id: string;
-  dons: Don[]
-  fourberie: Fourberie = new Fourberie();
-  fourberies: Fourberie[];
-  statistiques: Statistique[];
+  dons: IDon[]
+  fourberie = {} as IFourberie;
+  fourberies: IFourberie[];
+  statistiques: IStatistique[];
 
   ngOnInit() {
-    this.getFourberie();
-    this.getFourberies();
-    this.getDons();
-    this.getStatistiques();
+    this._getFourberie();
+    this._getFourberies();
+    this._getDons();
+    this._getStatistiques();
   }
 
-  getFourberie() {
-    this.activatedRoute.params.subscribe((params: Params) => {
+  private _getFourberie(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
       if (params['id']) {
         this.id = params['id'];
-        this.fourberieService.getFourberie(this.id).subscribe(response => {
-          this.fourberie = response;
-        });
+        this.fourberie = await this.fourberieService.getFourberie(this.id);
       }
     });
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons =  await this.donService.getDons();
   }
 
-  getFourberies() {
-    this.fourberieService.getFourberies().subscribe(response => {
-      this.fourberies = response;
-    })
+  private async _getFourberies(): Promise<void> {
+    this.fourberies = await this.fourberieService.getFourberies();
   }
 
-  getStatistiques() {
-    this.statistiqueService.getStatistiques().subscribe(response => {
-      this.statistiques = response;
-    })
+  private async _getStatistiques(): Promise<void> {
+    this.statistiques = await this.statistiqueService.getStatistiques();
   }
 
-  submit() {
+  public async submit(): Promise<void> {
     if (this.id) {
-      this.fourberieService.updateFourberie(this.id, this.fourberie.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/fourberies/list"]);
-        }
-      });
+      if (await this.fourberieService.updateFourberie(this.fourberie)) {
+        this.router.navigate(["/organisateur/fourberies/list"]);
+      }
     } else {
-      this.fourberieService.addFourberie(this.fourberie.saveState()).then(result => {
-        if (result) {
-          this.router.navigate(["/organisateur/fourberies/list"]);
-        }
-      });
+      if (await this.fourberieService.addFourberie(this.fourberie)) {
+        this.router.navigate(["/organisateur/fourberies/list"]);
+      }
     }
   }
 

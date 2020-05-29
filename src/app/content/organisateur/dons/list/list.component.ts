@@ -2,12 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { Sort as MatSort } from '@angular/material/sort';
-import { Observable } from 'rxjs';
-
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
-
-import { DonService } from '../../../../services/dons/don.service';
-import { Don } from '../../../../services/dons/models/don';
+import { DonService, IDon } from '../../../../services/don.service';
 
 @Component({
   selector: 'app-organisateur-dons-list',
@@ -17,9 +13,9 @@ import { Don } from '../../../../services/dons/models/don';
 export class OrganisateurDonsListComponent implements OnInit {
 
   constructor(
-    private donService: DonService,
-    public dialog: MatDialog
-  ){}
+    public dialog: MatDialog,
+    private donService: DonService,    
+  ) { }
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   length = 0;
@@ -28,53 +24,47 @@ export class OrganisateurDonsListComponent implements OnInit {
   pageEvent: PageEvent;
 
   sortedData: any;
-  dons: Don[] = [];
+  dons: IDon[] = [];
   filter: any = {
     nom: '',
     description: ''
   };
 
-  ngOnInit(){
-    this.getDons();        
+  ngOnInit() {
+    this._getDons();
   }
 
-  getDons(){
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-      this.sortedData = this.dons.slice(0, this.pageSize);
-      this.length = this.dons.length;
-    });
+  private async _getDons(): Promise<void> {
+    this.dons = await this.donService.getDons();
+    this.sortedData = this.dons.slice(0, this.pageSize);
+    this.length = this.dons.length;
   }
 
-  confirmDelete(item: Don) {
+  private confirmDelete(item: IDon): void {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if(result){
-        this.delete(result);
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        await this.donService.deleteDon(result);
       }
     });
   }
 
-  delete(don: Don){
-    this.donService.deleteDon(don);
-  }
-
-  filterResult(don: Don): boolean{
+  public filterResult(don: IDon): boolean {
 
     let result: boolean = true;
 
-    if(this.filter.nom){
-      if(!don.nom.toLowerCase().includes(this.filter.nom.toLowerCase())){
+    if (this.filter.nom) {
+      if (!don.nom.toLowerCase().includes(this.filter.nom.toLowerCase())) {
         result = false;
       }
     }
 
-    if(this.filter.description){
-      if(!don.description.toLowerCase().includes(this.filter.description.toLowerCase())){
+    if (this.filter.description) {
+      if (!don.description.toLowerCase().includes(this.filter.description.toLowerCase())) {
         result = false;
       }
     }
@@ -82,8 +72,8 @@ export class OrganisateurDonsListComponent implements OnInit {
     return result;
 
   }
-  
-  sortData(matSort: MatSort) {
+
+  public sortData(matSort: MatSort): void {
     const data = this.dons.slice();
     if (!matSort.active || matSort.direction == '') {
       this.sortedData = data;
@@ -93,19 +83,19 @@ export class OrganisateurDonsListComponent implements OnInit {
     this.sortedData = data.sort((a, b) => {
       let isAsc = matSort.direction == 'asc';
       switch (matSort.active) {
-        case 'nom': return compare(a.nom, b.nom, isAsc);
+        case 'nom': return this._compare(a.nom, b.nom, isAsc);
         default: return 0;
       }
     });
   }
 
-  setPageEvent(event: PageEvent){
+  public setPageEvent(event: PageEvent): void {
     this.pageEvent = event;
     this.sortedData = this.dons.slice(this.pageEvent.pageIndex * this.pageEvent.pageSize, (this.pageEvent.pageIndex + 1) * this.pageEvent.pageSize);
   }
 
-}
+  private _compare(a, b, isAsc): number {
+    return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+  }
 
-function compare(a, b, isAsc) {
-  return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
 }

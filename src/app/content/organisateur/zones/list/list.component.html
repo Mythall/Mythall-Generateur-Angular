@@ -27,7 +27,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let zone of zones | async">
+          <tr *ngFor="let zone of zones">
             <td [innerHtml]="zone.nom"></td>
             <td>
               <div class="button-row">
@@ -37,7 +37,7 @@
                 <button mat-icon-button [routerLink]="'/organisateur/zones/form/' + zone.id">
                   <mat-icon aria-label="Edit">edit</mat-icon>
                 </button>
-                <button mat-icon-button (click)="confirmDelete(zone)">
+                <button mat-icon-button (click)="confirm(zone)">
                   <mat-icon aria-label="Delete">delete</mat-icon>
                 </button>
               </div>

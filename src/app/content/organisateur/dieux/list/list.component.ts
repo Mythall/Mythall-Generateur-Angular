@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { DieuService } from '../../../../services/dieu.service';
-import { Dieu } from '../../../../models/dieu';
+import { IDieu, DieuService } from '../../../../services/dieu.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 import { ToastService } from '../../../../services/@core/toast.service';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-organisateur-dieux-list',
@@ -19,20 +17,25 @@ export class OrganisateurDieuxListComponent implements OnInit {
     private toast: ToastService
   ) { }
 
-  dieux: Observable<Dieu[]>;
+  dieux: IDieu[];
 
   ngOnInit() {
-    this.dieux = this.dieuService.getDieux$()
+    this._getDieux();
   }
 
-  confirmDelete(item: Dieu) {
+  private async _getDieux(): Promise<void> {
+    this.dieux = await this.dieuService.getDieux()
+  }
+
+  private async confirmDelete(item: IDieu): Promise<void> {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe((result: Dieu) => {
-      this.dieuService.deleteDieu(result.id).subscribe(res => this.toast.delete(result.nom));
+    dialogRef.afterClosed().subscribe(async (result: IDieu) => {
+      await this.dieuService.deleteDieu(result.id);
+      this.toast.delete(result.nom);
     });
   }
 

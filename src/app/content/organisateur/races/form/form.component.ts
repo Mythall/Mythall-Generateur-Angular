@@ -1,24 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs';
-import { RaceService } from '../../../../services/races/race.service';
-import { Race } from '../../../../services/races/models/race';
-import { ClasseService } from '../../../../services/classes/classe.service';
-import { DonService } from '../../../../services/dons/don.service';
-import { ImmuniteService } from '../../../../services/immunite.service';
-import { ResistanceService }  from '../../../../services/resistance.service';
-import { StatistiqueService } from '../../../../services/statistique.service';
-import { SortService } from '../../../../services/sorts/sort.service';
-import { Classe } from '../../../../services/classes/models/classe';
-import { Resistance, ResistanceItem } from '../../../../models/resistance';
-import { Immunite } from '../../../../models/immunite';
-import { Sort } from '../../../../services/sorts/models/sort';
-import { Statistique, StatistiqueItem } from '../../../../models/statistique';
-import { Don } from '../../../../services/dons/models/don';
-import { AptitudeService } from '../../../../services/aptitudes/aptitude.service';
-import { Aptitude } from '../../../../services/aptitudes/models/aptitude';
-import { Alignement } from '../../../../models/alignement';
-import { AlignementService } from '../../../../services/alignement.service';
+import { RaceService, IRace } from '../../../../services/race.service';
+import { ClasseService, IClasse } from '../../../../services/classe.service';
+import { DonService, IDon } from '../../../../services/don.service';
+import { ImmuniteService, IImmunite } from '../../../../services/immunite.service';
+import { ResistanceService, IResistance, ResistanceItem } from '../../../../services/resistance.service';
+import { StatistiqueService, IStatistique, StatistiqueItem } from '../../../../services/statistique.service';
+import { SortService, ISort } from '../../../../services/sort.service';
+import { AptitudeService, IAptitude } from '../../../../services/aptitude.service';
+import { IAlignement, AlignementService } from '../../../../services/alignement.service';
 
 @Component({
   selector: 'app-organisateur-races-form',
@@ -39,119 +29,101 @@ export class OrganisateurRacesFormComponent implements OnInit {
     private statistiqueService: StatistiqueService,
     private sortService: SortService,
     private router: Router
-  ){}
+  ) { }
 
   id: string;
-  race: Race = new Race();
-  classes: Observable<Classe[]>;
-  alignements: Alignement[];
-  aptitudes: Aptitude[];
-  dons: Don[];
-  resistances: Resistance[];
-  statistiques: Statistique[];
-  immunites: Immunite[];
-  sorts: Sort[];
+  race = {} as IRace;
+  classes: IClasse[];
+  alignements: IAlignement[];
+  aptitudes: IAptitude[];
+  dons: IDon[];
+  resistances: IResistance[];
+  statistiques: IStatistique[];
+  immunites: IImmunite[];
+  sorts: ISort[];
 
   ngOnInit() {
-    this.getRace();
-    this.getAlignements();
-    this.getClasses();
-    this.getAptitudes();
-    this.getDons();
-    this.getResistances();
-    this.getStatistiques();
-    this.getImmunites();
-    this.getSorts();
+    this._getRace();
+    this._getAlignements();
+    this._getClasses();
+    this._getAptitudes();
+    this._getDons();
+    this._getResistances();
+    this._getStatistiques();
+    this._getImmunites();
+    this._getSorts();
   }
 
-  getRace() {
-    this.activatedRoute.params.subscribe((params: Params) => {
-      if(params['id']){
+  private _getRace(): void {
+    this.activatedRoute.params.subscribe(async (params: Params) => {
+      if (params['id']) {
         this.id = params['id'];
-        this.raceService.getRace(this.id).subscribe(response => {
-          this.race = response;
-        });
+        this.race = await this.raceService.getRace(this.id);
       }
     });
   }
 
-  getAlignements() {
-    this.alignementService.getAlignements().subscribe(response => {
-      this.alignements = response;
-    })
+  private async _getAlignements(): Promise<void> {
+    this.alignements = await this.alignementService.getAlignements();
   }
 
-  getClasses() {
-    this.classes = this.classeService.getClasses();
+  private async _getClasses(): Promise<void> {
+    this.classes = await this.classeService.getClasses();
   }
 
-  getAptitudes() {
-    this.aptitudeService.getAptitudes().subscribe(response => {
-      this.aptitudes = response;
-    })
+  private async _getAptitudes(): Promise<void> {
+    this.aptitudes = await this.aptitudeService.getAptitudes();
   }
 
-  getDons() {
-    this.donService.getDons().subscribe(response => {
-      this.dons = response;
-    })
+  private async _getDons(): Promise<void> {
+    this.dons = await this.donService.getDons();
   }
 
-  getResistances() {
-    this.resistanceService.getResistances().subscribe(response => {
-      this.resistances = response;
-    });
+  private async _getResistances(): Promise<void> {
+    this.resistances = await this.resistanceService.getResistances();
   }
 
-  getStatistiques(){
-    this.statistiqueService.getStatistiques().subscribe(response => {
-      this.statistiques = response;
-    })
+  private async _getStatistiques(): Promise<void> {
+    this.statistiques = await this.statistiqueService.getStatistiques();
   }
 
-  getImmunites(){
-    this.immuniteService.getImmunites().subscribe(response => {
-      this.immunites = response;
-    })
+  private async _getImmunites(): Promise<void> {
+    this.immunites = await this.immuniteService.getImmunites();
   }
 
-  getSorts(){
-    this.sortService.getSorts().subscribe(response => {
-      this.sorts = response;
-    })
+  private async _getSorts(): Promise<void> {
+    this.sorts = await this.sortService.getSorts();
   }
 
-  submit() {
-    if(this.id){
-      this.raceService.updateRace(this.id, this.race.saveState()).then(result => {
-        if(result){
-          this.router.navigate(["/organisateur/races/list"]);
-        }
-      });
+  public async submit(): Promise<void> {
+    if (this.id) {
+      const result = await this.raceService.updateRace(this.race);
+      if (result) {
+        this.router.navigate(["/organisateur/races/list"]);
+      }
     } else {
-      this.raceService.addRace(this.race.saveState()).then(result => {
-        if(result){
-          this.router.navigate(["/organisateur/races/list"]);
-        }
-      });
-    }    
+      const result = await this.raceService.addRace(this.race);
+      if (result) {
+        this.router.navigate(["/organisateur/races/list"]);
+      }
+    }
   }
 
-  addResistance(){
-    if(!this.race.resistances) this.race.resistances = [];
+  public addResistance(): void {
+    if (!this.race.resistances) this.race.resistances = [];
     this.race.resistances.push(new ResistanceItem());
   }
 
-  deleteResistance(index: number){
+  public deleteResistance(index: number): void {
     this.race.resistances.splice(index, 1);
   }
 
-  addStatistique(){
-    if(!this.race.statistiques) this.race.statistiques = [];
+  public addStatistique(): void {
+    if (!this.race.statistiques) this.race.statistiques = [];
     this.race.statistiques.push(new StatistiqueItem());
   }
 
-  deleteStatistique(index: number){
+  public deleteStatistique(index: number): void {
     this.race.statistiques.splice(index, 1);
   }
 

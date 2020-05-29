@@ -1,72 +1,59 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Dieu } from '../../../../../models/dieu';
+import { PersonnageService, IPersonnage } from '../../../../../services/personnage.service';
+import { IDieu } from '../../../../../services/dieu.service';
 
 @Component({
-    selector: 'creation-progression-dieus',
-    templateUrl: './dieu.component.html'
+  selector: 'creation-progression-dieus',
+  templateUrl: './dieu.component.html'
 })
 export class JoueurPersonnageCreationProgressionDieuComponent implements OnInit {
 
-    constructor(
-        private personnageService: PersonnageService
-    ) { }
+  constructor(
+    private personnageService: PersonnageService
+  ) { }
 
-    @Input() stepper: MatStepper;
-    @Input() progression: boolean;
-    @Input() personnage: Personnage;
+  @Input() stepper: MatStepper;
+  @Input() progression: boolean;
+  @Input() personnage: IPersonnage;
 
-    @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
-    @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
+  @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-    selectedDieu: Dieu;
-    availableDieus: Dieu[] = [];
+  selectedDieu: IDieu;
+  availableDieus: IDieu[] = [];
 
-    ngOnInit() {
-        this.getAvailableDieus();
+  ngOnInit() {
+    this._getAvailableDieux();
+  }
+
+  public get isCompleted(): boolean {
+    return this.selectedDieu ? true : false;
+  }
+
+  private async _getAvailableDieux(): Promise<void> {
+    this.availableDieus = await this.personnageService.getAvailableDieux(this.personnage);
+  }
+
+  public setDieu(): void {
+    this.personnage.dieuRef = this.selectedDieu.id;
+    this.personnage.dieu = this.selectedDieu;
+  }
+
+  public async next(): Promise<void> {
+    if (this.isCompleted) {
+
+      // Rebuild Personnage
+      const personnage = await this.personnageService.buildPersonnage(this.personnage);
+
+      // Emit & Allow next step
+      this.personnageChange.emit(personnage);
+      this.completedChange.emit(true);
+      setTimeout(() => {
+        this.stepper.next();
+      });
+
     }
-
-    isCompleted(): boolean {
-
-        if (this.selectedDieu) {
-            return true;
-        }
-
-        return false;
-
-    }
-
-    getAvailableDieus() {
-        this.personnageService.getAvailableDieux(this.personnage).then(response => {
-            this.availableDieus = response;
-        });
-    }
-
-
-    setDieu() {
-        this.personnage.dieuRef = this.selectedDieu.id;
-        this.personnage.dieu = this.selectedDieu;
-    }
-
-    next() {
-        if (this.isCompleted()) {
-
-            // Rebuild Personnage
-            this.personnageService.buildPromise(this.personnage).then(personnage => {
-
-                // Emit & Allow next step
-                this.personnageChange.emit(personnage);
-                this.completedChange.emit(true);
-                setTimeout(()=> {
-                    this.stepper.next();
-                });
-                
-            });
-
-        }
-    }
+  }
 
 }

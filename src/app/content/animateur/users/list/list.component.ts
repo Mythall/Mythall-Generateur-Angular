@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService } from '../../../../services/@core/user.service';
-import { User } from '../../../../services/@core/models/user';
+import { UserService, IUser } from '../../../../services/@core/user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { Sort } from '@angular/material/sort';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
@@ -15,9 +14,9 @@ export class AnimateurUsersListComponent implements OnInit {
   constructor(
     private userService: UserService,
     public dialog: MatDialog
-  ){}
+  ) { }
 
-  users: User[];
+  users: IUser[];
   sortedData: any;
   filter: any = {
     displayname: '',
@@ -25,64 +24,62 @@ export class AnimateurUsersListComponent implements OnInit {
     role: ''
   };
 
-  ngOnInit(){
-    this.userService.getUsers().subscribe(response => {
-      this.users = response;
-      this.sortedData = this.users.slice();
-    });
+  ngOnInit() {
+    this._getUsers();
   }
 
-  confirmDelete(item: User) {
+  private async _getUsers(): Promise<void> {
+    this.users = await this.userService.getUsers();
+    this.sortedData = this.users.slice();
+  }
+
+  confirmDelete(item: IUser) {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.displayname, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if(result){
-        this.delete(result);
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        await this.userService.deleteUser(result);
       }
     });
   }
 
-  delete(user: User){
-    this.userService.deleteUser(user);
-  }
-
-  filterResult(user: User): boolean{
+  public filterResult(user: IUser): boolean {
 
     let result: boolean = true;
 
-    if(this.filter.displayname){
-      if(!user.displayname.toLowerCase().includes(this.filter.displayname.toLowerCase())){
+    if (this.filter.displayname) {
+      if (!user.displayname.toLowerCase().includes(this.filter.displayname.toLowerCase())) {
         result = false;
       }
     }
 
-    if(this.filter.email){
-      if(!user.email.toLowerCase().includes(this.filter.email.toLowerCase())){
+    if (this.filter.email) {
+      if (!user.email.toLowerCase().includes(this.filter.email.toLowerCase())) {
         result = false;
       }
     }
 
-    if(this.filter.role){
+    if (this.filter.role) {
 
       result = false;
 
-      if(this.filter.role == "joueur"){
-        if(user.roles.joueur){
+      if (this.filter.role == "joueur") {
+        if (user.roles.joueur) {
           result = true;
         }
       }
 
-      if(this.filter.role == "animateur"){
-        if(user.roles.animateur){
+      if (this.filter.role == "animateur") {
+        if (user.roles.animateur) {
           result = true;
         }
       }
 
-      if(this.filter.role == "organisateur"){
-        if(user.roles.organisateur){
+      if (this.filter.role == "organisateur") {
+        if (user.roles.organisateur) {
           result = true;
         }
       }
@@ -92,8 +89,8 @@ export class AnimateurUsersListComponent implements OnInit {
     return result;
 
   }
-  
-  sortData(sort: Sort) {
+
+  public sortData(sort: Sort): void {
     const data = this.users.slice();
     if (!sort.active || sort.direction == '') {
       this.sortedData = data;
@@ -103,16 +100,16 @@ export class AnimateurUsersListComponent implements OnInit {
     this.sortedData = data.sort((a, b) => {
       let isAsc = sort.direction == 'asc';
       switch (sort.active) {
-        case 'displayname': return compare(a.displayname, b.displayname, isAsc);
-        case 'email': return compare(a.email, b.email, isAsc);
-        case 'role': return compare(a.roles, b.roles, isAsc);
+        case 'displayname': return this._compare(a.displayname, b.displayname, isAsc);
+        case 'email': return this._compare(a.email, b.email, isAsc);
+        case 'role': return this._compare(a.roles, b.roles, isAsc);
         default: return 0;
       }
     });
   }
 
-}
+  private _compare(a, b, isAsc): number {
+    return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+  }
 
-function compare(a, b, isAsc) {
-  return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
 }

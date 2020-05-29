@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { EspritService } from '../../../../services/esprits/esprit-service';
-import { Esprit } from '../../../../services/esprits/models/esprit';
+import { EspritService, IEsprit } from '../../../../services/esprit.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent } from '../../../../layout/dialogs/delete/delete.dialog.component';
 
@@ -15,29 +13,29 @@ export class OrganisateurEspritsListComponent implements OnInit {
   constructor(
     private espritService: EspritService,
     public dialog: MatDialog
-  ){}
+  ) { }
 
-  esprits: Observable<Esprit[]>;
+  esprits: IEsprit[];
 
-  ngOnInit(){
-    this.esprits = this.espritService.getEsprits();    
+  ngOnInit() {
+    this._getEsprits();
   }
 
-  confirmDelete(item: Esprit) {
+  private async _getEsprits(): Promise<void> {
+    this.esprits = await this.espritService.getEsprits();
+  }
+
+  public confirmDelete(item: IEsprit): void {
     let dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: 'auto',
       data: { displayname: item.nom, item: item }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if(result){
-        this.delete(result);
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        await this.espritService.deleteEsprit(result);
       }
     });
-  }
-
-  delete(esprit: Esprit){
-    this.espritService.deleteEsprit(esprit);
   }
 
 }

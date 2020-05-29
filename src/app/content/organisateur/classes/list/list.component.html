@@ -1,4 +1,3 @@
-
 <div class="container-fluid">
   <div class="row">
     <mat-toolbar color="primary">
@@ -10,7 +9,8 @@
 <div class="container mt-4">
   <mat-card class="mb-4">
     <div>
-        <button mat-raised-button color="primary" class="mb-4" routerLink="/organisateur/classes/form">Ajouter Classe</button>
+      <button mat-raised-button color="primary" class="mb-4" routerLink="/organisateur/classes/form">Ajouter
+        Classe</button>
     </div>
     <div class="table-responsive">
       <table class="table">
@@ -22,7 +22,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let classe of classes | async">
+          <tr *ngFor="let classe of classes">
             <td [innerHtml]="classe.nom"></td>
             <td [innerHtml]="classe.description"></td>
             <td>
@@ -32,10 +32,10 @@
                 </button>
                 <button mat-icon-button [routerLink]="'/organisateur/classes/form/' + classe.id">
                   <mat-icon aria-label="Edit">edit</mat-icon>
-                </button>   
+                </button>
                 <button mat-icon-button (click)="confirmDelete(classe)">
                   <mat-icon aria-label="Delete">delete</mat-icon>
-                </button>   
+                </button>
               </div>
             </td>
           </tr>

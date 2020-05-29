@@ -22,7 +22,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let esprit of esprits | async">
+          <tr *ngFor="let esprit of esprits">
             <td [innerHtml]="esprit.nom"></td>
             <td [innerHtml]="esprit.description"></td>
             <td>

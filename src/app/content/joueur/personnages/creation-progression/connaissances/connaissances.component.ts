@@ -1,98 +1,85 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-
-import { Personnage } from '../../../../../services/personnages/models/personnage';
-import { PersonnageService } from '../../../../../services/personnages/personnage.service';
-import { Don, DonItem } from '../../../../../services/dons/models/don';
-import { Choix } from '../../../../../services/personnages/models/choix';
+import { PersonnageService, IPersonnage, Choix } from '../../../../../services/personnage.service';
+import { IDon, DonItem } from '../../../../../services/don.service';
 
 @Component({
-    selector: 'creation-progression-connaissances',
-    templateUrl: './connaissances.component.html'
+  selector: 'creation-progression-connaissances',
+  templateUrl: './connaissances.component.html'
 })
 export class JoueurPersonnageCreationProgressionConnaissancesComponent implements OnInit {
 
-    constructor(
-        private personnageService: PersonnageService
-    ) { }
+  constructor(
+    private personnageService: PersonnageService
+  ) { }
 
-    @Input() stepper: MatStepper;
-    @Input() progression: boolean;
-    @Input() personnage: Personnage;
-    @Input() choixPersonnage: Choix[];
+  @Input() stepper: MatStepper;
+  @Input() progression: boolean;
+  @Input() personnage: IPersonnage;
+  @Input() choixPersonnage: Choix[];
 
-    @Output() personnageChange: EventEmitter<Personnage> = new EventEmitter<Personnage>();
-    @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() personnageChange: EventEmitter<IPersonnage> = new EventEmitter<IPersonnage>();
+  @Output() completedChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-    selectedConnaissances: Don[] = [];
-    availableConnaissances = [];
-    quantity = [];
-    currentIndex: number = 0;
+  selectedConnaissances: IDon[] = [];
+  availableConnaissances = [];
+  quantity = [];
+  currentIndex: number = 0;
 
-    ngOnInit() {
-        this.getAvailableConnaissances();
+  ngOnInit() {
+    this._getAvailableConnaissances();
 
-        // Get the amount of connaissances to choose
-        this.choixPersonnage.forEach((choix) => {
-            if (choix.type == 'don' && choix.categorie == 'Connaissance' && choix.quantite > 0) {                
-                this.quantity = Array(choix.quantite).fill(1).map((x, i) => i); // Crée un array de la quantité de choix [1,2,3,...]
-            }
-        });
+    // Get the amount of connaissances to choose
+    this.choixPersonnage.forEach((choix) => {
+      if (choix.type == 'don' && choix.categorie == 'Connaissance' && choix.quantite > 0) {
+        this.quantity = Array(choix.quantite).fill(1).map((x, i) => i); // Crée un array de la quantité de choix [1,2,3,...]
+      }
+    });
+
+  }
+
+  public get isCompleted(): boolean {
+    return this.selectedConnaissances && this.selectedConnaissances.length == this.quantity.length ? true : false;
+  }
+
+  private async _getAvailableConnaissances(): Promise<void> {
+    this.availableConnaissances[this.currentIndex] = await this.personnageService.getAvailableConnaissances(this.personnage);
+  }
+
+  public setConnaissance(index): void {
+
+    // Set Current Index
+    this.currentIndex = index + 1;
+
+    // Set Current connaissance
+    if (!this.personnage.dons) this.personnage.dons = [];
+
+    const selectedConnaissanceItem: DonItem = new DonItem();
+    selectedConnaissanceItem.don = this.selectedConnaissances[index];
+    selectedConnaissanceItem.donRef = this.selectedConnaissances[index].id;
+    selectedConnaissanceItem.niveauObtention = this.personnage.niveauReel;
+
+    this.personnage.dons.push(selectedConnaissanceItem);
+
+    // Refresh List of Available connaissances
+    this._getAvailableConnaissances();
+
+  }
+
+  public async next(): Promise<void> {
+    if (this.isCompleted) {
+
+      // Rebuild Personnage
+      const personnage = await this.personnageService.buildPersonnage(this.personnage);
+
+      // Emit & Allow next step
+      this.personnageChange.emit(personnage);
+      this.completedChange.emit(true);
+      setTimeout(() => {
+        this.stepper.next();
+      });
 
     }
-
-    isCompleted(): boolean {
-
-        if (this.selectedConnaissances && this.selectedConnaissances.length == this.quantity.length) {
-            return true;
-        }
-
-        return false;
-
-    }
-
-    getAvailableConnaissances() {
-        this.personnageService.getAvailableConnaissances(this.personnage).then(response => {
-            this.availableConnaissances[this.currentIndex] = response;
-        });
-    }
-
-    setConnaissance(index) {
-
-        // Set Current Index
-        this.currentIndex = index + 1;
-
-        // Set Current connaissance
-        if (!this.personnage.dons) this.personnage.dons = [];
-
-        const selectedConnaissanceItem: DonItem = new DonItem();
-        selectedConnaissanceItem.don = this.selectedConnaissances[index];
-        selectedConnaissanceItem.donRef = this.selectedConnaissances[index].id;
-        selectedConnaissanceItem.niveauObtention = this.personnage.niveauReel;
-
-        this.personnage.dons.push(selectedConnaissanceItem);
-
-        // Refresh List of Available connaissances
-        this.getAvailableConnaissances();
-
-    }
-
-    next() {
-        if (this.isCompleted()) {
-
-            // Rebuild Personnage
-            this.personnageService.buildPromise(this.personnage).then(personnage => {
-
-                // Emit & Allow next step
-                this.personnageChange.emit(personnage);
-                this.completedChange.emit(true);
-                setTimeout(() => {
-                    this.stepper.next();
-                });
-
-            });
-
-        }
-    }
+  }
 
 }
