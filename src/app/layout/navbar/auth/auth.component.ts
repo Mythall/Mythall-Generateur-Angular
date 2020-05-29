@@ -13,12 +13,10 @@ export class NavbarAuthComponent implements OnInit {
     public auth: AuthenticationService
   ) { }
 
+  user: IUser;
+
   ngOnInit() {
-
-  }
-
-  public get user(): IUser {
-    return this.auth.user;
+    this.auth.user$.subscribe(response => this.user = response);
   }
 
 }

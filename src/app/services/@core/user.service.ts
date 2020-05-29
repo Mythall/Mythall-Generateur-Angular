@@ -52,7 +52,7 @@ export class UserService {
   }
 
   public async updateUser(user: IUser): Promise<IUser> {
-    await this.afs.doc<IUser>(`users/${user.uid}`).update(this._saveState(user));
+    await this.afs.doc<IUser>(`users/${user.uid}`).set(this._saveState(user), { merge: true });
     return user;
   }
 

@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
-
-import * as firebase from 'firebase';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestoreDocument, AngularFirestore } from '@angular/fire/firestore';
-
+import { switchMap, tap } from 'rxjs/operators';
+import * as firebase from 'firebase';
 import { UserService, IUser } from './user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../../layout/dialogs/error/error.dialog.component';
+import { Observable, of } from 'rxjs';
 
 @Injectable()
 export class AuthenticationService {
 
+  public user$: Observable<IUser>;
   public user: IUser;
 
   constructor(
@@ -26,14 +26,15 @@ export class AuthenticationService {
   }
 
   private setUser() {
-    this.afAuth.authState.pipe(
-      switchMap(async (user) => {
+    this.user$ = this.afAuth.authState.pipe(
+      switchMap(user => {
         if (user) {
-          this.user = await this.userService.getUser(user.uid);
+          return this.afs.doc<IUser>(`users/${user.uid}`).valueChanges();
         } else {
-          this.user = null;
+          return of(null)
         }
-      })
+      }),
+      tap(user => this.user = user)
     )
   }
 
@@ -60,7 +61,7 @@ export class AuthenticationService {
       }).then(
         () => this.router.navigate([""])
       ).catch(error => {
-        let dialogRef = this.dialog.open(ErrorDialogComponent, {
+        this.dialog.open(ErrorDialogComponent, {
           data: error.message
         });
       });
@@ -72,7 +73,7 @@ export class AuthenticationService {
     let updatedUser = {
       roles: {
         joueur: true,
-      }
+      },
     } as IUser;
 
     //Update Data from Credentials
@@ -80,14 +81,15 @@ export class AuthenticationService {
     updatedUser.displayname = user.displayName;
     updatedUser.email = user.email;
     updatedUser.photoURL = user.photoURL;
-    updatedUser.createdAt = new Date(); // firebase.firestore.Timestamp.now();
 
     const userDB = await this.userService.getUser(updatedUser.uid);
 
     if (!userDB) {
+      updatedUser.createdAt = new Date();
       updatedUser.roles = { ...updatedUser.roles };
       await this.userService.addUser(updatedUser);
     } else {
+      updatedUser = { ...updatedUser, ...userDB };
       updatedUser.updatedAt = new Date();
       await this.userService.updateUser(updatedUser);
     }
