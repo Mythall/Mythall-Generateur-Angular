@@ -1,0 +1,28 @@
+<div class="row">
+
+	<!--Fourberies-->
+	<ng-template ngFor let-i="index" [ngForOf]="quantity">		
+		<div class="col-12">
+
+			<!--Choix de fourberie-->
+			<mat-form-field>
+				<mat-select placeholder="Sélectionner un fourberie" [name]="selectedFourberies[i]" [(ngModel)]="selectedFourberies[i]" (ngModelChange)="setFourberie(i)"
+				 required [disabled]="i != currentIndex">
+					<mat-option *ngFor="let fourberie of availableFourberies[i]" [value]="fourberie" [innerHtml]="fourberie.nom"></mat-option>
+				</mat-select>
+			</mat-form-field>
+
+			<!--Description-->
+			<div class="mb-2" *ngIf="selectedFourberie && selectedFourberie[i]">
+				<span class="font-italic" [innerHtml]="selectedFourberie[i].description"></span>
+			</div>
+
+		</div>
+	</ng-template>
+
+	<!--Stepper Buttons-->
+	<div class="col-12">
+		<button mat-raised-button color="primary" (click)="next()" [disabled]="!isCompleted">Suivant</button>
+	</div>
+
+</div>

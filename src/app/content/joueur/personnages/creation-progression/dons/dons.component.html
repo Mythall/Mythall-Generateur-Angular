@@ -1,0 +1,28 @@
+<div class="row">
+
+	<!--Dons-->
+	<ng-template ngFor let-i="index" [ngForOf]="quantity">		
+		<div class="col-12">
+
+			<!--Choix de don-->
+			<mat-form-field *ngIf="availableDons && availableDons[i] && availableDons[i].length > 0">
+				<mat-select placeholder="Sélectionner un don" [name]="selectedDons[i]" [(ngModel)]="selectedDons[i]" (ngModelChange)="setDon(i)"
+				 required [disabled]="i != currentIndex">
+					<mat-option *ngFor="let don of availableDons[i]" [value]="don" [innerHtml]="don.nom"></mat-option>
+				</mat-select>
+			</mat-form-field>
+
+			<!--Description-->
+			<div class="mb-2" *ngIf="selectedDon && selectedDon[i]">
+				<span class="font-italic" [innerHtml]="selectedDon[i].description"></span>
+			</div>
+
+		</div>
+	</ng-template>
+
+	<!--Stepper Buttons-->
+	<div class="col-12">
+		<button mat-raised-button color="primary" (click)="next()" [disabled]="!isCompleted">Suivant</button>
+	</div>
+
+</div>

@@ -1,0 +1,44 @@
+
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Ordres</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card class="mb-4">
+    <div>
+        <button mat-raised-button color="primary" class="mb-4" routerLink="/organisateur/ordres/form">Ajouter Ordre</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ordre of ordres">
+            <td [innerHtml]="ordre.nom"></td>
+            <td>
+              <div class="button-row">
+                <button mat-icon-button [routerLink]="'/jeu/ordres'" disabled>
+                  <mat-icon aria-label="View">remove_red_eye</mat-icon>
+                </button>
+                <button mat-icon-button [routerLink]="'/organisateur/ordres/form/' + ordre.id">
+                  <mat-icon aria-label="Edit">edit</mat-icon>
+                </button>   
+                <button mat-icon-button (click)="confirmDelete(ordre)" disabled>
+                  <mat-icon aria-label="Delete">delete</mat-icon>
+                </button>   
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+</div>

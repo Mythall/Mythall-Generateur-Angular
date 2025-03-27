@@ -1,0 +1,25 @@
+<div class="row">
+
+	<!--Ecoles-->
+	<div class="col-12">
+
+		<!--Choix de ecole-->
+		<mat-form-field>
+			<mat-select placeholder="Sélectionner un Ecole" name="selectedEcole" [(ngModel)]="selectedEcole" (ngModelChange)="setEcole()" required>
+				<mat-option *ngFor="let e of availableEcoles" [value]="e" [innerHtml]="e.nom"></mat-option>
+			</mat-select>
+		</mat-form-field>
+
+		<!--Description Ecole-->
+		<div class="mb-2" *ngIf="selectedEcole">
+			<span class="font-italic" [innerHtml]="selectedEcole.description"></span>
+		</div>
+
+	</div>
+
+	<!--Stepper Buttons-->
+	<div class="col-12">
+		<button mat-raised-button color="primary" (click)="next()" [disabled]="!isCompleted">Suivant</button>
+	</div>
+
+</div>

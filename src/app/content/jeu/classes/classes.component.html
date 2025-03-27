@@ -1,0 +1,51 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Classes</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12 col-md-10 order-2 order-md-1">
+      <mat-card *ngFor="let classe of classes" [id]="classe.nom" class="mb-4">
+        <mat-card-title [innerHtml]="classe.nom"></mat-card-title>
+        <mat-card-content>
+          <p><i [innerHtml]="classe.description"></i></p>
+
+          <p><strong>Obligation(s) :</strong></p>
+          <p [innerHtml]="classe.obligations"></p>
+          <p *ngIf="!classe.obligations">Aucune</p>
+
+          <p><strong>Avantages(s) :</strong></p>
+          <p [innerHtml]="classe.avantages"></p>
+          <p *ngIf="!classe.avantages">Aucune</p>
+
+          <p><strong>Désavantages(s) :</strong></p>
+          <p [innerHtml]="classe.desavantages"></p>
+          <p *ngIf="!classe.desavantages">Aucune</p>
+
+          <p><strong>Multiclassement(s) :</strong></p>
+          <div *ngIf="classe.multiclassementRef">
+            <ng-template ngFor [ngForOf]="classe.multiclassementRef" let-c let-last="last">
+              <ng-template ngFor [ngForOf]="multiClasses" let-m>
+                <span *ngIf="c == m.id" [innerHtml]="!last ? m.nom + ', ' : m.nom"></span>
+              </ng-template>              
+            </ng-template>
+          </div>
+          <p *ngIf="!classe.multiclassementRef">Aucune</p>
+
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="col-12 col-md-2 order-1 order-md-2 mb-4">
+      <nav>
+        <div class="mb-2">
+          <strong>Classes</strong>
+        </div>
+        <a *ngFor="let classe of classes" [href]="'jeu/classes#' + classe.nom" [innerHtml]="classe.nom"></a>
+      </nav>
+    </div>
+  </div>
+</div>

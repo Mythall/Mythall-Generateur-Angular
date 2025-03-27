@@ -1,0 +1,47 @@
+
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Portées</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card class="mb-4">
+    <div>
+        <button mat-raised-button color="primary" class="mb-4" routerLink="/organisateur/portes/form">Ajouter Porté</button>
+        <button mat-raised-button color="default" class="mb-4" routerLink="/organisateur/sorts/list">Liste des Sorts</button>
+        <button mat-raised-button color="default" class="mb-4" routerLink="/organisateur/durees/list">Liste des Durées</button>
+        <button mat-raised-button color="default" class="mb-4" routerLink="/organisateur/zones/list">Liste des Zones d'Effets</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let porte of portes">
+            <td [innerHtml]="porte.nom"></td>
+            <td>
+              <div class="button-row">
+                <button mat-icon-button [routerLink]="'/jeu/portes'">
+                  <mat-icon aria-label="View">remove_red_eye</mat-icon>
+                </button>
+                <button mat-icon-button [routerLink]="'/organisateur/portes/form/' + porte.id">
+                  <mat-icon aria-label="Edit">edit</mat-icon>
+                </button>   
+                <button mat-icon-button (click)="confirmDelete(porte)">
+                  <mat-icon aria-label="Delete">delete</mat-icon>
+                </button>   
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+</div>

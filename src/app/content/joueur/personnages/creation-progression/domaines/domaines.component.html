@@ -1,0 +1,28 @@
+<div class="row">
+
+	<!--Domaines-->
+	<ng-template ngFor let-i="index" [ngForOf]="quantity">		
+		<div class="col-12">
+
+			<!--Choix de domaine-->
+			<mat-form-field>
+				<mat-select  placeholder="Sélectionner un domaine" [name]="selectedDomaines[i]" [(ngModel)]="selectedDomaines[i]" (ngModelChange)="setDomaine(i)"
+				 required [disabled]="i != currentIndex">
+					<mat-option *ngFor="let domaine of availableDomaines[i]" [value]="domaine" [innerHtml]="domaine.nom"></mat-option>
+				</mat-select>
+			</mat-form-field>
+
+			<!--Description-->
+			<div class="mb-2" *ngIf="selectedDomaine && selectedDomaine[i]">
+				<span class="font-italic" [innerHtml]="selectedDomaine[i].description"></span>
+			</div>
+
+		</div>
+	</ng-template>
+
+	<!--Stepper Buttons-->
+	<div class="col-12">
+		<button mat-raised-button color="primary" (click)="next()" [disabled]="!isCompleted">Suivant</button>
+	</div>
+
+</div>

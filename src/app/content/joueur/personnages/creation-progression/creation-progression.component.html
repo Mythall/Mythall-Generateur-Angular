@@ -1,0 +1,149 @@
+<div class="container-fluid">
+	<div class="row">
+		<mat-toolbar color="primary">
+			<span *ngIf="!progression">Création de personnage</span>
+			<span *ngIf="progression">Progression de personnage</span>
+		</mat-toolbar>
+	</div>
+</div>
+
+<div class="container mt-4">
+	<div class="row">
+
+		<div class="col-12">
+			<mat-card class="mb-4">
+
+				<!--Informations-->
+				<div class="row mb-1">
+					<div class="col">
+						<mat-card-content>
+
+							<mat-vertical-stepper #stepper linear>
+
+								<!--Nom & Race-->
+								<mat-step label="Nom & Race" *ngIf="!ajustementNiveau" [completed]="stepRaceCompleted" [editable]="!stepRaceCompleted">
+									<creation-progression-race *ngIf="personnageLoaded" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 (personnageChange)="personnage = $event" (completedChange)="stepRaceCompleted = $event">
+									</creation-progression-race>
+								</mat-step>
+
+								<!--Classes-->
+								<mat-step label="Classe(s)" *ngIf="!ajustementNiveau" [completed]="stepClassesCompleted" [editable]="!stepClassesCompleted">
+									<creation-progression-classes *ngIf="stepRaceCompleted" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 (personnageChange)="personnage = $event" (completedChange)="stepClasseCompletedEvent($event)" (selectedClasseChange)="selectedClasse = $event">
+									</creation-progression-classes>
+								</mat-step>
+
+								<!--Alignement-->
+								<mat-step label="Alignement" *ngIf="stepAlignementExist && !ajustementNiveau" [completed]="stepAlignementCompleted" [editable]="!stepAlignementCompleted">
+									<creation-progression-alignements *ngIf="isCurrentStepAlignement()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 (personnageChange)="personnage = $event" (completedChange)="stepAlignementCompleted = $event">
+									</creation-progression-alignements>
+								</mat-step>
+
+								<!--Domaines-->
+								<mat-step label="Domaines" *ngIf="stepDomainesExist && !ajustementNiveau" [completed]="stepDomainesCompleted" [editable]="!stepDomainesCompleted">
+									<creation-progression-domaines *ngIf="isCurrentStepDomaines()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 [choixPersonnage]="choixPersonnage" (personnageChange)="personnage = $event" (completedChange)="stepDomainesCompletedEvent($event)">
+									</creation-progression-domaines>
+								</mat-step>
+
+								<!--Ecole-->
+								<mat-step label="École" *ngIf="stepEcoleExist && !ajustementNiveau" [completed]="stepEcoleCompleted" [editable]="!stepEcoleCompleted">
+									<creation-progression-ecoles *ngIf="isCurrentStepEcole()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 (personnageChange)="personnage = $event" (completedChange)="stepEcoleCompletedEvent($event)">
+									</creation-progression-ecoles>
+								</mat-step>
+
+								<!--Esprit Patron-->
+								<mat-step label="Esprit Patron" *ngIf="stepEspritExist && !ajustementNiveau" [completed]="stepEspritCompleted" [editable]="!stepEspritCompleted">
+									<creation-progression-esprits *ngIf="isCurrentStepEsprit()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 (personnageChange)="personnage = $event" (completedChange)="stepEspritCompletedEvent($event)">
+									</creation-progression-esprits>
+								</mat-step>
+
+								<!--Ordre-->
+								<mat-step label="Ordre" *ngIf="stepOrdreExist && !ajustementNiveau" [completed]="stepOrdreCompleted" [editable]="!stepOrdreCompleted">
+									<creation-progression-ordres *ngIf="isCurrentStepOrdre()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 (personnageChange)="personnage = $event" (completedChange)="stepOrdreCompletedEvent($event)">
+									</creation-progression-ordres>
+								</mat-step>
+
+								<!--Connaissances-->
+								<mat-step label="Connaissance(s)" *ngIf="stepConnaissancesExist && !ajustementNiveau" [completed]="stepConnaissancesCompleted"
+								 [editable]="!stepConnaissancesCompleted">
+									<creation-progression-connaissances *ngIf="isCurrentStepConnaissances()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 [choixPersonnage]="choixPersonnage" (personnageChange)="personnage = $event" (completedChange)="stepConnaissancesCompleted = $event">
+									</creation-progression-connaissances>
+								</mat-step>
+
+								<!--Dons-->
+								<mat-step label="Don(s)" *ngIf="stepDonsExist && !ajustementNiveau" [completed]="stepDonsCompleted" [editable]="!stepDonsCompleted">
+									<creation-progression-dons *ngIf="isCurrentStepDons()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 [choixPersonnage]="choixPersonnage" (personnageChange)="personnage = $event" (completedChange)="stepDonsCompleted = $event">
+									</creation-progression-dons>
+								</mat-step>
+
+								<!--Fourberies-->
+								<mat-step label="Fourberie(s)" *ngIf="stepFourberiesExist && !ajustementNiveau" [completed]="stepFourberiesCompleted" [editable]="!stepFourberiesCompleted">
+									<creation-progression-fourberies *ngIf="isCurrentStepFourberies()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 [choixPersonnage]="choixPersonnage" (personnageChange)="personnage = $event" (completedChange)="stepFourberiesCompleted = $event">
+									</creation-progression-fourberies>
+								</mat-step>
+
+								<!--Sorts-->
+								<mat-step label="Sort(s)" *ngIf="stepSortsExist && !ajustementNiveau" [completed]="stepSortsCompleted" [editable]="!stepSortsCompleted">
+									<creation-progression-sorts *ngIf="isCurrentStepSorts()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 [choixPersonnage]="choixPersonnage" (personnageChange)="personnage = $event" (completedChange)="stepSortsCompleted = $event">
+									</creation-progression-sorts>
+								</mat-step>
+
+								<!--Sorts de domaine-->
+								<mat-step label="Sort(s) de domaine" *ngIf="stepSortsDomaineExist && !ajustementNiveau" [completed]="stepSortsDomaineCompleted" [editable]="!stepSortsDomaineCompleted">
+									<creation-progression-sorts-domaine *ngIf="isCurrentStepSortsDomaine()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 [choixPersonnage]="choixPersonnage" (personnageChange)="personnage = $event" (completedChange)="stepSortsDomaineCompleted = $event">
+									</creation-progression-sorts-domaine>
+								</mat-step>
+
+								<!--Dieu-->
+								<mat-step label="Divinité" *ngIf="stepDieuExist && !ajustementNiveau" [completed]="stepDieuCompleted" [editable]="!stepDieuCompleted">
+									<creation-progression-dieus *ngIf="isCurrentStepDieu()" [stepper]="stepper" [personnage]="personnage" [progression]="progression"
+									 (personnageChange)="personnage = $event" (completedChange)="stepDieuCompleted = $event">
+									</creation-progression-dieus>
+								</mat-step>
+
+								<!--Confirmation-->
+								<mat-step label="Confirmation">
+									<div class="row">
+										<div *ngIf="!ajustementNiveau" class="col-12 font-weight-bold">
+											Êtes-vous certain que vos choix sont exacte ?
+										</div>
+										<div *ngIf="ajustementNiveau" class="col-12">
+											<span>Vous êtes niveau effectif </span>
+											<span class="font-weight-bold" [innerHtml]="personnage.niveauEffectif"></span>
+											<span> et vous avez participé à </span>
+											<span class="font-weight-bold" [innerHtml]="personnage.gnEffectif - 1"></span>
+											<span> évenement(s). Ce niveau est donc un ajustement.</span>
+										</div>
+										<div class="col-12 mt-3">
+											<button mat-raised-button color="primary" (click)="save()">Sauvegarder</button>
+										</div>
+									</div>
+								</mat-step>
+
+							</mat-vertical-stepper>
+
+							<div class="font-weight-light font-italic">
+								<span>Prendre note: Vous ne pouvez pas revenir en arrière suite à la confirmation d'une étape.</span>
+								<br />
+								<span>Si vous vous êtes trompé, vous pouvez toujours rafraichir la page et recommancer.</span>
+							</div>
+
+						</mat-card-content>
+					</div>
+				</div>
+
+			</mat-card>
+		</div>
+	</div>
+</div>

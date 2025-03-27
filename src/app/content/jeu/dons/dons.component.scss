@@ -1,0 +1,22 @@
+@import "src/assets/scss/_custom.scss";
+
+nav {
+    border-left: 4px solid $primary;
+    padding-left: 12px;
+
+    @media(min-width: 768px){
+        position: fixed;
+        max-height: 70%;
+        overflow-y: auto;
+    }    
+
+    a {
+        display: block;
+        color: $primary;
+        &:hover {
+            cursor: pointer;
+            color: $secondary;
+            text-decoration: none;
+        }
+    }
+}

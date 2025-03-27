@@ -1,0 +1,144 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Esprits</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card>
+    <mat-card-title>Formulaire d'Esprit</mat-card-title>
+    <form #form="ngForm">
+      <div class="form-container">
+
+        <mat-tab-group class="tab-group">
+
+          <!--Information de base-->
+          <mat-tab label="Information de base">
+            <div class="row mb-1 mt-2">
+              <div class="col">
+                <mat-form-field>
+                  <input matInput name="esprit.nom" [(ngModel)]="esprit.nom" placeholder="Nom" required>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <textarea matInput name="esprit.description" [(ngModel)]="esprit.description" placeholder="Description" required></textarea>
+                </mat-form-field>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!--Aptitudes Spéciales-->
+          <mat-tab label="Progression des Aptitudes Spéciales" class="mat-tab">
+            <div class="row mb-1 mt-2">
+
+              <ng-template ngFor [ngForOf]="esprit.aptitudes" let-aptitude let-i="index">
+                <div *ngIf="aptitude" class="col-5">
+                  <mat-form-field>
+                    <mat-select placeholder="Aptitude" name="esprit.aptitudes[{{i}}].aptitudeRef" [(ngModel)]="esprit.aptitudes[i].aptitudeRef" required>
+                      <mat-option *ngFor="let a of aptitudes" [value]="a.id" [innerHtml]="a.nom"></mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-5">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="esprit.aptitudes[{{i}}].niveauObtention" [(ngModel)]="esprit.aptitudes[i].niveauObtention"
+                      placeholder="Niveau D\'Obtention" required>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-2">
+                  <button mat-raised-button color="basic" (click)="deleteAptitude(i)">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </ng-template>
+              <div class="col-12 mb-2">
+                <button mat-raised-button color="basic" (click)="addAptitude()">
+                  <i class="material-icons">add</i>
+                </button>
+              </div>
+
+            </div>
+          </mat-tab>
+
+          <!--Dons-->
+          <mat-tab label="Progression des Dons" class="mat-tab">
+            <div class="row mb-1 mt-2">
+
+              <ng-template ngFor [ngForOf]="esprit.dons" let-don let-i="index">
+                <div *ngIf="don" class="col-5">
+                  <mat-form-field>
+                    <mat-select placeholder="Don" name="esprit.dons[{{i}}].donRef" [(ngModel)]="esprit.dons[i].donRef" required>
+                      <mat-option *ngFor="let d of dons" [value]="d.id" [innerHtml]="d.nom"></mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-5">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="esprit.dons[{{i}}].niveauObtention" [(ngModel)]="esprit.dons[i].niveauObtention"
+                      placeholder="Niveau D\'Obtention" required>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-2">
+                  <button mat-raised-button color="basic" (click)="deleteDon(i)">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </ng-template>
+              <div class="col-12 mb-2">
+                <button mat-raised-button color="basic" (click)="addDon()">
+                  <i class="material-icons">add</i>
+                </button>
+              </div>
+
+            </div>
+          </mat-tab>
+
+          <!--Sorts-->
+          <mat-tab label="Progression des Sorts" class="mat-tab">
+            <div class="row mb-1 mt-2">
+
+              <ng-template ngFor [ngForOf]="esprit.sorts" let-sort let-i="index">
+                <div *ngIf="sort" class="col-5">
+                  <mat-form-field>
+                    <mat-select placeholder="Sort" name="esprit.sorts[{{i}}].sortRef" [(ngModel)]="esprit.sorts[i].sortRef" required>
+                      <mat-option *ngFor="let d of sorts" [value]="d.id" [innerHtml]="d.nom"></mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-5">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="esprit.sorts[{{i}}].niveauObtention" [(ngModel)]="esprit.sorts[i].niveauObtention"
+                      placeholder="Niveau D\'Obtention" required>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-2">
+                  <button mat-raised-button color="basic" (click)="deleteSort(i)">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </ng-template>
+              <div class="col-12 mb-2">
+                <button mat-raised-button color="basic" (click)="addSort()">
+                  <i class="material-icons">add</i>
+                </button>
+              </div>
+
+            </div>
+          </mat-tab>
+
+        </mat-tab-group>
+
+
+      </div>
+      <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+    </form>
+  </mat-card>
+</div>

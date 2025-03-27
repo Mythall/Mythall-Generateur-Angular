@@ -1,0 +1,50 @@
+@import "src/assets/scss/_custom.scss"; //Bootstrap & Custom Variables
+
+nav{
+  h3{
+    font-size: $font-size-lg;
+    padding: $grid-gutter-width/2;
+    margin: 0;
+    background: $primary;
+    color: $white;
+  }
+
+  ul{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    li{
+      display: list-item;
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      margin: 0;
+      padding: 0;
+      color: rgba(0, 0, 0, 0.54);
+      border-color: rgba(0, 0, 0, 0.06);
+
+      a{
+        box-sizing: border-box;
+        display: block;
+        font-size: $font-size-sm;
+        font-weight: 600;
+        line-height: $grid-gutter-width*1.5;
+        padding: 0 16px;
+        position: relative;
+        color: $primary;
+
+        &:hover,
+        &.active{
+          color: $secondary;
+          cursor: pointer;
+        }
+
+        &:active{
+          color: $primary;
+          font-weight: bold;
+        }
+
+      }
+    }
+  }
+}

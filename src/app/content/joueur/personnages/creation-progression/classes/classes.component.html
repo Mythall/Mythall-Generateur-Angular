@@ -1,0 +1,30 @@
+<div class="row">
+
+	<!--Classes-->
+	<div class="col-12">
+
+		<!--Choix de classe-->
+		<mat-form-field>
+			<mat-select placeholder="Sélectionner une classe" name="selectedClasse" [(ngModel)]="selectedClasse" required>
+				<mat-option *ngFor="let c of availableClasses" [value]="c" [innerHtml]="c.nom"></mat-option>
+			</mat-select>
+		</mat-form-field>
+
+		<!--Niveau après obtention-->
+		<div class="mb-2" *ngIf="progression && selectedClasse && personnage.classes && personnage.classes.length > 0 && !hideText">
+			<span class="font-italic">Votre personnage sera donc un </span>
+			<ng-template ngFor let-classeItem [ngForOf]="personnage.classes">
+				<span class="font-weight-bold" [innerHtml]="' ' + classeItem.classe.nom + '('"></span>
+				<span class="font-weight-bold" *ngIf="selectedClasse.id == classeItem.classeRef" [innerHtml]="(classeItem.niveau + 1) + ')'"></span>
+				<span class="font-weight-bold" *ngIf="selectedClasse.id != classeItem.classeRef" [innerHtml]="classeItem.niveau + ')'"></span>
+			</ng-template>
+		</div>
+
+	</div>
+
+	<!--Stepper Buttons-->
+	<div class="col-12">
+		<button mat-raised-button color="primary" (click)="next()" [disabled]="!isCompleted">Suivant</button>
+	</div>
+
+</div>

@@ -1,0 +1,78 @@
+@import '~@angular/material/theming';
+@include mat-core();
+
+$md-mythall: (
+    50 : #e7e0e3,
+    100 : #c3b3b8,
+    200 : #9b8089,
+    300 : #724d5a,
+    400 : #542636,
+    500 : #360013,
+    600 : #300011,
+    700 : #29000e,
+    800 : #22000b,
+    900 : #160006,
+    A100 : #ff5668,
+    A200 : #ff233a,
+    A400 : #ef001a,
+    A700 : #d50017,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #ffffff,
+        400 : #ffffff,
+        500 : #ffffff,
+        600 : #ffffff,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #ffffff,
+        A400 : #ffffff,
+        A700 : #ffffff,
+    )
+);
+
+$md-mythall-accent: (
+    50 : #f6f0e7,
+    100 : #e9dac4,
+    200 : #dac19c,
+    300 : #cba874,
+    400 : #bf9657,
+    500 : #b48339,
+    600 : #ad7b33,
+    700 : #a4702c,
+    800 : #9c6624,
+    900 : #8c5317,
+    A100 : #ffdfc3,
+    A200 : #ffc590,
+    A400 : #ffaa5d,
+    A700 : #ff9d43,
+    contrast: (
+        50 : #000000,
+        100 : #000000,
+        200 : #000000,
+        300 : #000000,
+        400 : #000000,
+        500 : #000000,
+        600 : #000000,
+        700 : #ffffff,
+        800 : #ffffff,
+        900 : #ffffff,
+        A100 : #000000,
+        A200 : #000000,
+        A400 : #000000,
+        A700 : #000000,
+    )
+);
+
+
+
+$my-app-primary: mat-palette($md-mythall); //#360013
+$my-app-accent:  mat-palette($md-mythall-accent, 500, 900, A100);
+$my-app-warn:    mat-palette($mat-deep-orange);
+
+$my-app-theme: mat-light-theme($my-app-primary, $my-app-accent, $my-app-warn);
+
+@include angular-material-theme($my-app-theme);

@@ -1,0 +1,241 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Domaines</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card>
+    <mat-card-title>Formulaire de Domaine</mat-card-title>
+    <form #form="ngForm">
+      <div class="form-container">
+
+        <mat-tab-group class="tab-group">
+
+          <!--Information de base-->
+          <mat-tab label="Information de base">
+            <div class="row mb-1 mt-2">
+              <div class="col">
+                <mat-form-field>
+                  <input matInput name="domaine.nom" [(ngModel)]="domaine.nom" placeholder="Nom" required>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <textarea matInput name="domaine.bonus" [(ngModel)]="domaine.bonus" placeholder="Bonus" required></textarea>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <mat-select placeholder="Domaine Contraire" name="domaine.domaineContraireRef" [(ngModel)]="domaine.domaineContraireRef">
+                    <mat-option *ngFor="let d of domaines" [value]="d.id">{{d.nom}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <mat-select placeholder="Multiclassement" name="domaine.multiclassementRef" [(ngModel)]="domaine.multiclassementRef" multiple
+                    required>
+                    <mat-option *ngFor="let c of classes" [value]="c.id">{{c.nom}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <mat-select placeholder="Alignement" name="domaine.alignementPermisRef" [(ngModel)]="domaine.alignementPermisRef" required
+                    multiple>
+                    <mat-option *ngFor="let a of alignements" [value]="a.id">{{a.nom}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+              </div>
+            </div>
+          </mat-tab>
+
+          <!--Choix-->
+          <mat-tab label="Choix" class="mat-tab">
+            <ng-template ngFor [ngForOf]="domaine.choix" let-i="index">
+              <div class="row mb-1 mt-2">
+                <div class="col-4">
+                  <mat-form-field>
+                    <mat-select placeholder="Choix" name="domaine.choix[{{i}}].type" [(ngModel)]="domaine.choix[i].type" (change)="changeChoix(i)"
+                      required>
+                      <mat-option *ngFor="let c of choix" [value]="c" [innerHtml]="c"></mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="domaine.choix[{{i}}].niveauObtention" [(ngModel)]="domaine.choix[i].niveauObtention"
+                      placeholder="Niveau" required>
+                  </mat-form-field>
+                </div>
+                <div class="col">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="domaine.choix[{{i}}].quantite" [(ngModel)]="domaine.choix[i].quantite" placeholder="Quantité"
+                      required>
+                  </mat-form-field>
+                </div>
+
+                <!--Categorie-->
+                <div *ngIf="domaine.choix[i].type == 'don' && !domaine.choix[i].ref" class="col">
+                  <mat-form-field>
+                    <mat-select placeholder="Catégorie" name="domaine.choix[{{i}}].categorie" [(ngModel)]="domaine.choix[i].categorie">
+                      <mat-option [value]="" [innerHtml]=""></mat-option>
+                      <mat-option *ngFor="let c of categories" [value]="c" [innerHtml]="c"></mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <!--Reference-->
+                <div *ngIf="domaine.choix[i].type == 'don' && !domaine.choix[i].categorie ||
+                                      domaine.choix[i].type == 'sort' ||
+                                      domaine.choix[i].type == 'aptitude' ||
+                                      domaine.choix[i].type == 'fourberie'" class="col">
+                  <mat-form-field>
+                    <mat-select placeholder="Référence" name="domaine.choix[{{i}}].ref" [(ngModel)]="domaine.choix[i].ref" multiple>
+                      <ng-template [ngIf]="domaine.choix[i].type == 'don'">
+                        <mat-option [value]="" [innerHtml]=""></mat-option>
+                        <mat-option *ngFor="let d of dons" [value]="d.id">{{d.nom}}</mat-option>
+                      </ng-template>
+                      <ng-template [ngIf]="domaine.choix[i].type == 'sort'">
+                        <mat-option *ngFor="let s of sorts" [value]="s.id">{{s.nom}}</mat-option>
+                      </ng-template>
+                      <ng-template [ngIf]="domaine.choix[i].type == 'aptitude'">
+                        <mat-option *ngFor="let a of aptitudes" [value]="a.id">{{a.nom}}</mat-option>
+                      </ng-template>
+                      <ng-template [ngIf]="domaine.choix[i].type == 'fourberie'">
+                        <mat-option *ngFor="let f of fourberies" [value]="f.id">{{f.nom}}</mat-option>
+                      </ng-template>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-2">
+                  <button mat-raised-button color="basic" (click)="deleteChoix(i)">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+            <div class="row">
+              <div class="col-12 mb-2">
+                <button mat-raised-button color="basic" (click)="addChoix()">
+                  <i class="material-icons">add</i>
+                </button>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!--Aptitudes Spéciales-->
+          <mat-tab label="Progression des Aptitudes Spéciales" class="mat-tab">
+            <div class="row mb-1 mt-2">
+
+              <ng-template ngFor [ngForOf]="domaine.aptitudes" let-aptitude let-i="index">
+                <div *ngIf="aptitude" class="col-5">
+                  <mat-form-field>
+                    <mat-select placeholder="Aptitude" name="domaine.aptitudes[{{i}}].aptitudeRef" [(ngModel)]="domaine.aptitudes[i].aptitudeRef"
+                      required>
+                      <mat-option *ngFor="let a of aptitudes" [value]="a.id" [innerHtml]="a.nom"></mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-5">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="domaine.aptitudes[{{i}}].niveauObtention" [(ngModel)]="domaine.aptitudes[i].niveauObtention"
+                      placeholder="Niveau D\'Obtention" required>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-2">
+                  <button mat-raised-button color="basic" (click)="deleteAptitude(i)">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </ng-template>
+              <div class="col-12 mb-2">
+                <button mat-raised-button color="basic" (click)="addAptitude()">
+                  <i class="material-icons">add</i>
+                </button>
+              </div>
+
+            </div>
+          </mat-tab>
+
+          <!--Dons-->
+          <mat-tab label="Progression des Dons" class="mat-tab">
+            <div class="row mb-1 mt-2">
+
+              <ng-template ngFor [ngForOf]="domaine.dons" let-don let-i="index">
+                <div *ngIf="don" class="col-5">
+                  <mat-form-field>
+                    <mat-select placeholder="Don" name="domaine.dons[{{i}}].donRef" [(ngModel)]="domaine.dons[i].donRef" required>
+                      <mat-option *ngFor="let d of dons" [value]="d.id" [innerHtml]="d.nom"></mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-5">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="domaine.dons[{{i}}].niveauObtention" [(ngModel)]="domaine.dons[i].niveauObtention"
+                      placeholder="Niveau D\'Obtention" required>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-2">
+                  <button mat-raised-button color="basic" (click)="deleteDon(i)">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </ng-template>
+              <div class="col-12 mb-2">
+                <button mat-raised-button color="basic" (click)="addDon()">
+                  <i class="material-icons">add</i>
+                </button>
+              </div>
+
+            </div>
+          </mat-tab>
+
+          <!--Sorts-->
+          <mat-tab label="Progression des Sorts" class="mat-tab">
+            <div class="row mb-1 mt-2">
+
+              <ng-template ngFor [ngForOf]="domaine.sorts" let-sort let-i="index">
+                <div *ngIf="sort" class="col-5">
+                  <mat-form-field>
+                    <mat-select placeholder="Sort" name="domaine.sorts[{{i}}].sortRef" [(ngModel)]="domaine.sorts[i].sortRef" required>
+                      <mat-option *ngFor="let d of sorts" [value]="d.id" [innerHtml]="d.nom"></mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-5">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="domaine.sorts[{{i}}].niveauObtention" [(ngModel)]="domaine.sorts[i].niveauObtention"
+                      placeholder="Niveau D\'Obtention" required>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-2">
+                  <button mat-raised-button color="basic" (click)="deleteSort(i)">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </ng-template>
+              <div class="col-12 mb-2">
+                <button mat-raised-button color="basic" (click)="addSort()">
+                  <i class="material-icons">add</i>
+                </button>
+              </div>
+
+            </div>
+          </mat-tab>
+
+        </mat-tab-group>
+
+
+      </div>
+      <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+    </form>
+  </mat-card>
+</div>

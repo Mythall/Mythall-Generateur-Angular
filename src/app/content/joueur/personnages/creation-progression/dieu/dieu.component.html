@@ -1,0 +1,25 @@
+<div class="row">
+
+	<!--Dieus-->
+	<div class="col-12">
+
+		<!--Choix de dieu-->
+		<mat-form-field>
+			<mat-select placeholder="Sélectionner un Dieu" name="selectedDieu" [(ngModel)]="selectedDieu" (ngModelChange)="setDieu()" required>
+				<mat-option *ngFor="let e of availableDieus" [value]="e" [innerHtml]="e.nom"></mat-option>
+			</mat-select>
+		</mat-form-field>
+
+		<!--Description Dieu-->
+		<div class="mb-2" *ngIf="selectedDieu">
+			<span class="font-italic" [innerHtml]="selectedDieu.description"></span>
+		</div>
+
+	</div>
+
+	<!--Stepper Buttons-->
+	<div class="col-12">
+		<button mat-raised-button color="primary" (click)="next()" [disabled]="!isCompleted">Suivant</button>
+	</div>
+
+</div>

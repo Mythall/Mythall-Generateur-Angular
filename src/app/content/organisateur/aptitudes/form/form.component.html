@@ -1,0 +1,202 @@
+<div class="container-fluid">
+	<div class="row">
+		<mat-toolbar color="primary">
+			<span>Aptitude Spécial</span>
+		</mat-toolbar>
+	</div>
+</div>
+
+<div class="container mt-4">
+	<mat-card>
+		<mat-card-title>Formulaire d'Aptitude Spécial</mat-card-title>
+		<form #form="ngForm">
+			<div class="form-container">
+
+				<mat-tab-group class="tab-group">
+
+					<!--Information de base-->
+					<mat-tab label="Information de base">
+						<div class="row mb-1 mt-2">
+							<div class="col">
+
+								<mat-form-field>
+									<input matInput name="aptitude.nom" [(ngModel)]="aptitude.nom" placeholder="Nom" required />
+								</mat-form-field>
+
+								<mat-form-field>
+									<textarea matInput name="aptitude.description" [(ngModel)]="aptitude.description" placeholder="description" required></textarea>
+								</mat-form-field>
+
+							</div>
+						</div>
+					</mat-tab>
+
+					<!--Équivalences-->
+					<mat-tab label="Équivalences" class="mat-tab">
+						<div class="row mb-1 mt-2">
+							<div class="col">
+
+								<mat-form-field>
+									<mat-select placeholder="Don(s)" name="aptitude.donsEquivalentRef" [(ngModel)]="aptitude.donsEquivalentRef" multiple>
+										<mat-option *ngFor="let d of dons" [value]="d.id">{{d.nom}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field>
+									<mat-select placeholder="Sort(s)" name="aptitude.sortsEquivalentRef" [(ngModel)]="aptitude.sortsEquivalentRef" multiple>
+										<mat-option *ngFor="let s of sorts" [value]="s.id">{{s.nom}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+							</div>
+						</div>
+					</mat-tab>
+
+					<!--Choix-->
+					<mat-tab label="Choix" class="mat-tab">
+						<div class="row mb-1 mt-2">
+
+							<ng-template ngFor [ngForOf]="aptitude.choix" let-i="index">
+								<div class="col-6">
+									<mat-form-field>
+										<mat-select placeholder="Choix" name="aptitude.choix[{{i}}].type" [(ngModel)]="aptitude.choix[i].type" required>
+											<mat-option *ngFor="let c of choix" [value]="c" [innerHtml]="c"></mat-option>
+										</mat-select>
+									</mat-form-field>
+								</div>
+								<div class="col-4">
+									<mat-form-field>
+										<input matInput type="number" [min]="1" name="aptitude.choix[{{i}}].quantite" [(ngModel)]="aptitude.choix[i].quantite" placeholder="Quantité"
+										 required>
+									</mat-form-field>
+								</div>
+								<div class="col-2">
+									<button mat-raised-button color="basic" (click)="deleteChoix(i)">
+										<i class="material-icons">delete</i>
+									</button>
+								</div>
+								<div *ngIf="aptitude.choix[i].type == 'don'" class="col-12">
+									<mat-form-field>
+										<mat-select placeholder="Catégorie" name="aptitude.choix[{{i}}].categorie" [(ngModel)]="aptitude.choix[i].categorie" required>
+											<mat-option *ngFor="let c of categories" [value]="c" [innerHtml]="c"></mat-option>
+										</mat-select>
+									</mat-form-field>
+								</div>
+							</ng-template>
+							<div class="col-12 mb-2">
+								<button mat-raised-button color="basic" (click)="addChoix()">
+									<i class="material-icons">add</i>
+								</button>
+							</div>
+
+						</div>
+					</mat-tab>
+
+					<!--Statistiques-->
+					<mat-tab label="Statistiques" class="mat-tab">
+						<div class="row mb-1 mt-2">
+
+							<ng-template ngFor [ngForOf]="aptitude.statistiques" let-statistique let-i="index">
+								<div class="col-4">
+									<mat-form-field>
+										<mat-select placeholder="Statistique" name="aptitude.statistiques[{{i}}].statistiqueRef" [(ngModel)]="aptitude.statistiques[i].statistiqueRef"
+										 required>
+											<mat-option *ngFor="let s of statistiques" [value]="s.id" [innerHtml]="s.nom"></mat-option>
+										</mat-select>
+									</mat-form-field>
+								</div>
+								<div class="col-2">
+									<mat-form-field>
+										<input matInput type="number" [min]="1" name="aptitude.statistiques[{{i}}].niveau" [(ngModel)]="aptitude.statistiques[i].niveau"
+										 placeholder="Niveau" required>
+									</mat-form-field>
+								</div>
+								<div class="col-2">
+									<mat-form-field>
+										<input matInput type="number" [min]="1" name="aptitude.statistiques[{{i}}].valeur" [(ngModel)]="aptitude.statistiques[i].valeur"
+										 placeholder="Valeur" required>
+									</mat-form-field>
+								</div>
+								<div class="col-2 pt-3">
+									<mat-checkbox name="aptitude.statistiques[{{i}}].cummulable" [(ngModel)]="aptitude.statistiques[i].cummulable">Cummulable</mat-checkbox>
+								</div>
+								<div class="col-2">
+									<button mat-raised-button color="basic" (click)="deleteStatistique(i)">
+										<i class="material-icons">delete</i>
+									</button>
+								</div>
+							</ng-template>
+							<div class="col-12 mb-2">
+								<button mat-raised-button color="basic" (click)="addStatistique()">
+									<i class="material-icons">add</i>
+								</button>
+							</div>
+
+						</div>
+					</mat-tab>
+
+					<!--Resistances-->
+					<mat-tab label="Résistances" class="mat-tab">
+						<div class="row mb-1 mt-2">
+
+							<ng-template ngFor [ngForOf]="aptitude.resistances" let-resistance let-i="index">
+								<div class="col-4">
+									<mat-form-field>
+										<mat-select placeholder="Resistance" name="aptitude.resistances[{{i}}].resistanceRef" [(ngModel)]="aptitude.resistances[i].resistanceRef"
+										 required>
+											<mat-option *ngFor="let r of resistances" [value]="r.id" [innerHtml]="r.nom"></mat-option>
+										</mat-select>
+									</mat-form-field>
+								</div>
+								<div class="col-2">
+									<mat-form-field>
+										<input matInput type="number" [min]="1" name="aptitude.resistances[{{i}}].niveau" [(ngModel)]="aptitude.resistances[i].niveau"
+										 placeholder="Niveau" required>
+									</mat-form-field>
+								</div>
+								<div class="col-2">
+									<mat-form-field>
+										<input matInput type="number" [min]="1" name="aptitude.resistances[{{i}}].valeur" [(ngModel)]="aptitude.resistances[i].valeur"
+										 placeholder="Valeur" required>
+									</mat-form-field>
+								</div>
+								<div class="col-2 pt-3">
+									<mat-checkbox name="aptitude.resistances[{{i}}].cummulable" [(ngModel)]="aptitude.resistances[i].cummulable">Cummulable</mat-checkbox>
+								</div>
+								<div class="col-2">
+									<button mat-raised-button color="basic" (click)="deleteResistance(i)">
+										<i class="material-icons">delete</i>
+									</button>
+								</div>
+							</ng-template>
+							<div class="col-12 mb-2">
+								<button mat-raised-button color="basic" (click)="addResistance()">
+									<i class="material-icons">add</i>
+								</button>
+							</div>
+
+						</div>
+					</mat-tab>
+
+					<!--Immunites-->
+					<mat-tab label="Immunités" class="mat-tab">
+						<div class="row mb-1 mt-2">
+							<div class="col">
+
+								<mat-form-field>
+									<mat-select placeholder="Immunité(s)" name="aptitude.immunitesRef" [(ngModel)]="aptitude.immunitesRef" multiple>
+										<mat-option *ngFor="let im of immunites" [value]="im.id">{{im.nom}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+							</div>
+						</div>
+					</mat-tab>
+
+				</mat-tab-group>
+
+			</div>
+			<button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+		</form>
+	</mat-card>
+</div>

@@ -1,0 +1,63 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Sorts</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card class="mb-4">
+    <div>
+      <button mat-raised-button color="primary" class="mb-4" routerLink="/organisateur/sorts/form">Ajouter Sort</button>
+      <button mat-raised-button color="default" class="mb-4" routerLink="/organisateur/durees/list">Liste des Durées</button>
+      <button mat-raised-button color="default" class="mb-4" routerLink="/organisateur/portes/list">Liste des Portés</button>
+      <button mat-raised-button color="default" class="mb-4" routerLink="/organisateur/zones/list">Liste des Zones d'Effets</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table" matSort (matSortChange)="sortData($event)">
+        <thead>
+          <tr>
+            <th mat-sort-header="nom">Nom</th>
+            <th mat-sort-header="niveau">Niveau</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <mat-form-field>
+                <input matInput placeholder="Filtre" [(ngModel)]="filter.nom">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field>
+                <input matInput placeholder="Filtre" [(ngModel)]="filter.niveau">
+              </mat-form-field>
+            </td>
+          </tr>
+          <ng-template ngFor let-sort [ngForOf]="sortedData">
+            <tr *ngIf="filterResult(sort)">
+              <td [innerHtml]="sort.nom"></td>
+              <td [innerHtml]="sort.niveau"></td>
+              <td>
+                <div class="button-row">
+                  <button mat-icon-button [routerLink]="'/joueur/sort/' + sort.id">
+                    <mat-icon aria-label="View">remove_red_eye</mat-icon>
+                  </button>
+                  <button mat-icon-button [routerLink]="'/organisateur/sorts/form/' + sort.id">
+                    <mat-icon aria-label="Edit">edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="confirmDelete(sort)">
+                    <mat-icon aria-label="Delete">delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+      </table>
+      <mat-paginator #paginator [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (page)="setPageEvent($event)"></mat-paginator>
+    </div>
+  </mat-card>
+</div>

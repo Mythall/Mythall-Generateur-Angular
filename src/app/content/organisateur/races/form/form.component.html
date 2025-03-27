@@ -1,0 +1,215 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Races</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card>
+    <mat-card-title>Formulaire de Race</mat-card-title>
+    <form #form="ngForm">
+      <div class="form-container">
+
+        <mat-tab-group class="tab-group">
+
+          <!--Information de base-->
+          <mat-tab label="Information de base">
+            <div class="row mb-1 mt-2">
+              <div class="col">
+                <mat-form-field>
+                  <input matInput name="race.nom" [(ngModel)]="race.nom" placeholder="Nom" required>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <textarea matInput name="race.description" [(ngModel)]="race.description" placeholder="Description" required></textarea>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <textarea matInput name="race.obligations" [(ngModel)]="race.obligations" placeholder="Obligation(s)" required></textarea>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <textarea matInput name="race.avantages" [(ngModel)]="race.avantages" placeholder="Avantage(s)" required></textarea>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <textarea matInput name="race.desavantages" [(ngModel)]="race.desavantages" placeholder="Désavantage(s)" required></textarea>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <input matInput name="race.ajustement" [(ngModel)]="race.ajustement" placeholder="Ajustement" required>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <mat-select placeholder="Classe(s) Disponible" name="race.classesDisponibleRef" [(ngModel)]="race.classesDisponibleRef" multiple
+                    required>
+                    <mat-option *ngFor="let c of classes | async" [value]="c.id">{{c.nom}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field>
+                  <mat-select placeholder="Alignement" name="race.alignementPermisRef" [(ngModel)]="race.alignementPermisRef" required multiple>
+                    <mat-option *ngFor="let a of alignements" [value]="a.id">{{a.nom}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+              </div>
+            </div>
+          </mat-tab>
+
+          <!--Statistiques-->
+          <mat-tab label="Statistiques" class="mat-tab">
+            <div class="row mb-1 mt-2">
+
+              <ng-template ngFor [ngForOf]="race.statistiques" let-statistique let-i="index">
+                <div class="col-4">
+                  <mat-form-field>
+                    <mat-select placeholder="Statistique" name="race.statistiques[{{i}}].statistiqueRef" [(ngModel)]="race.statistiques[i].statistiqueRef"
+                      required>
+                      <mat-option *ngFor="let r of statistiques" [value]="r.id" [innerHtml]="r.nom"></mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-2">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="race.statistiques[{{i}}].niveau" [(ngModel)]="race.statistiques[i].niveau"
+                      placeholder="Niveau" required>
+                  </mat-form-field>
+                </div>
+                <div class="col-2">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="race.statistiques[{{i}}].valeur" [(ngModel)]="race.statistiques[i].valeur"
+                      placeholder="Valeur" required>
+                  </mat-form-field>
+                </div>
+                <div class="col-2 pt-3">
+                  <mat-checkbox name="race.statistiques[{{i}}].cummulable" [(ngModel)]="race.statistiques[i].cummulable">Cummulable</mat-checkbox>
+                </div>
+                <div class="col-2">
+                  <button mat-raised-button color="basic" (click)="deleteStatistique(i)">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </ng-template>
+              <div class="col-12 mb-2">
+                <button mat-raised-button color="basic" (click)="addStatistique()">
+                  <i class="material-icons">add</i>
+                </button>
+              </div>
+
+            </div>
+          </mat-tab>
+
+          <!--Resistances-->
+          <mat-tab label="Résistances" class="mat-tab">
+            <div class="row mb-1 mt-2">
+
+              <ng-template ngFor [ngForOf]="race.resistances" let-resistance let-i="index">
+                <div class="col-4">
+                  <mat-form-field>
+                    <mat-select placeholder="Resistance" name="race.resistances[{{i}}].resistanceRef" [(ngModel)]="race.resistances[i].resistanceRef"
+                      required>
+                      <mat-option *ngFor="let r of resistances" [value]="r.id" [innerHtml]="r.nom"></mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-2">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="race.resistances[{{i}}].niveau" [(ngModel)]="race.resistances[i].niveau" placeholder="Niveau"
+                      required>
+                  </mat-form-field>
+                </div>
+                <div class="col-2">
+                  <mat-form-field>
+                    <input matInput type="number" [min]="1" name="race.resistances[{{i}}].valeur" [(ngModel)]="race.resistances[i].valeur" placeholder="Valeur"
+                      required>
+                  </mat-form-field>
+                </div>
+                <div class="col-2 pt-3">
+                  <mat-checkbox name="race.resistances[{{i}}].cummulable" [(ngModel)]="race.resistances[i].cummulable">Cummulable</mat-checkbox>
+                </div>
+                <div class="col-2">
+                  <button mat-raised-button color="basic" (click)="deleteResistance(i)">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </ng-template>
+              <div class="col-12 mb-2">
+                <button mat-raised-button color="basic" (click)="addResistance()">
+                  <i class="material-icons">add</i>
+                </button>
+              </div>
+
+            </div>
+          </mat-tab>
+
+          <!--Immunites-->
+          <mat-tab label="Immunités" class="mat-tab">
+            <div class="row mb-1 mt-2">
+              <div class="col">
+
+                <mat-form-field>
+                  <mat-select placeholder="Immunité(s)" name="race.immunitesRef" [(ngModel)]="race.immunitesRef" multiple>
+                    <mat-option *ngFor="let im of immunites" [value]="im.id">{{im.nom}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+              </div>
+            </div>
+          </mat-tab>
+
+          <!--Sorts Racial-->
+          <mat-tab label="Sort(s) Racial" class="mat-tab">
+            <div class="row mb-1 mt-2">
+              <div class="col">
+
+                <mat-form-field>
+                  <mat-select placeholder="Sort(s) Racial" name="race.sortsRacialRef" [(ngModel)]="race.sortsRacialRef" multiple>
+                    <mat-option *ngFor="let s of sorts" [value]="s.id">{{s.nom}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+              </div>
+            </div>
+          </mat-tab>
+
+          <!--Dons Racial-->
+          <mat-tab label="Don(s) Racial" class="mat-tab">
+            <div class="row mb-1 mt-2">
+              <div class="col">
+
+                <mat-form-field>
+                  <mat-select placeholder="Don(s) Racial" name="race.donsRacialRef" [(ngModel)]="race.donsRacialRef" multiple>
+                    <mat-option *ngFor="let s of dons" [value]="s.id">{{s.nom}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+              </div>
+            </div>
+          </mat-tab>
+
+          <!--Aptitudes Racial-->
+          <mat-tab label="Aptitude(s) Racial" class="mat-tab">
+            <div class="row mb-1 mt-2">
+              <div class="col">
+
+                <mat-form-field>
+                  <mat-select placeholder="Aptitude(s) Racial" name="race.aptitudesRacialRef" [(ngModel)]="race.aptitudesRacialRef" multiple>
+                    <mat-option *ngFor="let s of aptitudes" [value]="s.id">{{s.nom}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+              </div>
+            </div>
+          </mat-tab>
+
+        </mat-tab-group>
+
+
+      </div>
+      <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="submit()">Envoyer</button>
+    </form>
+  </mat-card>
+</div>

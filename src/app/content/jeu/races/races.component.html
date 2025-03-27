@@ -1,0 +1,49 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Races</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12 col-md-10 order-2 order-md-1">
+        <mat-card *ngFor="let race of races" [id]="race.nom" class="mb-4">
+          <mat-card-title [innerHtml]="race.nom"></mat-card-title>
+          <mat-card-content>
+            <p><i [innerHtml]="race.description"></i></p>
+      
+            <p><strong>Obligation(s) :</strong></p>
+            <p [innerHtml]="race.obligations"></p>
+            <p *ngIf="!race.obligations">Aucune</p>
+      
+            <p><strong>Avantages(s) :</strong></p>
+            <p [innerHtml]="race.avantages"></p>
+            <p *ngIf="!race.avantages">Aucune</p>
+      
+            <p><strong>Désavantages(s) :</strong></p>
+            <p [innerHtml]="race.desavantages"></p>
+            <p *ngIf="!race.desavantages">Aucune</p>
+
+            <p><strong>Classe(s) Disponible :</strong></p>
+            <div *ngIf="race.classesDisponible">
+              <ng-template ngFor [ngForOf]="race.classesDisponible" let-c let-last="last">
+                  <span [innerHtml]="!last ? c.nom + ', ' : c.nom"></span>
+              </ng-template>
+            </div>
+            <p *ngIf="!race.classesDisponible">Aucune</p>
+      
+          </mat-card-content>
+        </mat-card>
+    </div>
+    <div class="col-12 col-md-2 order-1 order-md-2 mb-4">
+      <nav>
+        <div class="mb-2">
+            <strong>Races</strong>
+        </div>
+        <a *ngFor="let race of races" [href]="'jeu/races#' + race.nom" [innerHtml]="race.nom"></a>
+      </nav>
+    </div> 
+  </div> 
+</div>

@@ -1,0 +1,28 @@
+<div class="row">
+
+	<!--Connaissances-->
+	<ng-template ngFor let-i="index" [ngForOf]="quantity">		
+		<div class="col-12">
+
+			<!--Choix de connaissance-->
+			<mat-form-field>
+				<mat-select placeholder="Sélectionner un connaissance" [name]="selectedConnaissances[i]" [(ngModel)]="selectedConnaissances[i]" (ngModelChange)="setConnaissance(i)"
+				 required [disabled]="i != currentIndex">
+					<mat-option *ngFor="let connaissance of availableConnaissances[i]" [value]="connaissance" [innerHtml]="connaissance.nom"></mat-option>
+				</mat-select>
+			</mat-form-field>
+
+			<!--Description-->
+			<div class="mb-2" *ngIf="selectedConnaissance && selectedConnaissance[i]">
+				<span class="font-italic" [innerHtml]="selectedConnaissance[i].description"></span>
+			</div>
+
+		</div>
+	</ng-template>
+
+	<!--Stepper Buttons-->
+	<div class="col-12">
+		<button mat-raised-button color="primary" (click)="next()" [disabled]="!isCompleted">Suivant</button>
+	</div>
+
+</div>

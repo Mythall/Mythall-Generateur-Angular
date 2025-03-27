@@ -1,0 +1,57 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Aptitudes Spéciales</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card class="mb-4">
+    <div>
+      <button mat-raised-button color="primary" class="mb-4" routerLink="/organisateur/aptitudes/form">Ajouter Aptitude Spéciale</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table" matSort (matSortChange)="sortData($event)">
+        <thead>
+          <tr>
+            <th mat-sort-header="nom">Nom</th>
+            <th mat-sort-header="description">Description</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <mat-form-field>
+                <input matInput placeholder="Filtre" [(ngModel)]="filter.nom">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field>
+                <input matInput placeholder="Filtre" [(ngModel)]="filter.description">
+              </mat-form-field>
+            </td>
+          </tr>
+          <ng-template ngFor let-aptitude [ngForOf]="sortedData">
+            <tr *ngIf="filterResult(aptitude)">
+              <td [innerHtml]="aptitude.nom"></td>
+              <td [innerHtml]="aptitude.description"></td>
+              <td>
+                <div class="button-row">
+                  <button mat-icon-button [routerLink]="'/organisateur/aptitudes/form/' + aptitude.id">
+                    <mat-icon aria-label="Edit">edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="confirmDelete(aptitude)">
+                    <mat-icon aria-label="Delete">delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+      </table>
+      <mat-paginator #paginator [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (page)="setPageEvent($event)"></mat-paginator>
+    </div>
+  </mat-card>
+</div>

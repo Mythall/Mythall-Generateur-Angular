@@ -1,0 +1,60 @@
+<div class="container-fluid">
+  <div class="row">
+    <mat-toolbar color="primary">
+      <span>Dons</span>
+    </mat-toolbar>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <mat-card class="mb-4">
+    <div>
+      <button mat-raised-button color="primary" class="mb-4" routerLink="/organisateur/dons/form">Ajouter Don</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table" matSort (matSortChange)="sortData($event)">
+        <thead>
+          <tr>
+            <th mat-sort-header="nom">Nom</th>
+            <th mat-sort-header="description">Description</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <mat-form-field>
+                <input matInput placeholder="Filtre" [(ngModel)]="filter.nom">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field>
+                <input matInput placeholder="Filtre" [(ngModel)]="filter.description">
+              </mat-form-field>
+            </td>
+          </tr>
+          <ng-template ngFor let-don [ngForOf]="sortedData">
+            <tr *ngIf="filterResult(don)">
+              <td [innerHtml]="don.nom"></td>
+              <td [innerHtml]="don.description"></td>
+              <td>
+                <div class="button-row">
+                  <button mat-icon-button [routerLink]="'/joueur/don/' + don.id">
+                    <mat-icon aria-label="View">remove_red_eye</mat-icon>
+                  </button>
+                  <button mat-icon-button [routerLink]="'/organisateur/dons/form/' + don.id">
+                    <mat-icon aria-label="Edit">edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="confirmDelete(don)">
+                    <mat-icon aria-label="Delete">delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+      </table>
+      <mat-paginator #paginator [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (page)="setPageEvent($event)"></mat-paginator>
+    </div>
+  </mat-card>
+</div>

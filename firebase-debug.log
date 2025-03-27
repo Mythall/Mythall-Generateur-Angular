@@ -1,0 +1,39 @@
+[debug] [2020-03-06T00:24:09.078Z] ----------------------------------------------------------------------
+[debug] [2020-03-06T00:24:09.080Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Dom\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js serve
+[debug] [2020-03-06T00:24:09.080Z] CLI Version:   7.14.0
+[debug] [2020-03-06T00:24:09.080Z] Platform:      win32
+[debug] [2020-03-06T00:24:09.080Z] Node Version:  v10.16.0
+[debug] [2020-03-06T00:24:09.080Z] Time:          Thu Mar 05 2020 19:24:09 GMT-0500 (Eastern Standard Time)
+[debug] [2020-03-06T00:24:09.081Z] ----------------------------------------------------------------------
+[debug] [2020-03-06T00:24:09.081Z] 
+[debug] [2020-03-06T00:24:09.086Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2020-03-06T00:24:09.087Z] > authorizing via signed-in user
+[debug] [2020-03-06T00:24:09.087Z] [iam] checking project mythall-v7 for permissions ["firebase.projects.get"]
+[debug] [2020-03-06T00:24:09.088Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/mythall-v7:testIamPermissions  
+
+[debug] [2020-03-06T00:24:09.374Z] <<< HTTP RESPONSE 200
+[debug] [2020-03-06T00:24:09.375Z] >>> HTTP REQUEST GET https://firebase.googleapis.com/v1beta1/projects/mythall-v7  
+ 
+[debug] [2020-03-06T00:24:09.593Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Serving from 'D:\Projects\Mythall'...
+[info] 
+[debug] [2020-03-06T00:24:09.595Z] >>> HTTP REQUEST GET https://firebase.googleapis.com/v1beta1/projects/mythall-v7/webApps/-/config  
+ 
+[debug] [2020-03-06T00:24:09.878Z] <<< HTTP RESPONSE 200
+[info] i  hosting: Serving hosting files from: dist
+[info] +  hosting: Local server: http://localhost:5000
+[warn] !  Your requested "node" version "8" doesn't match your global version "10"
+[info] +  functions: functions emulator started at http://localhost:5001
+[info] i  functions: Watching "D:\Projects\Mythall\functions" for Cloud Functions...
+[debug] [2020-03-06T00:24:10.615Z] [worker-pool] addWorker(~diagnostic~)
+[debug] [2020-03-06T00:24:10.616Z] [worker-pool] Adding worker with key ~diagnostic~, total=1
+[debug] [2020-03-06T00:24:10.616Z] [worker-pool] submitWork(triggerId=)
+[debug] [2020-03-06T00:24:10.616Z] [worker-~diagnostic~-83607176-7882-4aff-ad6a-1c114974040e]: Assigning socketPath: \\?\pipe\D:\Projects\Mythall\functions\16444
+[debug] [2020-03-06T00:24:10.616Z] [worker-~diagnostic~-83607176-7882-4aff-ad6a-1c114974040e]: BUSY
+[debug] [2020-03-06T00:24:10.955Z] [runtime-status] [16444] Functions runtime initialized. {"cwd":"D:\\Projects\\Mythall\\functions","node_version":"10.16.0"}
+[debug] [2020-03-06T00:24:10.956Z] [runtime-status] [16444] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
+[warn] !  The Cloud Functions emulator requires the module "firebase-admin" to be installed. This package is in your package.json, but it's not available. You probably need to run "npm install" in your functions directory.
+[info] i  functions: Your functions could not be parsed due to an issue with your node_modules (see above)
+[debug] [2020-03-06T00:24:10.976Z] [worker-~diagnostic~-83607176-7882-4aff-ad6a-1c114974040e]: exited
+[debug] [2020-03-06T00:24:10.976Z] [worker-~diagnostic~-83607176-7882-4aff-ad6a-1c114974040e]: FINISHED
