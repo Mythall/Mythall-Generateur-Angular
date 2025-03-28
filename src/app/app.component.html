@@ -1,8 +1,12 @@
 <app-navbar (sidenavToggle)="sidenavToggle()"></app-navbar>
 
 <mat-sidenav-container class="app-container" fxLayout="row">
-
-  <mat-sidenav #sidenav class="app-sidenav mat-elevation-z6" fxLayout="column" [mode]="(mediaQueryList.matches) ? 'over' : 'side'">
+  <mat-sidenav
+    #sidenav
+    class="app-sidenav mat-elevation-z6"
+    fxLayout="column"
+    [mode]="mediaQueryList.matches ? 'over' : 'side'"
+  >
     <app-sidenav></app-sidenav>
   </mat-sidenav>
 
@@ -11,11 +15,16 @@
   <div class="container">
     <div class="row">
       <div class="col">
-        <small class="float-right font-weight-light font-italic">Made with <span class="referal"><3</span> by 
-          <a class="font-weight-bold referal" href="https://www.linkedin.com/in/dominikgiroux/" target="_blank">Dominik Giroux</a>
+        <small class="float-right font-weight-light font-italic"
+          >Made with <span class="referal"><3</span> by
+          <a
+            class="font-weight-bold referal"
+            href="https://www.elysegiroux.com"
+            target="_blank"
+            >Elyse Giroux</a
+          >
         </small>
       </div>
     </div>
   </div>
-
 </mat-sidenav-container>
